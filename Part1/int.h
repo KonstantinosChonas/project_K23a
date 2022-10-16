@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-
+#define L2 512000       /* bits of information stored in L2 cache memory */
 
 
 
@@ -26,7 +26,7 @@ typedef struct relation {
 
 
 typedef struct result {  //NOTE: katholou sigouros gia to ti tha prepe na einai to struct result to vala etsi gia arxi pisteuo thelei allagi
-    relation;
+    relation *r;
 }result;
 
 
