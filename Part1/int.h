@@ -36,3 +36,4 @@ result* PartitionedHashJoin(relation *relR, relation *relS);
 
 /**Our Hash Function**/
 int hashl(int x, int n);
+tuple* SearchKey(relation *r,int key);
