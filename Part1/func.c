@@ -67,12 +67,12 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
         tuple *t;
 
-        if (t = SearchKey(hist,relR->tuples[i]->key)
+        if (t = SearchKey(hist,relR->tuples[i]->key)        //psaxno to key an to vro epistefo pointer se auto allios NULL
             t->payload++;
         else{
 
             hist->tuples[hist->num_tuples]->key=relR->tuples[i]->key;
-            hist->num_tuples++;
+            hist->num_tuples++;                             //oso to gemizo ayksano to num_tuples
 
         }
         
@@ -104,16 +104,16 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     i=0;
 
-    while ( currPos != relR->num_tuples) {
+    while ( currPos != relR->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
 
-        if( relR->tuples[i]->key==key){
+        if( relR->tuples[i]->key==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
             newR->tuples[currPos]->key=key;
             newR->tuples[currPos]->payload=relR->tuples[i]->payload;
 
             newR->num_tuples++;
 
             currPos++;
-            if (currPos==positions){
+            if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
 
                 positions=Psum->tuples[++j]->payload;
                 key =  Psum->tuples[j]->key;
@@ -122,11 +122,13 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
             }
         }
-        if (i==relR->num_tuples)
+        if (i==relR->num_tuples)                //ama ftaso sto telos ksanarxizo 
             i=0;
         i++;
     
-    }
+    }           
+    
+        /*tha mporouse olo auto na mpei se mia sinartisi p apla na epistrefei to newR alla tha thela na doume prota pos tha ginei me to L2*/
 
     /**     Step 2. Building            **/
 
