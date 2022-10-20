@@ -29,7 +29,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     /* gia na ginei to partitioning prepei prota na pothikeusoume ta dedomena */
     /* se seira (des ekfonisi sel4 stin arxi to eksigei)*/
 
-    int i,count=0 , n=3 , histSize=1;
+    int i,count=0 , n=1 , histSize=1;
 
     for ( i = 0 ; i < n ; i++ ){
 
@@ -71,7 +71,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
             t->payload++;
         else{
 
-            hist->tuples[hist->num_tuples]->key=relR->tuples[i]->key;
+            hist->tuples[hist->num_tuples]->key=hashl(relR->tuples[i]->key,n);
             hist->num_tuples++;                             //oso to gemizo ayksano to num_tuples
 
         }
@@ -86,7 +86,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
 
-        Psum->tuples[i]->key=hist->tuples[i]->key
+        Psum->tuples[i]->key=hashl(hist->tuples[i]->key,n);
         Psum->tuples[i]->payload=position;
 
         position+=hist->tuples[i]->payload;
@@ -106,7 +106,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     while ( currPos != relR->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
 
-        if( relR->tuples[i]->key==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
+        if( hashl(relR->tuples[i]->key,n)==hashl(key,n){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
             newR->tuples[currPos]->key=key;
             newR->tuples[currPos]->payload=relR->tuples[i]->payload;
 
@@ -117,8 +117,6 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
                 positions=Psum->tuples[++j]->payload;
                 key =  Psum->tuples[j]->key;
-
-
 
             }
         }
@@ -145,7 +143,7 @@ tuple* SearchKey(relation *r,int key){              /*psaxnei ena key an den to 
 
     for ( i = 0 ; i < r->num_tuples ; i++ ){
 
-        if (r->tuples[i]->key==key){
+        if (hashl(r->tuples[i]->key,n)==hashl(key,n)){
 
             return r->tuples[i];
 
