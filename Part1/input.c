@@ -2,8 +2,8 @@
 // Created by aris on 20/10/2022.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 #include "int.h"
 
 tuple* createTuple(int key){
