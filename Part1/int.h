@@ -11,6 +11,7 @@
 typedef struct tuple {
     int32_t key;
     int32_t payload;
+    struct tuple* nextTuple;
 }tuple;
 
 /**
@@ -37,3 +38,12 @@ result* PartitionedHashJoin(relation *relR, relation *relS);
 /**Our Hash Function**/
 int hashl(int x, int n);
 tuple* SearchKey(relation *r,int key);
+
+/** Functions used to create input**/
+
+tuple* createTuple(int key);
+relation* createRelation();
+void printRelation(relation* myRelation);
+
+void relationDelete(relation* myRelation);
+void tupleDelete(tuple* myTuple);

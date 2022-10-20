@@ -1,2 +1,2 @@
-main: main.c func.c
-	gcc -o main main.c func.c -I.
+main: main.c input.c
+	gcc -o main main.c input.c -I.
