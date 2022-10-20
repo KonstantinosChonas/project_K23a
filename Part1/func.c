@@ -1,7 +1,7 @@
 #include "int.h"
 
 
-int hashl(int x, int n){
+int hashl(int key, int n){
 
     int i=0,j=1;
     for (i=0;i<n;i++){
@@ -9,7 +9,71 @@ int hashl(int x, int n){
     }
     j--;
 
-    return x & j;
+    return key & j;
+
+}
+
+
+
+
+int findNumOfBuckets(relation *r){
+
+    int size;
+
+    size = r->num_tuples*sizeof(tuple);
+
+    if (L2>size){       /* no need to partition */
+
+
+        return 0;
+
+    }
+    else{           /* the table does not fit in the L2 cache whole */      //TODO na do gia poliplokotites
+
+        int i,n=1,x,flag=0;
+
+        while(){
+
+
+            for (i=0;i<n;i++){          /* j = 2^n */
+                j=j*2;
+            }
+
+
+
+            int *count=malloc(j*sizeof(int));                
+
+
+            for (i = 0 ; i < r->num_tuples ; i++){  /* at the end of this loop we have the number of elements in each bucket */
+
+                count[hashl(r->tuples[i],n)]++;
+            }
+
+
+            flag=1;
+
+
+            for (i = 0 ; i < j; i++)            
+                if(count[i]*sizeof(tuple)>L2){          /* if we cant fit it in the L2 cache we increse n by one and we test again */
+                    flag=0;
+                    break;
+                }
+
+
+
+
+            if(flag) break;
+
+            n++;
+
+            
+        }
+
+        return n;
+
+
+    }
+
 
 }
 
@@ -24,6 +88,13 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     /* edo prepei na ginei prota i douleia me tin L2  kai tin euresi tou n (gia arxi theoro dedomeno oti to n einai 3)*/
 
     /*##################################################*/
+
+
+    int nR,nS;
+
+    // nR=findNumOfBuckets(relR);
+    // nS=findNumOfBuckets(relS);
+
 
 
     /* gia na ginei to partitioning prepei prota na pothikeusoume ta dedomena */
@@ -54,7 +125,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     for ( i = 0 ; i < histSize ; i++ ){
 
-        hist->tuples[i]->payload=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
+        hist->tuples[i].payload=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
 
 
     }
@@ -67,11 +138,11 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
         tuple *t;
 
-        if (t = SearchKey(hist,relR->tuples[i]->key)        //psaxno to key an to vro epistefo pointer se auto allios NULL
+        if (t = SearchKey(hist,relR->tuples[i].key,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
             t->payload++;
         else{
 
-            hist->tuples[hist->num_tuples]->key=hashl(relR->tuples[i]->key,n);
+            hist->tuples[hist->num_tuples].key=hashl(relR->tuples[i].key,n);
             hist->num_tuples++;                             //oso to gemizo ayksano to num_tuples
 
         }
@@ -86,10 +157,10 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
 
-        Psum->tuples[i]->key=hashl(hist->tuples[i]->key,n);
-        Psum->tuples[i]->payload=position;
+        Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
+        Psum->tuples[i].payload=position;
 
-        position+=hist->tuples[i]->payload;
+        position+=hist->tuples[i].payload;
 
     }
 
@@ -97,26 +168,26 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     /* ftiaxnoume to newR */
 
-    int j=0;
-    key = Psum->tuples[j]->key;
-    positions = Psum->tuples[j]->payload;
+    int j=0,key,positions,currPos;
+    key = Psum->tuples[j].key;
+    positions = Psum->tuples[j].payload;
     currPos=0;
 
     i=0;
 
     while ( currPos != relR->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
 
-        if( hashl(relR->tuples[i]->key,n)==hashl(key,n){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
-            newR->tuples[currPos]->key=key;
-            newR->tuples[currPos]->payload=relR->tuples[i]->payload;
+        if( hashl(relR->tuples[i].key,n)==hashl(key,n)){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
+            newR->tuples[currPos].key=key;
+            newR->tuples[currPos].payload=relR->tuples[i].payload;
 
             newR->num_tuples++;
 
             currPos++;
             if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
 
-                positions=Psum->tuples[++j]->payload;
-                key =  Psum->tuples[j]->key;
+                positions=Psum->tuples[++j].payload;
+                key =  Psum->tuples[j].key;
 
             }
         }
@@ -136,16 +207,16 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
 
 
-tuple* SearchKey(relation *r,int key){              /*psaxnei ena key an den to vrei epistrefei null allios epistrefei deikti sto key*/
+tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an den to vrei epistrefei null allios epistrefei deikti sto key*/
 
     int i;
 
 
     for ( i = 0 ; i < r->num_tuples ; i++ ){
 
-        if (hashl(r->tuples[i]->key,n)==hashl(key,n)){
+        if (hashl(r->tuples[i].key,n)==hashl(key,n)){
 
-            return r->tuples[i];
+            return &r->tuples[i];
 
         }
         
