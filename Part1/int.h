@@ -12,7 +12,6 @@
 typedef struct tuple {
     int32_t key;
     int32_t payload;
-    struct tuple* nextTuple;
 }tuple;
 
 /**
