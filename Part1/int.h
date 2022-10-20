@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <time.h>
 #define L2 512000       /* bits of information stored in L2 cache memory */
 
 
@@ -37,7 +38,9 @@ result* PartitionedHashJoin(relation *relR, relation *relS);
 
 /**Our Hash Function**/
 int hashl(int x, int n);
-tuple* SearchKey(relation *r,int key);
+
+int findNumOfBuckets(relation *r);
+tuple* SearchKey(relation *r,int key, int n);
 
 /** Functions used to create input**/
 
