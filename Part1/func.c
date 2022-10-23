@@ -18,6 +18,7 @@ int hashl(int key, int n){
 
 int findNumOfBuckets(relation *r){
 
+    printf("i just entered find num of buckets\n");
     int size;
 
     size = r->num_tuples*sizeof(tuple);
@@ -32,7 +33,9 @@ int findNumOfBuckets(relation *r){
 
         int i,n=1,x,flag=0;
 
-        while(){
+        for(n=1;;n++){
+
+            int j=1;
 
 
             for (i=0;i<n;i++){          /* j = 2^n */
@@ -42,31 +45,29 @@ int findNumOfBuckets(relation *r){
 
 
             int *count=malloc(j*sizeof(int));                
-
+            for (i=0;i<j;i++)
+                count[i]=0;
 
             for (i = 0 ; i < r->num_tuples ; i++){  /* at the end of this loop we have the number of elements in each bucket */
 
-                count[hashl(r->tuples[i],n)]++;
+                count[hashl(r->tuples[i].key,n)]++;
             }
 
 
             flag=1;
 
 
-            for (i = 0 ; i < j; i++)            
+            for (i = 0 ; i < j; i++){
                 if(count[i]*sizeof(tuple)>L2){          /* if we cant fit it in the L2 cache we increse n by one and we test again */
                     flag=0;
                     break;
                 }
-
-
+            }
+            free(count);
 
 
             if(flag) break;
 
-            n++;
-
-            
         }
 
         return n;
@@ -76,6 +77,143 @@ int findNumOfBuckets(relation *r){
 
 
 }
+
+
+relation* createPsum(relation* r,int n){
+
+
+    if(n==0) return NULL; 
+
+    int i,count=0 , histSize=1;
+
+    for ( i = 0 ; i < n ; i++ ){
+
+        histSize = 2 * histSize;
+    }
+
+
+
+
+    relation *hist=malloc(sizeof(relation));
+    hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
+
+    hist->num_tuples=0;     /*arxika den exei tipota mesa*/
+
+
+    for ( i = 0 ; i < histSize ; i++ ){
+
+        hist->tuples[i].payload=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
+
+
+    }
+
+    relation *Psum=malloc(sizeof(relation));
+    Psum->tuples = malloc(histSize * sizeof(tuple));       /* to Psum */
+
+
+
+    for ( i = 0 ; i < r->num_tuples ; i++ ){             /* etoiamzoume to hist */
+
+        tuple *t;
+
+        if (t = SearchKey(hist,r->tuples[i].key,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
+            t->payload++;
+        else{
+
+            hist->tuples[hist->num_tuples].key=hashl(r->tuples[i].key,n);
+            hist->tuples[hist->num_tuples].payload++;
+            hist->num_tuples++;                             //oso to gemizo ayksano to num_tuples
+
+        }
+        
+
+    }
+
+
+    //printf("printing hist\n");
+    //printRelation(hist);
+
+
+    Psum->num_tuples=hist->num_tuples;
+
+
+    int position=0;
+
+    for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
+
+        Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
+        Psum->tuples[i].payload=position;
+
+        position+=hist->tuples[i].payload;
+
+    }
+
+    // printf("printing psum\n");
+    // printRelation(Psum);
+    return Psum;
+
+}
+
+
+
+relation* relPartitioned(relation *r, relation *Psum, int n){
+
+
+    if (n==0) return r;
+
+
+    printf("i just entered relPartitioned\n");
+
+    
+    /* ftiaxnoume to newR */
+
+    int j=0,key,positions,currPos,i;
+    key = Psum->tuples[j].key;
+    printf("this is the key: %d\n",Psum->tuples[7].key);
+    positions = Psum->tuples[j+1].payload;      //i topothesia p vrisketai to epomeno bucket
+    currPos=0;          //i topothesia p vriskomaste ston newR
+    // printf("positions = %d\n",positions);
+    i=0;
+
+
+    relation *newR=malloc(sizeof(relation));
+    newR->tuples=malloc(r->num_tuples*sizeof(tuple));   /* o R' apo tin ekfonisi */
+
+    newR->num_tuples = 0;
+
+    //printf("printing r\n");
+    //printRelation(r);
+
+    while ( currPos != r->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
+
+        if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
+            newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
+            newR->tuples[currPos].payload=r->tuples[i].payload;
+
+            newR->num_tuples++;
+
+            currPos++;
+            if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
+                j++;
+                positions=Psum->tuples[j+1].payload;
+                key =  Psum->tuples[j].key;
+
+            }
+        }
+        if (i==r->num_tuples){              //ama ftaso sto telos ksanarxizo
+            i=0;
+            continue;
+        }
+        i++;
+    
+    }           
+
+    printf("printing new r\n");
+    printRelation(newR);
+    return newR;
+
+}
+
 
 
 result* PartitionedHashJoin(relation *relR, relation *relS){
@@ -92,111 +230,26 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     int nR,nS;
 
-    // nR=findNumOfBuckets(relR);
-    // nS=findNumOfBuckets(relS);
 
 
 
-    /* gia na ginei to partitioning prepei prota na pothikeusoume ta dedomena */
-    /* se seira (des ekfonisi sel4 stin arxi to eksigei)*/
+    nR=findNumOfBuckets(relR);
+    nS=findNumOfBuckets(relS);
 
-    int i,count=0 , n=1 , histSize=1;
-
-    for ( i = 0 ; i < n ; i++ ){
-
-        histSize = 2 * histSize;
-    }
+    printf("nr:%d  ns:%d  \n",nR,nS);
 
 
+    relation *newR,*newS,*rPsum,*sPsum;
+
+    rPsum=createPsum(relR,nR);          
+    sPsum=createPsum(relS,nS);
 
 
-    relation *newR;
-    newR->tuples=malloc(relR->num_tuples*sizeof(tuple));   /* o R' apo tin ekfonisi */
+    newR=relPartitioned(relR, rPsum, nR);   //na do an xreiazontai na n
+    newS=relPartitioned(relS, sPsum, nS);
 
-    newR->num_tuples = 0;
+    return NULL;
 
-
-
-
-    relation *hist;
-    hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
-
-    hist->num_tuples=0;     /*arxika den exei tipota mesa*/
-
-    for ( i = 0 ; i < histSize ; i++ ){
-
-        hist->tuples[i].payload=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
-
-
-    }
-
-    relation *Psum;
-    Psum->tuples = malloc(histSize * sizeof(tuple));       /* to Psum */
-
-
-    for ( i = 0 ; i < relR->num_tuples ; i++ ){             /* etoiamzoume to hist */
-
-        tuple *t;
-
-        if (t = SearchKey(hist,relR->tuples[i].key,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
-            t->payload++;
-        else{
-
-            hist->tuples[hist->num_tuples].key=hashl(relR->tuples[i].key,n);
-            hist->num_tuples++;                             //oso to gemizo ayksano to num_tuples
-
-        }
-        
-
-    }
-
-    Psum->num_tuples=hist->num_tuples;
-
-
-    int position=0;
-
-    for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
-
-        Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
-        Psum->tuples[i].payload=position;
-
-        position+=hist->tuples[i].payload;
-
-    }
-
-    
-
-    /* ftiaxnoume to newR */
-
-    int j=0,key,positions,currPos;
-    key = Psum->tuples[j].key;
-    positions = Psum->tuples[j].payload;
-    currPos=0;
-
-    i=0;
-
-    while ( currPos != relR->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
-
-        if( hashl(relR->tuples[i].key,n)==hashl(key,n)){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
-            newR->tuples[currPos].key=key;
-            newR->tuples[currPos].payload=relR->tuples[i].payload;
-
-            newR->num_tuples++;
-
-            currPos++;
-            if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
-
-                positions=Psum->tuples[++j].payload;
-                key =  Psum->tuples[j].key;
-
-            }
-        }
-        if (i==relR->num_tuples)                //ama ftaso sto telos ksanarxizo 
-            i=0;
-        i++;
-    
-    }           
-    
         /*tha mporouse olo auto na mpei se mia sinartisi p apla na epistrefei to newR alla tha thela na doume prota pos tha ginei me to L2*/
 
     /**     Step 2. Building            **/
