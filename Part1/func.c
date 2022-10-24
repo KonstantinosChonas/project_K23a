@@ -169,7 +169,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
     int j=0,key,positions,currPos,i;
     key = Psum->tuples[j].key;
-    printf("this is the key: %d\n",Psum->tuples[7].key);
+    //printf("this is the key: %d\n",Psum->tuples[7].key);
     positions = Psum->tuples[j+1].payload;      //i topothesia p vrisketai to epomeno bucket
     currPos=0;          //i topothesia p vriskomaste ston newR
     // printf("positions = %d\n",positions);
@@ -214,6 +214,58 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 }
 
+void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, int nR, int nS){
+    int j = 0;
+    int bucket = 0;
+    int rNum = rPsum->num_tuples;
+    int sNum = sPsum->num_tuples;
+
+    relation *alignedBuckets = malloc(sizeof(relation));
+    alignedBuckets->num_tuples = 0;
+    alignedBuckets->tuples = malloc((r->num_tuples + s->num_tuples) * sizeof(tuple));
+
+    printf("r number of buckets: %d\n", rNum);
+    printf("s number of buckets: %d\n", sNum);
+
+    int new = 0;
+    int rBucket = 0;
+    int sBucket = 0;
+    int rIndex = 0;
+    int sIndex = 0;
+    int rHash = 0;
+    int sHash = 0;
+
+    /* sugkrinoume kathe kouva ths r me kathe kouva ths s kai kratame ta koina se neo relation
+    xrhsimopoioume rPsum kai sPsum gia na broume apo poio index 3ekinaei o kathe o kouvas */
+
+    for(int i = 0; i < rPsum->num_tuples; i++){
+        rIndex = rPsum->tuples[i].payload;
+        rHash = hashl(r->tuples[rIndex].key, nR);
+        while(hashl(r->tuples[rIndex].key, nR) == rHash){
+            for(int j = 0; j < sPsum->num_tuples; j++) {
+                sIndex = sPsum->tuples[j].payload;
+                sHash = hashl(s->tuples[sIndex].key, nS);
+                while (hashl(s->tuples[sIndex].key, nS) == sHash) {
+                    if (hashl(r->tuples[rIndex].key, nR) == hashl(s->tuples[sIndex].key, nS)) {
+                        //an ta 2 tuples exoun idio hash, tote bazoume sto neo relation to antistoixo tuple ths R
+
+                        if(hashl(r->tuples[rIndex].key, nR) == rHash){          //elegxoume an briskomaste akoma ston idio kouva ths R
+                            alignedBuckets->tuples[new] = r->tuples[rIndex];
+                            alignedBuckets->num_tuples = new++;
+                            rIndex++;
+                            sIndex++;
+                        }else break;        //an exoume paei sto epomeno bucket ths R, agnooume auto to loop
+                    }else break;            //an ta hash twn 2 tuple den einai idia, proxwrame sto epomeno kouva ths S
+                }
+            }
+            break;
+        }
+    }
+
+    relation* alignedPsum = createPsum(alignedBuckets, nR);
+    printRelation(alignedBuckets);
+}
+
 
 
 result* PartitionedHashJoin(relation *relR, relation *relS){
@@ -247,6 +299,13 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     newR=relPartitioned(relR, rPsum, nR);   //na do an xreiazontai na n
     newS=relPartitioned(relS, sPsum, nS);
+
+
+    printf("now combining appropriate buckets into new relation\n");
+    /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
+    de douleuei gia kathe input atm */
+    compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
+
 
     return NULL;
 

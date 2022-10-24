@@ -18,14 +18,14 @@ tuple* createTuple(int key){
 }
 
 relation* createRelation(){
-    srand((unsigned) time(NULL));
     int relationSize;
     tuple* prevTuple = NULL;
     tuple* newTuple = NULL;
 
     relation *newRelation = malloc(sizeof(struct relation));
 
-    newRelation->num_tuples = rand() % 15 + 1;
+    newRelation->num_tuples = 20;
+    //newRelation->num_tuples = rand() % 10 + 5;        //use for random number of tuples in relation
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){
@@ -40,7 +40,7 @@ relation* createRelation(){
 }
 
 void printRelation(relation* myRelation){
-    printf("Printing Relation with %d tuples:\n\n", myRelation->num_tuples);
+    printf("\nPrinting Relation with %d tuples:\n\n", myRelation->num_tuples);
     for(int i = 0; i < myRelation->num_tuples; i++){
         printf("Tuple with key: %d and payload %d\n", myRelation->tuples[i].key, myRelation->tuples[i].payload);
     }
