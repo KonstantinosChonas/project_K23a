@@ -2,13 +2,19 @@
 
 int main (void){
 
-    relation* myRelation = createRelation();
-    printRelation(myRelation);
-    relationDelete(myRelation);
-//  relation *R, *S, *res;
+    relation* relR = createRelation();
+    //sleep(1);                 
+    relation* relS = createRelation();
+    
+    
 
 
-//  res = PartitionedHashJoin(relation *relR, relation *relS);
+    result *res;
 
 
+    res = PartitionedHashJoin(relR,relS);
+
+
+    relationDelete(relR);
+    relationDelete(relS);
 }

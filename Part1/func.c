@@ -33,7 +33,7 @@ int findNumOfBuckets(relation *r){
 
         int i,n=1,x,flag=0;
 
-        for(n=1;;n++){
+        for(n=1;n<3;n++){              //TODO na to kano na stamataei
 
             int j=1;
 
@@ -70,7 +70,7 @@ int findNumOfBuckets(relation *r){
 
         }
 
-        return n;
+        return n-1;
 
 
     }
@@ -97,18 +97,22 @@ relation* createPsum(relation* r,int n){
     relation *hist=malloc(sizeof(relation));
     hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
 
-    hist->num_tuples=0;     /*arxika den exei tipota mesa*/
 
 
     for ( i = 0 ; i < histSize ; i++ ){
 
         hist->tuples[i].payload=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
-
+        hist->tuples[i].key=i;
 
     }
 
+    hist->num_tuples=histSize;
+
+
     relation *Psum=malloc(sizeof(relation));
     Psum->tuples = malloc(histSize * sizeof(tuple));       /* to Psum */
+
+
 
 
 
@@ -118,20 +122,12 @@ relation* createPsum(relation* r,int n){
 
         if (t = SearchKey(hist,r->tuples[i].key,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
             t->payload++;
-        else{
-
-            hist->tuples[hist->num_tuples].key=hashl(r->tuples[i].key,n);
-            hist->tuples[hist->num_tuples].payload++;
-            hist->num_tuples++;                             //oso to gemizo ayksano to num_tuples
-
-        }
-        
-
+      
     }
 
 
-    //printf("printing hist\n");
-    //printRelation(hist);
+    // printf("printing hist\n");
+    // printRelation(hist);
 
 
     Psum->num_tuples=hist->num_tuples;
@@ -148,8 +144,8 @@ relation* createPsum(relation* r,int n){
 
     }
 
-    // printf("printing psum\n");
-    // printRelation(Psum);
+    printf("printing psum\n");
+    printRelation(Psum);
     return Psum;
 
 }
@@ -172,7 +168,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
     printf("this is the key: %d\n",Psum->tuples[7].key);
     positions = Psum->tuples[j+1].payload;      //i topothesia p vrisketai to epomeno bucket
     currPos=0;          //i topothesia p vriskomaste ston newR
-    // printf("positions = %d\n",positions);
+    //printf("positions = %d\n",positions);
     i=0;
 
 
@@ -181,15 +177,13 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
     newR->num_tuples = 0;
 
-    //printf("printing r\n");
-    //printRelation(r);
+    // printf("printing r\n");
+    // printRelation(r);
 
     while ( currPos != r->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
-
         if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
             newR->tuples[currPos].payload=r->tuples[i].payload;
-
             newR->num_tuples++;
 
             currPos++;
@@ -220,24 +214,16 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     /**     Step 1. Partitioning        **/
 
-
-    /*##################################################*/
-
-    /* edo prepei na ginei prota i douleia me tin L2  kai tin euresi tou n (gia arxi theoro dedomeno oti to n einai 3)*/
-
-    /*##################################################*/
+    printRelation(relR);
 
 
     int nR,nS;
 
 
-
-
     nR=findNumOfBuckets(relR);
     nS=findNumOfBuckets(relS);
 
-    printf("nr:%d  ns:%d  \n",nR,nS);
-
+    printf(" nr: %d ns: %d\n",nR,nS);
 
     relation *newR,*newS,*rPsum,*sPsum;
 
