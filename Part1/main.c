@@ -9,10 +9,8 @@ int main (void){
     
 
 
-    result *res;
 
 
-    res = PartitionedHashJoin(relR,relS);
 
 
     relationDelete(relR);

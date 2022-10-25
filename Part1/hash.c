@@ -5,10 +5,12 @@
 #include "hash.h"
 #include "int.h"
 
-void hashCreate(int* hashTable){
-    for(int i = 0; i < HASH_TABLE_SIZE; i++){
-        hashTable[i] = 0;
-    }
+hashMap* hashCreate(int bucket){
+    hashMap *newHashMap = malloc(sizeof(struct hashMap));
+    newHashMap->nodeCount = 0;
+    newHashMap->bucket = bucket;
+    newHashMap->nodeList = calloc(HASH_TABLE_SIZE, sizeof(hashNode*));
+    return newHashMap;
 }
 
 int hashInsert(int* hashTable, int key, int n){

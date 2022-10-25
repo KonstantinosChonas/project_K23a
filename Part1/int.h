@@ -43,7 +43,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n);
 int findNumOfBuckets(relation *r);
 tuple* SearchKey(relation *r,int key, int n);
 
-void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, int nR, int nS);
+void createHashForBuckets(relation *r, relation *pSum, int n);
 
 /** Functions used to create input**/
 
