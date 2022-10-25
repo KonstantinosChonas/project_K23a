@@ -1,5 +1,5 @@
 #include "int.h"
-
+#include "hash.h"
 
 int hashl(int key, int n){
 
@@ -208,6 +208,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 }
 
+/*
 void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, int nR, int nS){
     int j = 0;
     int bucket = 0;
@@ -232,6 +233,7 @@ void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, 
     /* sugkrinoume kathe kouva ths r me kathe kouva ths s kai kratame ta koina se neo relation
     xrhsimopoioume rPsum kai sPsum gia na broume apo poio index 3ekinaei o kathe o kouvas */
 
+/*
     for(int i = 0; i < rPsum->num_tuples; i++){
         rIndex = rPsum->tuples[i].payload;
         rHash = hashl(r->tuples[rIndex].key, nR);
@@ -259,8 +261,20 @@ void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, 
     relation* alignedPsum = createPsum(alignedBuckets, nR);
     printRelation(alignedBuckets);
 }
+*/
 
+void createHashForBuckets(relation* r, relation* pSum, int n){
+    int bucket = 0;
+    int* myHash = NULL;
 
+    hashMap* hashMapArray[pSum->num_tuples];
+
+    for(int i = 0; i < pSum->num_tuples; i++){
+        hashMapArray[i] = hashCreate(i);
+        printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+    }
+
+}
 
 result* PartitionedHashJoin(relation *relR, relation *relS){
 
@@ -287,11 +301,10 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     newS=relPartitioned(relS, sPsum, nS);
 
 
-    printf("now combining appropriate buckets into new relation\n");
     /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
     de douleuei gia kathe input atm */
-    compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
-
+    //compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
+    createHashForBuckets(newR, rPsum, nR);
 
     return NULL;
 
