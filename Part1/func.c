@@ -33,7 +33,7 @@ int findNumOfBuckets(relation *r){
 
         int i,n=1,x,flag=0;
 
-        for(n=1;n<3;n++){              //TODO na to kano na stamataei
+        for(n=2;n<6;n+=2){              //TODO na to kano na stamataei
 
             int j=1;
 
@@ -70,7 +70,7 @@ int findNumOfBuckets(relation *r){
 
         }
 
-        return n-1;
+        return n-2;
 
 
     }
