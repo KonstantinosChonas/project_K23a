@@ -267,11 +267,17 @@ void createHashForBuckets(relation* r, relation* pSum, int n){
     int bucket = 0;
     int* myHash = NULL;
 
-    hashMap* hashMapArray[pSum->num_tuples];
+    if(pSum != NULL){
+        hashMap* hashMapArray[pSum->num_tuples];
 
-    for(int i = 0; i < pSum->num_tuples; i++){
-        hashMapArray[i] = hashCreate(i);
-        printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+        for(int i = 0; i < pSum->num_tuples; i++){
+            hashMapArray[i] = hashCreate(i);
+            printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+        }
+    }else{
+        hashMap* hashMapArray[0];
+        hashMapArray[0] = hashCreate(0);
+        printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
     }
 
 }
