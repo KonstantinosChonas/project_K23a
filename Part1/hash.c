@@ -13,15 +13,28 @@ hashMap* hashCreate(int bucket){
     return newHashMap;
 }
 
-int hashInsert(int* hashTable, int key, int n){
+hashNode* hashNodeCreate(int key, int payload){
+    hashNode *newHashNode = malloc(sizeof(struct hashNode));
+    newHashNode->key = key;
+    newHashNode->payload = payload;
+
+    return newHashNode;
+}
+
+int hashInsert(hashMap* hashTable, int key, int payload, int n){
     int keyHash, jump, step, index, keyHashAlready;
-    int hop = 3;
+    int hop = 4;
 
     keyHash = hashl(key,n);
-    if(hashTable[keyHash] == 0){
-        hashTable[keyHash] = key;
+    //if the key is new to the hashTable
+    if(hashTable->nodeList[keyHash] == NULL){
+        hashTable->nodeList[keyHash] = hashNodeCreate(key, payload);
+        printf("now bitmap is: %d\n", hashTable->nodeList[keyHash]->bitmap[0]);
+        updateBitmapInsert(hashTable->nodeList[keyHash]->bitmap, 0);
+        printf("now bitmap is: %d\n", hashTable->nodeList[keyHash]->bitmap[0]);
         return 1;
     }else{
+        /*
         jump = keyHash + 1;
         while(jump != keyHash && hashTable[jump%HASH_TABLE_SIZE] != 0)
             jump = (jump+1) % 20;
@@ -58,5 +71,13 @@ int hashInsert(int* hashTable, int key, int n){
             if(step >= hop)
                 return 0;
         }
-    }
+    */}
+}
+
+void updateBitmapInsert(int* bitmap, int position){
+    bitmap[position] = 1;
+}
+
+void updateBitmapRemove(int* bitmap, int position){
+    bitmap[position] = 0;
 }
