@@ -8,12 +8,10 @@ typedef struct hashNode{
     int key;
     int payload;
     int bitmap[BITMAP_SIZE];
-    struct hashNode* next;
-    struct hashNode* prev;
 }hashNode;
 
 typedef struct hashMap{
-    hashNode** nodeList;
+    hashNode* hashNodes[HASH_TABLE_SIZE];
     int nodeCount;
     int bucket;     //which bucket is this hashMap for
 }hashMap;

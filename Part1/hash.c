@@ -9,7 +9,6 @@ hashMap* hashCreate(int bucket){
     hashMap *newHashMap = malloc(sizeof(struct hashMap));
     newHashMap->nodeCount = 0;
     newHashMap->bucket = bucket;
-    newHashMap->nodeList = calloc(HASH_TABLE_SIZE, sizeof(hashNode*));
     return newHashMap;
 }
 
@@ -27,11 +26,11 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
 
     keyHash = hashl(key,n);
     //if the key is new to the hashTable
-    if(hashTable->nodeList[keyHash] == NULL){
-        hashTable->nodeList[keyHash] = hashNodeCreate(key, payload);
-        printf("now bitmap is: %d\n", hashTable->nodeList[keyHash]->bitmap[0]);
-        updateBitmapInsert(hashTable->nodeList[keyHash]->bitmap, 0);
-        printf("now bitmap is: %d\n", hashTable->nodeList[keyHash]->bitmap[0]);
+    if(hashTable->hashNodes[keyHash] == NULL){
+        hashTable->hashNodes[keyHash] = hashNodeCreate(key, payload);
+        printf("now bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
+        updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, 0);
+        printf("now bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         return 1;
     }else{
         /*
