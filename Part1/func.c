@@ -1,0 +1,346 @@
+#include "int.h"
+#include "hash.h"
+
+int hashl(int key, int n){
+
+    int i=0,j=1;
+    for (i=0;i<n;i++){
+        j=j*2;
+    }
+    j--;
+
+    return key & j;
+
+}
+
+
+
+
+int findNumOfBuckets(relation *r){
+
+    printf("i just entered find num of buckets\n");
+    int size;
+
+    size = r->num_tuples*sizeof(tuple);
+
+    if (L2>size){       /* no need to partition */
+
+
+        return 0;
+
+    }
+    else{           /* the table does not fit in the L2 cache whole */      //TODO na do gia poliplokotites
+
+        int i,n=1,x,flag=0;
+
+        for(n=2;n<6;n+=2){              //TODO na to kano na stamataei
+
+            int j=1;
+
+
+            for (i=0;i<n;i++){          /* j = 2^n */
+                j=j*2;
+            }
+
+
+
+            int *count=malloc(j*sizeof(int));                
+            for (i=0;i<j;i++)
+                count[i]=0;
+
+            for (i = 0 ; i < r->num_tuples ; i++){  /* at the end of this loop we have the number of elements in each bucket */
+
+                count[hashl(r->tuples[i].key,n)]++;
+            }
+
+
+            flag=1;
+
+
+            for (i = 0 ; i < j; i++){
+                if(count[i]*sizeof(tuple)>L2){          /* if we cant fit it in the L2 cache we increse n by one and we test again */
+                    flag=0;
+                    break;
+                }
+            }
+            free(count);
+
+
+            if(flag) break;
+
+        }
+
+        return n-2;
+
+
+    }
+
+
+}
+
+
+relation* createPsum(relation* r,int n){
+
+
+    if(n==0) return NULL; 
+
+    int i,count=0 , histSize=1;
+
+    for ( i = 0 ; i < n ; i++ ){
+
+        histSize = 2 * histSize;
+    }
+
+
+
+
+    relation *hist=malloc(sizeof(relation));
+    hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
+
+
+
+    for ( i = 0 ; i < histSize ; i++ ){
+
+        hist->tuples[i].payload=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
+        hist->tuples[i].key=i;
+
+    }
+
+    hist->num_tuples=histSize;
+
+
+    relation *Psum=malloc(sizeof(relation));
+    Psum->tuples = malloc(histSize * sizeof(tuple));       /* to Psum */
+
+
+
+
+
+    for ( i = 0 ; i < r->num_tuples ; i++ ){             /* etoiamzoume to hist */
+
+        tuple *t;
+
+        if (t = SearchKey(hist,r->tuples[i].key,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
+            t->payload++;
+      
+    }
+
+
+    // printf("printing hist\n");
+    // printRelation(hist);
+
+
+    Psum->num_tuples=hist->num_tuples;
+
+
+    int position=0;
+
+    for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
+
+        Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
+        Psum->tuples[i].payload=position;
+
+        position+=hist->tuples[i].payload;
+
+    }
+
+    printf("printing psum\n");
+    printRelation(Psum);
+    return Psum;
+
+}
+
+
+
+relation* relPartitioned(relation *r, relation *Psum, int n){
+
+
+    if (n==0) return r;
+
+
+    printf("i just entered relPartitioned\n");
+
+    
+    /* ftiaxnoume to newR */
+
+    int j=0,key,positions,currPos,i;
+    key = Psum->tuples[j].key;
+    //printf("this is the key: %d\n",Psum->tuples[7].key);
+    positions = Psum->tuples[j+1].payload;      //i topothesia p vrisketai to epomeno bucket
+    currPos=0;          //i topothesia p vriskomaste ston newR
+    //printf("positions = %d\n",positions);
+    i=0;
+
+
+    relation *newR=malloc(sizeof(relation));
+    newR->tuples=malloc(r->num_tuples*sizeof(tuple));   /* o R' apo tin ekfonisi */
+
+    newR->num_tuples = 0;
+
+    // printf("printing r\n");
+    // printRelation(r);
+
+    while ( currPos != r->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
+        if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
+            newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
+            newR->tuples[currPos].payload=r->tuples[i].payload;
+            newR->num_tuples++;
+
+            currPos++;
+            if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
+                j++;
+                positions=Psum->tuples[j+1].payload;
+                key =  Psum->tuples[j].key;
+
+            }
+        }
+        if (i==r->num_tuples){              //ama ftaso sto telos ksanarxizo
+            i=0;
+            continue;
+        }
+        i++;
+    
+    }           
+
+    printf("printing new r\n");
+    printRelation(newR);
+    return newR;
+
+}
+
+/*
+void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, int nR, int nS){
+    int j = 0;
+    int bucket = 0;
+    int rNum = rPsum->num_tuples;
+    int sNum = sPsum->num_tuples;
+
+    relation *alignedBuckets = malloc(sizeof(relation));
+    alignedBuckets->num_tuples = 0;
+    alignedBuckets->tuples = malloc((r->num_tuples + s->num_tuples) * sizeof(tuple));
+
+    printf("r number of buckets: %d\n", rNum);
+    printf("s number of buckets: %d\n", sNum);
+
+    int new = 0;
+    int rBucket = 0;
+    int sBucket = 0;
+    int rIndex = 0;
+    int sIndex = 0;
+    int rHash = 0;
+    int sHash = 0;
+
+    /* sugkrinoume kathe kouva ths r me kathe kouva ths s kai kratame ta koina se neo relation
+    xrhsimopoioume rPsum kai sPsum gia na broume apo poio index 3ekinaei o kathe o kouvas */
+
+/*
+    for(int i = 0; i < rPsum->num_tuples; i++){
+        rIndex = rPsum->tuples[i].payload;
+        rHash = hashl(r->tuples[rIndex].key, nR);
+        while(hashl(r->tuples[rIndex].key, nR) == rHash){
+            for(int j = 0; j < sPsum->num_tuples; j++) {
+                sIndex = sPsum->tuples[j].payload;
+                sHash = hashl(s->tuples[sIndex].key, nS);
+                while (hashl(s->tuples[sIndex].key, nS) == sHash) {
+                    if (hashl(r->tuples[rIndex].key, nR) == hashl(s->tuples[sIndex].key, nS)) {
+                        //an ta 2 tuples exoun idio hash, tote bazoume sto neo relation to antistoixo tuple ths R
+
+                        if(hashl(r->tuples[rIndex].key, nR) == rHash){          //elegxoume an briskomaste akoma ston idio kouva ths R
+                            alignedBuckets->tuples[new] = r->tuples[rIndex];
+                            alignedBuckets->num_tuples = new++;
+                            rIndex++;
+                            sIndex++;
+                        }else break;        //an exoume paei sto epomeno bucket ths R, agnooume auto to loop
+                    }else break;            //an ta hash twn 2 tuple den einai idia, proxwrame sto epomeno kouva ths S
+                }
+            }
+            break;
+        }
+    }
+
+    relation* alignedPsum = createPsum(alignedBuckets, nR);
+    printRelation(alignedBuckets);
+}
+*/
+
+void createHashForBuckets(relation* r, relation* pSum, int n){
+    int bucket = 0;
+    int* myHash = NULL;
+
+    if(pSum != NULL){
+        hashMap* hashMapArray[pSum->num_tuples];
+
+        for(int i = 0; i < pSum->num_tuples; i++){
+            hashMapArray[i] = hashCreate(i);
+            printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+        }
+        hashInsert(hashMapArray[0], 5, 10, n);  //just for testing
+    }else{
+        hashMap* hashMapArray[0];
+        hashMapArray[0] = hashCreate(0);
+        printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
+        hashInsert(hashMapArray[0], 5, 10, n);  //just for testing
+    }
+}
+
+result* PartitionedHashJoin(relation *relR, relation *relS){
+
+    /**     Step 1. Partitioning        **/
+
+    printRelation(relR);
+
+
+    int nR,nS;
+
+
+    nR=findNumOfBuckets(relR);
+    nS=findNumOfBuckets(relS);
+
+    printf(" nr: %d ns: %d\n",nR,nS);
+
+    relation *newR,*newS,*rPsum,*sPsum;
+
+    rPsum=createPsum(relR,nR);          
+    sPsum=createPsum(relS,nS);
+
+
+    newR=relPartitioned(relR, rPsum, nR);   //na do an xreiazontai na n
+    newS=relPartitioned(relS, sPsum, nS);
+
+
+    /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
+    de douleuei gia kathe input atm */
+    //compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
+    createHashForBuckets(newR, rPsum, nR);
+
+    return NULL;
+
+        /*tha mporouse olo auto na mpei se mia sinartisi p apla na epistrefei to newR alla tha thela na doume prota pos tha ginei me to L2*/
+
+    /**     Step 2. Building            **/
+
+    /**     Step 3. Probing             **/
+}
+
+
+
+
+tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an den to vrei epistrefei null allios epistrefei deikti sto key*/
+
+    int i;
+
+
+    for ( i = 0 ; i < r->num_tuples ; i++ ){
+
+        if (hashl(r->tuples[i].key,n)==hashl(key,n)){
+
+            return &r->tuples[i];
+
+        }
+        
+
+    }
+
+    return NULL;
+
+}
