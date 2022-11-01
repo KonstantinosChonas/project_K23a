@@ -1,7 +1,3 @@
-//
-// Created by aris on 24/10/2022.
-//
-
 #include "hash.h"
 #include "int.h"
 
@@ -87,7 +83,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
             break;
     }
     //if empty node is in the neighbor
-    if(jump-keyHash<hop){
+    if((jump-keyHash)%n < hop){
         if(hashTable->hashNodes[jump] ==NULL){
             hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
     }
