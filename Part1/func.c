@@ -82,6 +82,8 @@ int findNumOfBuckets(relation *r){
 relation* createPsum(relation* r,int n){
 
 
+    printf("i just entered psum\n");
+
     if(n==0) return NULL; 
 
     int i,count=0 , histSize=1;
@@ -177,11 +179,16 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
     newR->num_tuples = 0;
 
-    // printf("printing r\n");
-    // printRelation(r);
+    printf("printing r\n");
+    printRelation(r);
 
     while ( currPos != r->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
+        if (i==r->num_tuples) i=0;
         if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
+
+            printf("key: %d payload: %d  i: %d\n",r->tuples[i].key,r->tuples[i].payload,i);
+
+
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
             newR->tuples[currPos].payload=r->tuples[i].payload;
             newR->num_tuples++;
@@ -300,11 +307,16 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     newR=relPartitioned(relR, rPsum, nR);   //na do an xreiazontai na n
     newS=relPartitioned(relS, sPsum, nS);
 
-
+    printf(" partitioning over\n");
     /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
     de douleuei gia kathe input atm */
     //compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
-    createHashForBuckets(newR, rPsum, nR);
+    //createHashForBuckets(newR, rPsum, nR);
+
+
+    printRelation(newR);
+    printRelation(newS);
+
 
     return NULL;
 

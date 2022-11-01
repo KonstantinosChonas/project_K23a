@@ -8,7 +8,7 @@ int main (void){
     
     
 
-
+    result *r=PartitionedHashJoin(relR,relS);
 
 
 
