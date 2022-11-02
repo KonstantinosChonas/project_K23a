@@ -12,7 +12,7 @@ int main (void){
 
     result *r=PartitionedHashJoin(relR,relS);
 
-    PartitionedHashJoin(relR, relS);
+//    PartitionedHashJoin(relR, relS);
 
 
 
