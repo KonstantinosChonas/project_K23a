@@ -1,6 +1,55 @@
 #include "int.h"
 #include "hash.h"
 
+
+relation* inputFromFile(char* s){
+
+
+    FILE *fp;
+    int count=0,num1,num2,num3;
+    relation* r;
+    char c;
+
+    fp = fopen(s, "r");
+ 
+    // Extract characters from file and store in character c
+    for (c = getc(fp); c != EOF; c = getc(fp))
+        if (c == '\n') // Increment count if this character is newline
+            count = count + 1;
+ 
+    // Close the file
+    fclose(fp);
+
+
+
+    r=malloc(sizeof(relation));
+    r->tuples = malloc(count * sizeof(tuple)); 
+    r->num_tuples=count;
+
+
+    fp = fopen(s, "r");
+
+    
+    // Extract characters from file and store in character c
+    for(int i = 0 ; i < count ; i++ ){
+
+        fscanf(fp,"%d|%d|%d|\n",&num1,&num2,&num3);
+        r->tuples[i].key=num1;
+        r->tuples[i].payload=num2;
+
+
+
+    }
+
+
+
+    return r;
+}
+
+
+
+
+
 int hashl(int key, int n){
 
     int i=0,j=1;
@@ -12,8 +61,6 @@ int hashl(int key, int n){
     return key & j;
 
 }
-
-
 
 
 int findNumOfBuckets(relation *r){
@@ -335,8 +382,6 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 }
 
 
-
-
 tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an den to vrei epistrefei null allios epistrefei deikti sto key*/
 
     int i;
@@ -356,3 +401,4 @@ tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an d
     return NULL;
 
 }
+
