@@ -283,10 +283,10 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
         }
         return hashMapArray;
     }else{
-        hashMap* hashMapArray[0];
+        struct hashMap **hashMapArray = malloc(sizeof(struct hashMap));
         hashMapArray[0] = hashCreate(0);
         printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
-        return *hashMapArray;
+        return hashMapArray;
     }
 }
 
