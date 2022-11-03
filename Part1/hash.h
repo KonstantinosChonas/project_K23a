@@ -26,11 +26,11 @@ typedef struct hashMap{
 
 hashMap* hashCreate(int bucket);
 hashNode* hashNodeCreate(int key, int payload, int hop);
-hashMap** hashDelete(hashMap** myHashMap);
+void hashDelete(hashMap** myHashMap);
 
 payloadList* createPayloadList(int data);
 void addPayload(payloadList* head, int data);
-int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag)
+int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag);
 int checkNeighborhood(hashMap* hashTable, int keyhash);
 void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop);
 int hashInsert(hashMap* hashTable, int key, int payload, int n);
