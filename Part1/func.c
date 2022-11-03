@@ -270,23 +270,23 @@ void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, 
 }
 */
 
-void createHashForBuckets(relation* r, relation* pSum, int n){
+hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
     int bucket = 0;
     int* myHash = NULL;
 
     if(pSum != NULL){
-        hashMap* hashMapArray[pSum->num_tuples];
+        struct hashMap **hashMapArray = malloc(sizeof(struct hashMap) * pSum->num_tuples);
 
         for(int i = 0; i < pSum->num_tuples; i++){
             hashMapArray[i] = hashCreate(i);
             printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
         }
-        hashInsert(hashMapArray[0], 5, 10, n);  //just for testing
+        return hashMapArray;
     }else{
         hashMap* hashMapArray[0];
         hashMapArray[0] = hashCreate(0);
         printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
-        hashInsert(hashMapArray[0], 5, 10, n);  //just for testing
+        return *hashMapArray;
     }
 }
 
@@ -318,12 +318,17 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
     de douleuei gia kathe input atm */
     //compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
-    //createHashForBuckets(newR, rPsum, nR);
 
+    hashMap** hashMapArray = NULL;
 
-    printRelation(newR);
-    printRelation(newS);
+    hashMapArray = createHashForBuckets(newR, rPsum, nR);
 
+    printf("%d\n", hashMapArray[2]->bucket);
+
+    //printRelation(newR);
+    //printRelation(newS);
+
+    hashDelete(hashMapArray);
 
     return NULL;
 
