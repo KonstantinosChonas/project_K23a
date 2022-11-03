@@ -53,9 +53,9 @@ int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag){      
         return 0;
     int hop=hashTable->hashNodes[keyHash]->hop;    
     for(int i=0; i<hop; i++){
-        if(hashTable->hashNodes[keyHash+i]->key==key){
+        if(hashTable->hashNodes[keyHash+i]->key == key){
             if (flag == 1)
-                addPayload(hashTable->hashNodes[keyHash+1]->payload,payload)
+                addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
             return 1;
         }
     }
