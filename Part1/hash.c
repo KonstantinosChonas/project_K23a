@@ -3,7 +3,7 @@
 
 payloadList* createPayloadList(int data){
     payloadList *temp; 
-    temp = (node)malloc(sizeof(payloadList));
+    temp = malloc(sizeof(payloadList));
     temp->data=data;
     temp->next = NULL;
     return temp;
@@ -22,7 +22,7 @@ void addPayload(payloadList* head, int data){
         }
         x->next = temp;
     }
-    return head;
+    return;
 }
 
 hashMap* hashCreate(int bucket){
@@ -65,7 +65,7 @@ int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag){      
 
 void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop){
     hashNode->key = key;
-    hashNode->payload = payload;
+    hashNode->payload->data = payload;
     hashNode->hop = hop;
 }
 
@@ -97,7 +97,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
         updateBitmapInsert(hashTable->bitmap, 0);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         printf("now hash bitmap is: %d\n", hashTable->bitmap[0]);
-        int x=hashSearch(hashTable,key,n);
+        int x=hashSearch(hashTable,key,payload,n, 1); //not sure if flag should be 1
         printf("exists: %d\n",x);
         return 1;
     }
@@ -136,7 +136,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
             keyHashAlready=hashl(hashTable->hashNodes[y]->key,n);
             if ((jump-keyHashAlready)%n < hop){
                 if(hashTable->hashNodes[jump] == NULL){
-                    hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload, hop);
+                    hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);
                     updateBitmapInsert(hashTable->hashNodes[keyHashAlready]->bitmap,jump-keyHashAlready);
                     updateBitmapInsert(hashTable->bitmap, jump);
                     updateBitmapRemove(hashTable->hashNodes[keyHashAlready]->bitmap,y-keyHashAlready);
@@ -178,7 +178,7 @@ void hashDelete(hashMap** myHashMap){
     int i = 0;
     int j = 0;
 
-    printf("%d\n", myHashMap[7]->bucket);
+    printf("%d\n", myHashMap[2]->bucket);
     while(myHashMap[i] != NULL){
         while(myHashMap[i]->hashNodes[j] != NULL){
             free(myHashMap[i]->hashNodes[j]);
