@@ -174,3 +174,18 @@ void updateBitmapRemove(int* bitmap, int position){
     bitmap[position] = 0;
 }
 
+void hashDelete(hashMap** myHashMap){
+    int i = 0;
+    int j = 0;
+
+    printf("%d\n", myHashMap[7]->bucket);
+    while(myHashMap[i] != NULL){
+        while(myHashMap[i]->hashNodes[j] != NULL){
+            free(myHashMap[i]->hashNodes[j]);
+            j++;
+        }
+        free(myHashMap[i]);
+        i++;
+    }
+    free(myHashMap);
+}

@@ -26,6 +26,7 @@ typedef struct hashMap{
 
 hashMap* hashCreate(int bucket);
 hashNode* hashNodeCreate(int key, int payload, int hop);
+void hashDelete(hashMap** myHashMap);
 
 payloadList* createPayloadList(int data);
 void addPayload(payloadList* head, int data);
