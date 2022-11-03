@@ -8,7 +8,7 @@
 typedef struct payloadList{
     int data;
     struct payloadList *next;
- }payloadList
+ }payloadList;
 
 typedef struct hashNode{
     int key;
