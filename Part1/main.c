@@ -14,6 +14,7 @@ int main (void){
 
 
     PartitionedHashJoin(relR, relS);
+//    PartitionedHashJoin(relR, relS);
 
 
 
