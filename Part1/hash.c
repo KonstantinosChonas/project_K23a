@@ -1,6 +1,30 @@
 #include "hash.h"
 #include "int.h"
 
+payloadList* createPayloadList(int data){
+    payloadList *temp; 
+    temp = (node)malloc(sizeof(payloadList));
+    temp->data=data;
+    temp->next = NULL;
+    return temp;
+}
+
+void addPayload(payloadList* head, int data){
+    payloadList *temp,*x;
+    temp = createPayloadList(data);
+    if(head == NULL){
+        head = temp;    
+    }
+    else{
+        x = head;
+        while(x->next != NULL){
+            x = x->next;
+        }
+        x->next = temp;
+    }
+    return head;
+}
+
 hashMap* hashCreate(int bucket){
     hashMap *newHashMap = malloc(sizeof(struct hashMap));
     newHashMap->nodeCount = 0;
@@ -15,7 +39,7 @@ hashMap* hashCreate(int bucket){
 hashNode* hashNodeCreate(int key, int payload, int hop){
     hashNode *newHashNode = malloc(sizeof(struct hashNode));
     newHashNode->key = key;
-    newHashNode->payload = payload;
+    newHashNode->payload = createPayloadList(payload);
     newHashNode->hop = hop;
     newHashNode->bitmap = malloc(sizeof(hop*sizeof(int)));
     for (int i=0; i<hop; i++)
@@ -23,21 +47,30 @@ hashNode* hashNodeCreate(int key, int payload, int hop){
     return newHashNode;
 }
 
-int hashSearch(hashMap* hashTable, int key, int n){
+int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag){            //if flag==1 addpayload to payload list
     int keyHash = hashl(key,n);
     if(hashTable->hashNodes[keyHash] == NULL)
         return 0;
     int hop=hashTable->hashNodes[keyHash]->hop;    
     for(int i=0; i<hop; i++){
-        if(hashTable->hashNodes[keyHash+i]->key==key)
+        if(hashTable->hashNodes[keyHash+i]->key==key){
+            if (flag == 1)
+                addPayload(hashTable->hashNodes[keyHash+1]->payload,payload)
             return 1;
+        }
     }
     return 0;
 }
+
+
 void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop){
     hashNode->key = key;
     hashNode->payload = payload;
     hashNode->hop = hop;
+}
+
+void addPayloadToNode(hashNode* hashNode,int payload){
+    addPayload(hashNode->payload, payload);
 }
 
 int checkNeighborhood(hashMap* hashTable, int keyhash){
@@ -69,8 +102,8 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
         return 1;
     }
     //if the same key exists    
-    if(hashSearch(hashTable,key,n) == 1){
-        return 0;    
+    if(hashSearch(hashTable,key,payload,n,1) == 1){
+        return 1;   
     }
 
     //if neighborhood is full
@@ -82,8 +115,8 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
         if(hashTable->bitmap[jump]==0)
             break;
     }
-    //if empty node is in the neighbor
-    if(jump-keyHash<hop){
+    //if empty node is in the neighborhood
+    if((jump-keyHash)%n < hop){
         if(hashTable->hashNodes[jump] ==NULL){
             hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
     }
