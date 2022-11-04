@@ -95,6 +95,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     //if the hash is new to the hashTable
     if(hashTable->hashNodes[keyHash] == NULL){
         hashTable->hashNodes[keyHash] = hashNodeCreate(key, payload, hop);
+        hashTable->nodeCount++;
         printf("now hash bitmap is: %d\n", hashTable->bitmap[0]);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, 0);
@@ -123,7 +124,8 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     if((jump-keyHash)%n < hop){
         if(hashTable->hashNodes[jump] ==NULL){
             hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
-    }
+            hashTable->nodeCount++;
+        }
         printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
         updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, jump-keyHash);
@@ -141,6 +143,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
             if ((jump-keyHashAlready)%n < hop){
                 if(hashTable->hashNodes[jump] == NULL){
                     hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);
+                    hashTable->nodeCount++;
                     updateBitmapInsert(hashTable->hashNodes[keyHashAlready]->bitmap,jump-keyHashAlready);
                     updateBitmapInsert(hashTable->bitmap, jump);
                     updateBitmapRemove(hashTable->hashNodes[keyHashAlready]->bitmap,y-keyHashAlready);
@@ -158,6 +161,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     }
     if(hashTable->hashNodes[jump] ==NULL){
         hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
+        hashTable->nodeCount++;
         printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
         updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, jump-keyHash);
