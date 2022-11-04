@@ -9,6 +9,10 @@ payloadList* createPayloadList(int data){
     return temp;
 }
 
+int getHash(int key, int numOfBuckets){
+    return(key % numOfBuckets) + 1;
+}
+
 void addPayload(payloadList* head, int data){
     payloadList *temp,*x;
     temp = createPayloadList(data);
@@ -48,7 +52,7 @@ hashNode* hashNodeCreate(int key, int payload, int hop){
 }
 
 int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag){            //if flag==1 addpayload to payload list
-    int keyHash = hashl(key,n);
+    int keyHash = getHash(key,hashTable->nodeCount);
     if(hashTable->hashNodes[keyHash] == NULL)
         return 0;
     int hop=hashTable->hashNodes[keyHash]->hop;    
@@ -87,7 +91,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     int keyHash, jump, step, index, keyHashAlready;
     int hop = 4;
 
-    keyHash = hashl(key,n);
+    keyHash = getHash(key,hashTable->nodeCount);
     //if the hash is new to the hashTable
     if(hashTable->hashNodes[keyHash] == NULL){
         hashTable->hashNodes[keyHash] = hashNodeCreate(key, payload, hop);
@@ -133,7 +137,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     while((jump-keyHash)%n >= hop){
         int flag=0;
         for(y=jump-hop+1; y<jump; y++){
-            keyHashAlready=hashl(hashTable->hashNodes[y]->key,n);
+            keyHashAlready = getHash(hashTable->hashNodes[y]->key,hashTable->nodeCount);
             if ((jump-keyHashAlready)%n < hop){
                 if(hashTable->hashNodes[jump] == NULL){
                     hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);

@@ -36,5 +36,6 @@ void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop);
 int hashInsert(hashMap* hashTable, int key, int payload, int n);
 void updateBitmapInsert(int* bitmap, int position);
 void updateBitmapRemove(int* bitmap, int position);
+int getHash(int key, int numOfBuckets);
 
 #endif //PROJECTIOAN_HASH_H
