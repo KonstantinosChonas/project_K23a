@@ -293,7 +293,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
             while(hashMapArray[j]){
                 exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payload, 0);
                 if(exists){
-                    newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                    newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payload);
                     result->tuples[nodeCounter] = *newTuple;
                     nodeCounter++;
                     free(newTuple);
