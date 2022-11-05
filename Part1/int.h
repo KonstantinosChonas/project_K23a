@@ -30,6 +30,8 @@ typedef struct result {  //NOTE: katholou sigouros gia to ti tha prepe na einai 
     relation *r;
 }result;
 
+relation* inputFromFile(char* s);
+
 
 /** Partitioned Hash Join**/
 result* PartitionedHashJoin(relation *relR, relation *relS);
