@@ -186,7 +186,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
         if (i==r->num_tuples) i=0;
         if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
 
-            printf("key: %d payload: %d  i: %d\n",r->tuples[i].key,r->tuples[i].payload,i);
+            //printf("key: %d payload: %d  i: %d\n",r->tuples[i].key,r->tuples[i].payload,i);
 
 
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
@@ -262,22 +262,26 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
         for(int i = 0; i < pSum->num_tuples; i++){
             if(pSum->tuples[i+1].payload == 0){
                 for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
-                    exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
-                    if(exists){
-                        newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
-                        result->tuples[nodeCounter] = *newTuple;
-                        nodeCounter++;
-                        free(newTuple);
+                    if(hashMapArray[i]){
+                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
+                        if(exists){
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                            result->tuples[nodeCounter] = *newTuple;
+                            nodeCounter++;
+                            free(newTuple);
+                        }
                     }
                 }
             }else
                 for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
-                    exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
-                    if(exists){
-                        newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
-                        result->tuples[nodeCounter] = *newTuple;
-                        nodeCounter++;
-                        free(newTuple);
+                    if(hashMapArray[i]) {
+                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
+                        if (exists) {
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                            result->tuples[nodeCounter] = *newTuple;
+                            nodeCounter++;
+                            free(newTuple);
+                        }
                     }
                 }
         }
@@ -285,17 +289,22 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
         return result;
     }else{
         for(int i = 0; i < r->num_tuples; i++){
-           exists = hashSearch(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, 0);
-            if(exists){
-                newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payload);
-                result->tuples[nodeCounter] = *newTuple;
-                nodeCounter++;
-                free(newTuple);
+            int j = 0;
+            while(hashMapArray[j]){
+                exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payload, 0);
+                if(exists){
+                    newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                    result->tuples[nodeCounter] = *newTuple;
+                    nodeCounter++;
+                    free(newTuple);
+                }
+                j++;
             }
         }
-        return result;
     }
+    return result;
 }
+
 
 result* PartitionedHashJoin(relation *relR, relation *relS){
 
@@ -343,6 +352,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     int x = hashSearch(hashMapArray[0],80, 0, 0);
     */
 
+    /*
     int j = 0;
     while(hashMapArray[j]){
         printf("h: %d\n", hashMapArray[j]->nodeCount);
@@ -353,6 +363,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         }
         j++;
     }
+*/
 
     relation* result = joinRelation(hashMapArray, newS, sPsum, nS);
     printRelation(result);
