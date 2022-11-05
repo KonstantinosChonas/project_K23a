@@ -103,7 +103,7 @@ int hashInsert(hashMap* hashTable, int key, int payload){
         printf("now hash bitmap is: %d\n", hashTable->bitmap[0]);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, 0);
-        updateBitmapInsert(hashTable->bitmap, 0);
+        updateBitmapInsert(hashTable->bitmap, keyHash);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         printf("now hash bitmap is: %d\n", hashTable->bitmap[0]);
         int x=hashSearch(hashTable,key+2,payload, 0); //not sure if flag should be 1
@@ -113,7 +113,7 @@ int hashInsert(hashMap* hashTable, int key, int payload){
 
     //if the same key exists    
     if(hashSearch(hashTable,key,payload,0) == 1){
-        return 1;   
+        return 1;
     }
 
     //if neighborhood is full
@@ -122,7 +122,8 @@ int hashInsert(hashMap* hashTable, int key, int payload){
     }
 
     //find empty node
-    for(jump=keyHash+1; jump<HASH_TABLE_SIZE; jump++){
+    for(jump = keyHash+1; jump<HASH_TABLE_SIZE; jump++){
+        //        if(hashTable->hashNodes[keyHash]->bitmap[jump] ==0)
         if(hashTable->bitmap[jump]==0)
             break;
     }
@@ -131,14 +132,14 @@ int hashInsert(hashMap* hashTable, int key, int payload){
         if(hashTable->hashNodes[jump] ==NULL){
             hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
             hashTable->nodeCount++;
+            printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
+            printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
+            updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, jump-keyHash);
+            updateBitmapInsert(hashTable->bitmap, jump);
+            printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
+            printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
+            return 1;
         }
-        printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
-        printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
-        updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, jump-keyHash);
-        updateBitmapInsert(hashTable->bitmap, jump);
-        printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
-        printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
-        return 1;
     }
     
     int y;
@@ -171,7 +172,7 @@ int hashInsert(hashMap* hashTable, int key, int payload){
         //printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
         updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, jump-keyHash);
-        //updateBitmapInsert(hashTable->bitmap, jump);
+        updateBitmapInsert(hashTable->bitmap, jump);
         //printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
         printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
         return 1;

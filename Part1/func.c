@@ -323,17 +323,22 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     hashMapArray = createHashForBuckets(newR, rPsum, nR);
     hashInsert(hashMapArray[0], 40, 12);
-    hashInsert(hashMapArray[0], 45, 122);
-    hashInsert(hashMapArray[0], 12, 123);
-    hashInsert(hashMapArray[0], 35, 124);
+    hashInsert(hashMapArray[0], 41, 122);
+    hashInsert(hashMapArray[0], 42, 123);
+    hashInsert(hashMapArray[0], 43, 124);
     hashInsert(hashMapArray[0], 120, 125);
     hashInsert(hashMapArray[0], 160, 121);
     hashInsert(hashMapArray[0], 200, 127);
 
-    hashInsert(hashMapArray[0], 80, 15);
+    int y = hashInsert(hashMapArray[0], 80, 15);
 
     int x = hashSearch(hashMapArray[0],80, 0, 0);
-    printf("%d\n", x);
+    printf("%d\n", y);
+
+    printf("%d\n", hashMapArray[0]->hashNodes[getHash(40, HASH_TABLE_SIZE)]->bitmap[0]);
+    printf("%d\n", hashMapArray[0]->hashNodes[getHash(40, HASH_TABLE_SIZE)]->bitmap[1]);
+    printf("%d\n", hashMapArray[0]->hashNodes[getHash(40, HASH_TABLE_SIZE)]->bitmap[2]);
+    printf("%d\n", hashMapArray[0]->hashNodes[getHash(40, HASH_TABLE_SIZE)]->bitmap[3]);
 
     for(int i = 0; i<HASH_TABLE_SIZE; i++){
         if(hashMapArray[0]->hashNodes[i]){
