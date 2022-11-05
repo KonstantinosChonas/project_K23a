@@ -215,7 +215,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 }
 
-hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
+hashMap** createHashForBuckets(relation* r, relation* pSum){
     int bucket = 0;
     int* myHash = NULL;
     if(pSum != NULL){
@@ -248,7 +248,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
     }
 }
 
-relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum, int n){
+relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum){
     int bucket = 0;
     int exists = 0;
     int nodeCounter = 0;
@@ -331,6 +331,23 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     newR=relPartitioned(relR, rPsum, nR);   //na do an xreiazontai na n
     newS=relPartitioned(relS, sPsum, nS);
 
+    relation* largerR = NULL;
+    relation* largerPSum = NULL;
+    relation* smallerR = NULL;
+    relation* smallerPSum = NULL;
+
+    if(newR->num_tuples > newS->num_tuples){
+        largerR = newR;
+        largerPSum = rPsum;
+        smallerR = newS;
+        smallerPSum = sPsum;
+    }else{
+        largerR = newS;
+        largerPSum = sPsum;
+        smallerR = newR;
+        smallerPSum = rPsum;
+    }
+
     printf(" partitioning over\n");
     /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
     de douleuei gia kathe input atm */
@@ -338,7 +355,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     hashMap** hashMapArray = NULL;
 
-    hashMapArray = createHashForBuckets(newR, rPsum, nR);
+    hashMapArray = createHashForBuckets(largerR, largerPSum);
     /*
     hashInsert(hashMapArray[0], 40, 12);
     hashInsert(hashMapArray[0], 41, 122);
@@ -366,7 +383,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     }
 */
 
-    relation* result = joinRelation(hashMapArray, newS, sPsum, nS);
+    relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);
     //printRelation(newR);
     //printRelation(newS);
