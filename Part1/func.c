@@ -285,7 +285,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                     }
                 }
         }
-
+        result->num_tuples = nodeCounter;
         return result;
     }else{
         for(int i = 0; i < r->num_tuples; i++){
@@ -302,6 +302,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
             }
         }
     }
+    result->num_tuples = nodeCounter;
     return result;
 }
 
