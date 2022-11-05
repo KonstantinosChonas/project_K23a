@@ -17,6 +17,15 @@ tuple* createTuple(int key){
     return newTuple;
 }
 
+tuple* createTupleFromNode(int key, int payload){
+    tuple *newTuple = malloc(sizeof(struct tuple));
+
+    newTuple->key = key;
+    newTuple->payload = payload;
+
+    return newTuple;
+}
+
 relation* createRelation(){
     int relationSize;
     tuple* prevTuple = NULL;

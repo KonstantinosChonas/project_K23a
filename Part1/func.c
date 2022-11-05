@@ -248,6 +248,55 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
     }
 }
 
+relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum, int n){
+    int bucket = 0;
+    int exists = 0;
+    int nodeCounter = 0;
+    struct tuple* newTuple = NULL;
+
+    relation *result = malloc(sizeof(struct relation));
+    result->num_tuples = r->num_tuples;
+    result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
+
+    if(pSum != NULL){
+        for(int i = 0; i < pSum->num_tuples; i++){
+            if(pSum->tuples[i+1].payload == 0){
+                for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
+                    exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
+                    if(exists){
+                        newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                        result->tuples[nodeCounter] = *newTuple;
+                        nodeCounter++;
+                        free(newTuple);
+                    }
+                }
+            }else
+                for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
+                    exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
+                    if(exists){
+                        newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                        result->tuples[nodeCounter] = *newTuple;
+                        nodeCounter++;
+                        free(newTuple);
+                    }
+                }
+        }
+
+        return result;
+    }else{
+        for(int i = 0; i < r->num_tuples; i++){
+           exists = hashSearch(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, 0);
+            if(exists){
+                newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payload);
+                result->tuples[nodeCounter] = *newTuple;
+                nodeCounter++;
+                free(newTuple);
+            }
+        }
+        return result;
+    }
+}
+
 result* PartitionedHashJoin(relation *relR, relation *relS){
 
     /**     Step 1. Partitioning        **/
@@ -305,6 +354,8 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         j++;
     }
 
+    relation* result = joinRelation(hashMapArray, newS, sPsum, nS);
+    printRelation(result);
     //printRelation(newR);
     //printRelation(newS);
 
