@@ -202,5 +202,4 @@ void hashDelete(hashMap** myHashMap){
         free(myHashMap[i]);
         i++;
     }
-    free(myHashMap);
 }

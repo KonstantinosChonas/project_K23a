@@ -229,10 +229,10 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
                     hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
                 }
             }else
-            for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
-                hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
-            }
-            printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+                for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
+                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
+                }
+                printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
         }
 
         return hashMapArray;
