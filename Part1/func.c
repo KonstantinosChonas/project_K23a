@@ -233,7 +233,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
         if (i==r->num_tuples) i=0;
         if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
 
-            printf("key: %d payload: %d  i: %d\n",r->tuples[i].key,r->tuples[i].payload,i);
+            //printf("key: %d payload: %d  i: %d\n",r->tuples[i].key,r->tuples[i].payload,i);
 
 
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
@@ -262,80 +262,97 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 }
 
-/*
-void compareBuckets(relation *r, relation *s, relation *rPsum, relation *sPsum, int nR, int nS){
-    int j = 0;
-    int bucket = 0;
-    int rNum = rPsum->num_tuples;
-    int sNum = sPsum->num_tuples;
-
-    relation *alignedBuckets = malloc(sizeof(relation));
-    alignedBuckets->num_tuples = 0;
-    alignedBuckets->tuples = malloc((r->num_tuples + s->num_tuples) * sizeof(tuple));
-
-    printf("r number of buckets: %d\n", rNum);
-    printf("s number of buckets: %d\n", sNum);
-
-    int new = 0;
-    int rBucket = 0;
-    int sBucket = 0;
-    int rIndex = 0;
-    int sIndex = 0;
-    int rHash = 0;
-    int sHash = 0;
-
-    /* sugkrinoume kathe kouva ths r me kathe kouva ths s kai kratame ta koina se neo relation
-    xrhsimopoioume rPsum kai sPsum gia na broume apo poio index 3ekinaei o kathe o kouvas */
-
-/*
-    for(int i = 0; i < rPsum->num_tuples; i++){
-        rIndex = rPsum->tuples[i].payload;
-        rHash = hashl(r->tuples[rIndex].key, nR);
-        while(hashl(r->tuples[rIndex].key, nR) == rHash){
-            for(int j = 0; j < sPsum->num_tuples; j++) {
-                sIndex = sPsum->tuples[j].payload;
-                sHash = hashl(s->tuples[sIndex].key, nS);
-                while (hashl(s->tuples[sIndex].key, nS) == sHash) {
-                    if (hashl(r->tuples[rIndex].key, nR) == hashl(s->tuples[sIndex].key, nS)) {
-                        //an ta 2 tuples exoun idio hash, tote bazoume sto neo relation to antistoixo tuple ths R
-
-                        if(hashl(r->tuples[rIndex].key, nR) == rHash){          //elegxoume an briskomaste akoma ston idio kouva ths R
-                            alignedBuckets->tuples[new] = r->tuples[rIndex];
-                            alignedBuckets->num_tuples = new++;
-                            rIndex++;
-                            sIndex++;
-                        }else break;        //an exoume paei sto epomeno bucket ths R, agnooume auto to loop
-                    }else break;            //an ta hash twn 2 tuple den einai idia, proxwrame sto epomeno kouva ths S
-                }
-            }
-            break;
-        }
-    }
-
-    relation* alignedPsum = createPsum(alignedBuckets, nR);
-    printRelation(alignedBuckets);
-}
-*/
-
-void createHashForBuckets(relation* r, relation* pSum, int n){
+hashMap** createHashForBuckets(relation* r, relation* pSum, int n){
     int bucket = 0;
     int* myHash = NULL;
-
     if(pSum != NULL){
-        hashMap* hashMapArray[pSum->num_tuples];
+        struct hashMap **hashMapArray = malloc(sizeof(struct hashMap) * pSum->num_tuples);
 
         for(int i = 0; i < pSum->num_tuples; i++){
             hashMapArray[i] = hashCreate(i);
-            printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+
+            if(pSum->tuples[i+1].payload == 0){
+                for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
+                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
+                }
+            }else
+                for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
+                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
+                }
+                printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
         }
-        hashInsert(hashMapArray[0], 5, 10, n);  //just for testing
+
+        return hashMapArray;
     }else{
-        hashMap* hashMapArray[0];
+        struct hashMap **hashMapArray = malloc(sizeof(struct hashMap));
         hashMapArray[0] = hashCreate(0);
+
+        for(int i = 0; i < r->num_tuples; i++){
+            hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload);
+        }
         printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
-        hashInsert(hashMapArray[0], 5, 10, n);  //just for testing
+        return hashMapArray;
     }
 }
+
+relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum, int n){
+    int bucket = 0;
+    int exists = 0;
+    int nodeCounter = 0;
+    struct tuple* newTuple = NULL;
+
+    relation *result = malloc(sizeof(struct relation));
+    result->num_tuples = r->num_tuples;
+    result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
+
+    if(pSum != NULL){
+        for(int i = 0; i < pSum->num_tuples; i++){
+            if(pSum->tuples[i+1].payload == 0){
+                for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
+                    if(hashMapArray[i]){
+                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
+                        if(exists){
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                            result->tuples[nodeCounter] = *newTuple;
+                            nodeCounter++;
+                            free(newTuple);
+                        }
+                    }
+                }
+            }else
+                for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
+                    if(hashMapArray[i]) {
+                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 0);
+                        if (exists) {
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payload);
+                            result->tuples[nodeCounter] = *newTuple;
+                            nodeCounter++;
+                            free(newTuple);
+                        }
+                    }
+                }
+        }
+        result->num_tuples = nodeCounter;
+        return result;
+    }else{
+        for(int i = 0; i < r->num_tuples; i++){
+            int j = 0;
+            while(hashMapArray[j]){
+                exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payload, 0);
+                if(exists){
+                    newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payload);
+                    result->tuples[nodeCounter] = *newTuple;
+                    nodeCounter++;
+                    free(newTuple);
+                }
+                j++;
+            }
+        }
+    }
+    result->num_tuples = nodeCounter;
+    return result;
+}
+
 
 result* PartitionedHashJoin(relation *relR, relation *relS){
 
@@ -365,12 +382,43 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
     de douleuei gia kathe input atm */
     //compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
-    //createHashForBuckets(newR, rPsum, nR);
 
+    hashMap** hashMapArray = NULL;
 
-    printRelation(newR);
-    printRelation(newS);
+    hashMapArray = createHashForBuckets(newR, rPsum, nR);
+    /*
+    hashInsert(hashMapArray[0], 40, 12);
+    hashInsert(hashMapArray[0], 41, 122);
+    hashInsert(hashMapArray[0], 42, 123);
+    hashInsert(hashMapArray[0], 43, 124);
+    hashInsert(hashMapArray[0], 120, 125);
+    hashInsert(hashMapArray[0], 160, 121);
+    hashInsert(hashMapArray[0], 200, 127);
 
+    int y = hashInsert(hashMapArray[0], 80, 15);
+
+    int x = hashSearch(hashMapArray[0],80, 0, 0);
+    */
+
+    /*
+    int j = 0;
+    while(hashMapArray[j]){
+        printf("h: %d\n", hashMapArray[j]->nodeCount);
+        for(int i = 0; i<HASH_TABLE_SIZE; i++){
+            if(hashMapArray[j]->hashNodes[i]){
+                printf("%d\n", hashMapArray[j]->hashNodes[i]->key);
+            }
+        }
+        j++;
+    }
+*/
+
+    relation* result = joinRelation(hashMapArray, newS, sPsum, nS);
+    printRelation(result);
+    //printRelation(newR);
+    //printRelation(newS);
+
+    hashDelete(hashMapArray);
 
     return NULL;
 

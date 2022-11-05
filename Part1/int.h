@@ -45,11 +45,13 @@ relation* relPartitioned(relation *r, relation *Psum, int n);
 int findNumOfBuckets(relation *r);
 tuple* SearchKey(relation *r,int key, int n);
 
-void createHashForBuckets(relation *r, relation *pSum, int n);
+struct hashMap** createHashForBuckets(relation *r, relation *pSum, int n);
+relation* joinRelation(struct hashMap**, relation *r, relation *pSum, int n);
 
 /** Functions used to create input**/
 
 tuple* createTuple(int key);
+tuple* createTupleFromNode(int key, int payload);
 relation* createRelation();
 void printRelation(relation* myRelation);
 
