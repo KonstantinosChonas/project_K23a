@@ -37,8 +37,6 @@ relation* inputFromFile(char* s){
         r->tuples[i].key=num1;
         r->tuples[i].payload=num2;
 
-
-
     }
 
 
