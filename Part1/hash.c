@@ -10,7 +10,7 @@ payloadList* createPayloadList(int data){
 }
 
 int getHash(int key, int numOfBuckets){
-    return(key % numOfBuckets) + 1;
+    return (key % numOfBuckets);
 }
 
 void addPayload(payloadList* head, int data){
@@ -51,16 +51,19 @@ hashNode* hashNodeCreate(int key, int payload, int hop){
     return newHashNode;
 }
 
-int hashSearch(hashMap* hashTable, int key, int payload, int n, int flag){            //if flag==1 addpayload to payload list
-    int keyHash = getHash(key,hashTable->nodeCount);
+int hashSearch(hashMap* hashTable, int key, int payload, int flag){            //if flag==1 addpayload to payload list
+    int keyHash = getHash(key,HASH_TABLE_SIZE);
     if(hashTable->hashNodes[keyHash] == NULL)
         return 0;
-    int hop=hashTable->hashNodes[keyHash]->hop;    
+    int hop=hashTable->hashNodes[keyHash]->hop;
+
     for(int i=0; i<hop; i++){
-        if(hashTable->hashNodes[keyHash+i]->key==key){
-            if (flag == 1)
-                addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
-            return 1;
+        if(hashTable->hashNodes[keyHash+i]){
+            if(hashTable->hashNodes[keyHash+i]->key==key){
+                if (flag == 1)
+                    addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
+                return 1;
+            }
         }
     }
     return 0;
@@ -87,12 +90,13 @@ int checkNeighborhood(hashMap* hashTable, int keyhash){
 
 }
 
-int hashInsert(hashMap* hashTable, int key, int payload, int n){
+int hashInsert(hashMap* hashTable, int key, int payload){
     int keyHash, jump, step, index, keyHashAlready;
     int hop = 4;
 
-    keyHash = getHash(key,hashTable->nodeCount);
+    keyHash = getHash(key,HASH_TABLE_SIZE);
     //if the hash is new to the hashTable
+
     if(hashTable->hashNodes[keyHash] == NULL){
         hashTable->hashNodes[keyHash] = hashNodeCreate(key, payload, hop);
         hashTable->nodeCount++;
@@ -102,12 +106,13 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
         updateBitmapInsert(hashTable->bitmap, 0);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         printf("now hash bitmap is: %d\n", hashTable->bitmap[0]);
-        int x=hashSearch(hashTable,key,payload,n, 1); //not sure if flag should be 1
+        int x=hashSearch(hashTable,key+2,payload, 0); //not sure if flag should be 1
         printf("exists: %d\n",x);
         return 1;
     }
+
     //if the same key exists    
-    if(hashSearch(hashTable,key,payload,n,1) == 1){
+    if(hashSearch(hashTable,key,payload,0) == 1){
         return 1;   
     }
 
@@ -115,13 +120,14 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     if(checkNeighborhood(hashTable,keyHash) == 1){
         return -1;
     }
+
     //find empty node
     for(jump=keyHash+1; jump<HASH_TABLE_SIZE; jump++){
         if(hashTable->bitmap[jump]==0)
             break;
     }
     //if empty node is in the neighborhood
-    if((jump-keyHash)%n < hop){
+    if((jump-keyHash)% HASH_TABLE_SIZE < hop){
         if(hashTable->hashNodes[jump] ==NULL){
             hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
             hashTable->nodeCount++;
@@ -136,11 +142,11 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     }
     
     int y;
-    while((jump-keyHash)%n >= hop){
+    while((jump-keyHash)% HASH_TABLE_SIZE >= hop){
         int flag=0;
         for(y=jump-hop+1; y<jump; y++){
-            keyHashAlready = getHash(hashTable->hashNodes[y]->key,hashTable->nodeCount);
-            if ((jump-keyHashAlready)%n < hop){
+            keyHashAlready = getHash(hashTable->hashNodes[y]->key,HASH_TABLE_SIZE);
+            if ((jump-keyHashAlready)% HASH_TABLE_SIZE < hop){
                 if(hashTable->hashNodes[jump] == NULL){
                     hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);
                     hashTable->nodeCount++;
@@ -162,11 +168,11 @@ int hashInsert(hashMap* hashTable, int key, int payload, int n){
     if(hashTable->hashNodes[jump] ==NULL){
         hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
         hashTable->nodeCount++;
-        printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
+        //printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
         printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
         updateBitmapInsert(hashTable->hashNodes[keyHash]->bitmap, jump-keyHash);
-        updateBitmapInsert(hashTable->bitmap, jump);
-        printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
+        //updateBitmapInsert(hashTable->bitmap, jump);
+        //printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[jump-keyHash]);
         printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
         return 1;
     }
@@ -186,7 +192,6 @@ void hashDelete(hashMap** myHashMap){
     int i = 0;
     int j = 0;
 
-    printf("%d\n", myHashMap[2]->bucket);
     while(myHashMap[i] != NULL){
         while(myHashMap[i]->hashNodes[j] != NULL){
             free(myHashMap[i]->hashNodes[j]);

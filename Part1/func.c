@@ -322,9 +322,24 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     hashMap** hashMapArray = NULL;
 
     hashMapArray = createHashForBuckets(newR, rPsum, nR);
+    hashInsert(hashMapArray[0], 40, 12);
+    hashInsert(hashMapArray[0], 45, 122);
+    hashInsert(hashMapArray[0], 12, 123);
+    hashInsert(hashMapArray[0], 35, 124);
+    hashInsert(hashMapArray[0], 120, 125);
+    hashInsert(hashMapArray[0], 160, 121);
+    hashInsert(hashMapArray[0], 200, 127);
 
-    printf("%d\n", hashMapArray[2]->bucket);
+    hashInsert(hashMapArray[0], 80, 15);
 
+    int x = hashSearch(hashMapArray[0],80, 0, 0);
+    printf("%d\n", x);
+
+    for(int i = 0; i<HASH_TABLE_SIZE; i++){
+        if(hashMapArray[0]->hashNodes[i]){
+            printf("%d\n", hashMapArray[0]->hashNodes[i]->payload->data);
+        }
+    }
     //printRelation(newR);
     //printRelation(newS);
 
