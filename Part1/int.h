@@ -50,7 +50,7 @@ relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
 /** Functions used to create input**/
 
-tuple createTuple(int key);
+tuple* createTuple(int key);
 tuple* createTupleFromNode(int key, int payload);
 relation* createRelation();
 void printRelation(relation* myRelation);
