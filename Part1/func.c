@@ -282,7 +282,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, neighborhood_size);
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
-                        hashMapArray = calloc(pSum->num_tuples,sizeof(struct hashMap));
+                        hashMapArray = NULL;
                         hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
                         return hashMapArray;
                     }
@@ -292,7 +292,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, neighborhood_size);
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
-                        hashMapArray = calloc(pSum->num_tuples,sizeof(struct hashMap));
+                        hashMapArray = NULL;
                         hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
                         return hashMapArray;
                     }
@@ -309,7 +309,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
             rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, neighborhood_size);
             if(rehash_check == -1 && neighborhood_size < 40){
                 hashDelete(hashMapArray);
-                hashMapArray = calloc(1,sizeof(struct hashMap));
+                hashMapArray = NULL;
                 hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
                 return hashMapArray;
             }
