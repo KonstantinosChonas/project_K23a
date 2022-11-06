@@ -92,9 +92,9 @@ int checkNeighborhood(hashMap* hashTable, int keyhash){
 
 }
 
-int hashInsert(hashMap* hashTable, int key, int payload){
+int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
     int keyHash, jump, step, index, keyHashAlready;
-    int hop = 4;
+    int hop = neighborhood_size;
 
     keyHash = getHash(key,HASH_TABLE_SIZE);
     //if the hash is new to the hashTable
@@ -108,8 +108,6 @@ int hashInsert(hashMap* hashTable, int key, int payload){
         updateBitmapInsert(hashTable->bitmap, keyHash);
         //printf("now node bitmap is: %d\n", hashTable->hashNodes[keyHash]->bitmap[0]);
         //printf("now hash bitmap is: %d\n", hashTable->bitmap[0]);
-        int x=hashSearch(hashTable,key+2,payload, 0); //not sure if flag should be 1
-        //printf("exists: %d\n",x);
         return 1;
     }
 
@@ -132,7 +130,7 @@ int hashInsert(hashMap* hashTable, int key, int payload){
     }
     //if empty node is in the neighborhood
     if((jump-keyHash)% HASH_TABLE_SIZE < hop){
-        if(hashTable->hashNodes[jump] ==NULL){
+        if(hashTable->hashNodes[jump] == NULL){
             hashTable->hashNodes[jump] = hashNodeCreate(key, payload, hop);
             hashTable->nodeCount++;
             //printf("now hash bitmap is: %d\n", hashTable->bitmap[jump]);
@@ -198,7 +196,8 @@ void hashDelete(hashMap** myHashMap){
 
     if(myHashMap){
         while(myHashMap[i] != NULL){
-            for(j; j< HASH_TABLE_SIZE; j++){
+            printf("loop\n");
+            for(j = 0; j < HASH_TABLE_SIZE; j++){
                 if(myHashMap[i]->hashNodes[j]){
                     free(myHashMap[i]->hashNodes[j]->payload);
                     free(myHashMap[i]->hashNodes[j]->bitmap);

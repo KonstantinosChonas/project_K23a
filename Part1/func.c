@@ -279,11 +279,11 @@ hashMap** createHashForBuckets(relation* r, relation* pSum){
 
             if(pSum->tuples[i+1].payload == 0){
                 for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
-                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
+                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 4);
                 }
             }else
                 for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
-                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload);
+                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 4);
                 }
                 printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
         }
@@ -294,7 +294,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum){
         hashMapArray[0] = hashCreate(0);
 
         for(int i = 0; i < r->num_tuples; i++){
-            hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload);
+            hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, 4);
         }
         printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
         return hashMapArray;
@@ -409,12 +409,12 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     relationDelete(rPsum);
     relationDelete(sPsum);
-
-
-
-
+    relationDelete(newR);
+    relationDelete(newS);
     relationDelete(result);
     hashDelete(hashMapArray);
+
+    printf("%d\n", L2);
 
     return NULL;
 

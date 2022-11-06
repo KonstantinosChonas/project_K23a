@@ -33,7 +33,7 @@ void addPayload(payloadList* head, int data);
 int hashSearch(hashMap* hashTable, int key, int payload, int flag);
 int checkNeighborhood(hashMap* hashTable, int keyhash);
 void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop);
-int hashInsert(hashMap* hashTable, int key, int payload);
+int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size);
 void updateBitmapInsert(int* bitmap, int position);
 void updateBitmapRemove(int* bitmap, int position);
 int getHash(int key, int numOfBuckets);
