@@ -390,45 +390,17 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     }
 
     printf(" partitioning over\n");
-    /* tha epistrefei relation pou tha exei mono ta koina buckets twn 2 relation (dhladh auta pou exoun idio hash)
-    de douleuei gia kathe input atm */
-    //compareBuckets(newR, newS, rPsum, sPsum, nR, nS);
 
     hashMap** hashMapArray = NULL;
 
     hashMapArray = createHashForBuckets(largerR, largerPSum);
-    /*
-    hashInsert(hashMapArray[0], 40, 12);
-    hashInsert(hashMapArray[0], 41, 122);
-    hashInsert(hashMapArray[0], 42, 123);
-    hashInsert(hashMapArray[0], 43, 124);
-    hashInsert(hashMapArray[0], 120, 125);
-    hashInsert(hashMapArray[0], 160, 121);
-    hashInsert(hashMapArray[0], 200, 127);
-
-    int y = hashInsert(hashMapArray[0], 80, 15);
-
-    int x = hashSearch(hashMapArray[0],80, 0, 0);
-    */
-
-    /*
-    int j = 0;
-    while(hashMapArray[j]){
-        printf("h: %d\n", hashMapArray[j]->nodeCount);
-        for(int i = 0; i<HASH_TABLE_SIZE; i++){
-            if(hashMapArray[j]->hashNodes[i]){
-                printf("%d\n", hashMapArray[j]->hashNodes[i]->key);
-            }
-        }
-        j++;
-    }
-*/
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);
 
-    relationDelete(rPsum);
-    relationDelete(sPsum);
+    //relationDelete(rPsum);
+    //relationDelete(sPsum);
+    relationDelete(result);
     hashDelete(hashMapArray);
 
     return NULL;

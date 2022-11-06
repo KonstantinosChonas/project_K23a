@@ -54,9 +54,9 @@ void printRelation(relation* myRelation){
 void relationDelete(relation* myRelation){
     //printf("deleting relation with %d tuples\n", myRelation->num_tuples);
 
-    //if(myRelation->tuples){
-    //    free(myRelation->tuples);
-    // }
+    if(myRelation->tuples){
+        free(myRelation->tuples);
+    }
 
     if(myRelation != NULL){
         free(myRelation);

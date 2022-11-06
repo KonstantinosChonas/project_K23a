@@ -198,6 +198,7 @@ void hashDelete(hashMap** myHashMap){
 
     while(myHashMap[i] != NULL){
         for(j; j< myHashMap[i]->nodeCount; j++){
+            free(myHashMap[i]->hashNodes[j]->payload);
             free(myHashMap[i]->hashNodes[j]->bitmap);
             free(myHashMap[i]->hashNodes[j]);
         }
@@ -209,4 +210,5 @@ void hashDelete(hashMap** myHashMap){
         free(myHashMap[i]);
         i++;
     }
+    free(myHashMap);
 }
