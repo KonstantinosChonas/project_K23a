@@ -16,6 +16,6 @@ int main (void){
 
     PartitionedHashJoin(relR, relS);
 
-    //relationDelete(relR);
-    //relationDelete(relS);
+    relationDelete(relR);
+    relationDelete(relS);
 }
