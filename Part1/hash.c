@@ -196,19 +196,23 @@ void hashDelete(hashMap** myHashMap){
     int i = 0;
     int j = 0;
 
-    while(myHashMap[i] != NULL){
-        for(j; j< myHashMap[i]->nodeCount; j++){
-            free(myHashMap[i]->hashNodes[j]->payload);
-            free(myHashMap[i]->hashNodes[j]->bitmap);
-            free(myHashMap[i]->hashNodes[j]);
+    if(myHashMap){
+        while(myHashMap[i] != NULL){
+            for(j; j< HASH_TABLE_SIZE; j++){
+                if(myHashMap[i]->hashNodes[j]){
+                    free(myHashMap[i]->hashNodes[j]->payload);
+                    free(myHashMap[i]->hashNodes[j]->bitmap);
+                    free(myHashMap[i]->hashNodes[j]);
+                }
+            }
+            i++;
         }
-        i++;
-    }
 
-    i = 0;
-    while(myHashMap[i] != NULL){
-        free(myHashMap[i]);
-        i++;
+        i = 0;
+        while(myHashMap[i] != NULL){
+            free(myHashMap[i]);
+            i++;
+        }
+        free(myHashMap);
     }
-    free(myHashMap);
 }

@@ -39,7 +39,8 @@ relation* inputFromFile(char* s){
 
     }
 
-
+    // Close the file
+    fclose(fp);
 
     return r;
 }
@@ -263,8 +264,9 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 hashMap** createHashForBuckets(relation* r, relation* pSum){
     int bucket = 0;
     int* myHash = NULL;
+    struct hashMap** hashMapArray = NULL;
     if(pSum != NULL){
-        struct hashMap **hashMapArray = malloc(sizeof(struct hashMap) * pSum->num_tuples);
+        hashMapArray = calloc(pSum->num_tuples,sizeof(struct hashMap));
 
         for(int i = 0; i < pSum->num_tuples; i++){
             hashMapArray[i] = hashCreate(i);
@@ -282,7 +284,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum){
 
         return hashMapArray;
     }else{
-        struct hashMap **hashMapArray = malloc(sizeof(struct hashMap));
+        hashMapArray = calloc(1,sizeof(struct hashMap));
         hashMapArray[0] = hashCreate(0);
 
         for(int i = 0; i < r->num_tuples; i++){
