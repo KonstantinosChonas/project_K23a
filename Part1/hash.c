@@ -157,6 +157,11 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
                     updateBitmapInsert(hashTable->bitmap, jump);
                     updateBitmapRemove(hashTable->hashNodes[keyHashAlready]->bitmap,y-keyHashAlready);
                     updateBitmapInsert(hashTable->bitmap, y);
+                    if(hashTable->hashNodes[y] != NULL){
+                        free(hashTable->hashNodes[y]->payload);
+                        free(hashTable->hashNodes[y]->bitmap);
+                        free(hashTable->hashNodes[y]);
+                    }
                     hashTable->hashNodes[y] = NULL;
                 }
                 flag=1;

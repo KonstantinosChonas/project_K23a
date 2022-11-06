@@ -420,7 +420,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     hashMap** hashMapArray = NULL;
 
-    hashMapArray = createHashForBuckets(largerR, largerPSum, 2);
+    hashMapArray = createHashForBuckets(largerR, largerPSum, 4);
 
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
