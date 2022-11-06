@@ -1,6 +1,7 @@
 #include "int.h"
 
 tuple* createTuple(int key){
+
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
