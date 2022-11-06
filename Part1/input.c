@@ -30,7 +30,7 @@ relation* createRelation(){
     // newRelation->num_tuples = 20;
     //newRelation->num_tuples = rand() % 100 + 50;        //use for random number of tuples in relation
     //newRelation->num_tuples = 20;
-    newRelation->num_tuples = rand() % 300 + 5;        //use for random number of tuples in relation
+    newRelation->num_tuples = rand() % 30000 + 10000;        //use for random number of tuples in relation
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){
@@ -52,12 +52,16 @@ void printRelation(relation* myRelation){
 }
 
 void relationDelete(relation* myRelation){
-    tuple* nextTuple = NULL;
-    tuple* currTuple = myRelation->tuples;
     //printf("deleting relation with %d tuples\n", myRelation->num_tuples);
 
-    free(myRelation->tuples);
-    free(myRelation);
+    //if(myRelation->tuples){
+    //    free(myRelation->tuples);
+    // }
+
+    if(myRelation != NULL){
+        free(myRelation);
+    }
+
 }
 
 void tupleDelete(tuple* myTuple){

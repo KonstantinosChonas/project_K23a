@@ -45,7 +45,7 @@ hashNode* hashNodeCreate(int key, int payload, int hop){
     newHashNode->key = key;
     newHashNode->payload = createPayloadList(payload);
     newHashNode->hop = hop;
-    newHashNode->bitmap = malloc(sizeof(hop*sizeof(int)));
+    newHashNode->bitmap = malloc(sizeof(int) * hop);
     for (int i=0; i<hop; i++)
         newHashNode->bitmap[i] = 0;
     return newHashNode;
@@ -58,11 +58,13 @@ int hashSearch(hashMap* hashTable, int key, int payload, int flag){            /
     int hop=hashTable->hashNodes[keyHash]->hop;
 
     for(int i=0; i<hop; i++){
-        if(hashTable->hashNodes[keyHash+i]){
-            if(hashTable->hashNodes[keyHash+i]->key==key){
-                if (flag == 1)
-                    addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
-                return 1;
+        if(keyHash + i < hashTable->nodeCount){
+            if(hashTable->hashNodes[keyHash+i]){
+                if(hashTable->hashNodes[keyHash+i]->key==key){
+                    if (flag == 1)
+                        addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
+                    return 1;
+                }
             }
         }
     }
@@ -195,10 +197,6 @@ void hashDelete(hashMap** myHashMap){
     int j = 0;
 
     while(myHashMap[i] != NULL){
-        while(myHashMap[i]->hashNodes[j] != NULL){
-            free(myHashMap[i]->hashNodes[j]);
-            j++;
-        }
         free(myHashMap[i]);
         i++;
     }

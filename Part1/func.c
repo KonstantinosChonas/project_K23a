@@ -355,10 +355,6 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
 result* PartitionedHashJoin(relation *relR, relation *relS){
 
     /**     Step 1. Partitioning        **/
-
-    printRelation(relR);
-
-
     int nR,nS;
 
 
@@ -430,9 +426,9 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);
-    //printRelation(newR);
-    //printRelation(newS);
 
+    relationDelete(rPsum);
+    relationDelete(sPsum);
     hashDelete(hashMapArray);
 
     return NULL;

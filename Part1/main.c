@@ -4,11 +4,11 @@
 int main (void){
     time_t t;
     srand((unsigned)time(&t));
-    relation* relR = inputFromFile("r0.tbl");
-    // relation* relR = createRelation();
+    //relation* relR = inputFromFile("r0.tbl");
+     relation* relR = createRelation();
     //sleep(1);
-    relation* relS = inputFromFile("r1.tbl");
-    //relation* relS = createRelation();
+    //relation* relS = inputFromFile("r1.tbl");
+    relation* relS = createRelation();
     //printRelation(relR);
     //printRelation(relS);
 
@@ -16,6 +16,6 @@ int main (void){
 
     PartitionedHashJoin(relR, relS);
 
-    relationDelete(relR);
-    relationDelete(relS);
+    //relationDelete(relR);
+    //relationDelete(relS);
 }
