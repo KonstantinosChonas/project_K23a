@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
-#define L2 256000       /* bits of information stored in L2 cache memory */
+#define L2 256000      /* bits of information stored in L2 cache memory */
 
 
 
@@ -50,7 +50,7 @@ relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
 /** Functions used to create input**/
 
-tuple* createTuple(int key);
+tuple createTuple(int key);
 tuple* createTupleFromNode(int key, int payload);
 relation* createRelation();
 void printRelation(relation* myRelation);

@@ -191,6 +191,8 @@ relation* createPsum(relation* r,int n){
 
     }
 
+    relationDelete(hist);
+
     printf("printing psum\n");
     printRelation(Psum);
     return Psum;
