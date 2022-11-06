@@ -3,8 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
-#define L2 51       /* bits of information stored in L2 cache memory */
-
+#define L2 256000      /* bits of information stored in L2 cache memory */
 
 
 /** Type definition for a tuple */
@@ -30,6 +29,8 @@ typedef struct result {  //NOTE: katholou sigouros gia to ti tha prepe na einai 
     relation *r;
 }result;
 
+relation* inputFromFile(char* s);
+
 
 /** Partitioned Hash Join**/
 result* PartitionedHashJoin(relation *relR, relation *relS);
@@ -43,11 +44,13 @@ relation* relPartitioned(relation *r, relation *Psum, int n);
 int findNumOfBuckets(relation *r);
 tuple* SearchKey(relation *r,int key, int n);
 
-struct hashMap** createHashForBuckets(relation *r, relation *pSum, int n);
+struct hashMap** createHashForBuckets(relation *r, relation *pSum, int neighborhood_size);
+relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
 /** Functions used to create input**/
 
 tuple* createTuple(int key);
+tuple* createTupleFromNode(int key, int payload);
 relation* createRelation();
 void printRelation(relation* myRelation);
 

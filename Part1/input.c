@@ -1,18 +1,22 @@
-//
-// Created by aris on 20/10/2022.
-//
-
-// #include <stdio.h>
-// #include <stdlib.h>
 #include "int.h"
 
 tuple* createTuple(int key){
+
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
     newTuple->payload = rand() % 20;
 
     printf("new tuple created with key: %d, and payload: %d\n", newTuple->key, newTuple->payload);
+
+    return newTuple;
+}
+
+tuple* createTupleFromNode(int key, int payload){
+    tuple *newTuple = malloc(sizeof(struct tuple));
+
+    newTuple->key = key;
+    newTuple->payload = payload;
 
     return newTuple;
 }
@@ -27,7 +31,7 @@ relation* createRelation(){
     // newRelation->num_tuples = 20;
     //newRelation->num_tuples = rand() % 100 + 50;        //use for random number of tuples in relation
     //newRelation->num_tuples = 20;
-    newRelation->num_tuples = rand() % 100 + 5;        //use for random number of tuples in relation
+    newRelation->num_tuples = rand() % 300 + 30000;        //use for random number of tuples in relation
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){
@@ -41,6 +45,7 @@ relation* createRelation(){
     return newRelation;
 }
 
+
 void printRelation(relation* myRelation){
     printf("\nPrinting Relation with %d tuples:\n\n", myRelation->num_tuples);
     for(int i = 0; i < myRelation->num_tuples; i++){
@@ -49,12 +54,16 @@ void printRelation(relation* myRelation){
 }
 
 void relationDelete(relation* myRelation){
-    tuple* nextTuple = NULL;
-    tuple* currTuple = myRelation->tuples;
     //printf("deleting relation with %d tuples\n", myRelation->num_tuples);
 
-    free(myRelation->tuples);
-    free(myRelation);
+    if(myRelation->tuples){
+        free(myRelation->tuples);
+    }
+
+    if(myRelation != NULL){
+        free(myRelation);
+    }
+
 }
 
 void tupleDelete(tuple* myTuple){
