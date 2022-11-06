@@ -267,8 +267,8 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 }
 
 
-hashMap** createHashForBuckets(relation* r, relation* pSum){
-    int bucket = 0;
+hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_size){
+    int rehash_check = 0;
     int* myHash = NULL;
     struct hashMap** hashMapArray = NULL;
     if(pSum != NULL){
@@ -279,11 +279,23 @@ hashMap** createHashForBuckets(relation* r, relation* pSum){
 
             if(pSum->tuples[i+1].payload == 0){
                 for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
-                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 4);
+                    rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, neighborhood_size);
+                    if(rehash_check == -1){
+                        hashDelete(hashMapArray);
+                        hashMap** hashMapArray = NULL;
+                        hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
+                        return hashMapArray;
+                    }
                 }
             }else
                 for(int j = pSum->tuples[i].payload; j < pSum->tuples[i+1].payload; j++){
-                    hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, 4);
+                    rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payload, neighborhood_size);
+                    if(rehash_check == -1){
+                        hashDelete(hashMapArray);
+                        hashMap** hashMapArray = NULL;
+                        hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
+                        return hashMapArray;
+                    }
                 }
                 printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
         }
@@ -294,7 +306,13 @@ hashMap** createHashForBuckets(relation* r, relation* pSum){
         hashMapArray[0] = hashCreate(0);
 
         for(int i = 0; i < r->num_tuples; i++){
-            hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, 4);
+            rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, neighborhood_size);
+            if(rehash_check == -1){
+                hashDelete(hashMapArray);
+                hashMap** hashMapArray = NULL;
+                hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
+                return hashMapArray;
+            }
         }
         printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
         return hashMapArray;
@@ -402,7 +420,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     hashMap** hashMapArray = NULL;
 
-    hashMapArray = createHashForBuckets(largerR, largerPSum);
+    hashMapArray = createHashForBuckets(largerR, largerPSum, 4);
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);

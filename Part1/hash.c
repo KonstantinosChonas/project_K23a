@@ -196,7 +196,6 @@ void hashDelete(hashMap** myHashMap){
 
     if(myHashMap){
         while(myHashMap[i] != NULL){
-            printf("loop\n");
             for(j = 0; j < HASH_TABLE_SIZE; j++){
                 if(myHashMap[i]->hashNodes[j]){
                     free(myHashMap[i]->hashNodes[j]->payload);
