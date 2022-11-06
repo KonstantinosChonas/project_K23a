@@ -150,6 +150,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
             keyHashAlready = getHash(hashTable->hashNodes[y]->key,HASH_TABLE_SIZE);
             if ((jump-keyHashAlready)% HASH_TABLE_SIZE < hop){
                 if(hashTable->hashNodes[jump] == NULL){
+                    /* node is moved but not deleted */
                     hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);
                     hashTable->nodeCount++;
                     updateBitmapInsert(hashTable->hashNodes[keyHashAlready]->bitmap,jump-keyHashAlready);
@@ -193,11 +194,12 @@ void updateBitmapRemove(int* bitmap, int position){
 void hashDelete(hashMap** myHashMap){
     int i = 0;
     int j = 0;
+    int counter = 0;
 
     if(myHashMap){
         while(myHashMap[i] != NULL){
             for(j = 0; j < HASH_TABLE_SIZE; j++){
-                if(myHashMap[i]->hashNodes[j]){
+                if(myHashMap[i]->hashNodes[j] != NULL){
                     free(myHashMap[i]->hashNodes[j]->payload);
                     free(myHashMap[i]->hashNodes[j]->bitmap);
                     free(myHashMap[i]->hashNodes[j]);
