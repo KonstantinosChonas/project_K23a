@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
-#define L2 51      /* bits of information stored in L2 cache memory */
+#define L2 256000      /* bits of information stored in L2 cache memory */
 
 
 /** Type definition for a tuple */

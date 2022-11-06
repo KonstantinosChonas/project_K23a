@@ -407,10 +407,20 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);
 
-    relationDelete(rPsum);
-    relationDelete(sPsum);
-    relationDelete(newR);
-    relationDelete(newS);
+    if(rPsum){
+        relationDelete(rPsum);
+        relationDelete(newR);
+    }
+    if(sPsum){
+        relationDelete(sPsum);
+        relationDelete(newS);
+    }
+//    if(newR){
+//        relationDelete(newR);
+//    }
+//    if(newS){
+//        relationDelete(newS);
+//    }
     relationDelete(result);
     hashDelete(hashMapArray);
 
