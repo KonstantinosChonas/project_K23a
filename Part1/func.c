@@ -398,12 +398,14 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     hashMap** hashMapArray = NULL;
 
     hashMapArray = createHashForBuckets(largerR, largerPSum);
-
+//
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);
 
-    //relationDelete(rPsum);
-    //relationDelete(sPsum);
+    relationDelete(rPsum);
+    relationDelete(sPsum);
+    relationDelete(newR);
+    relationDelete(newS);
     relationDelete(result);
     hashDelete(hashMapArray);
 
