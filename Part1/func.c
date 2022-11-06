@@ -46,9 +46,6 @@ relation* inputFromFile(char* s){
 }
 
 
-
-
-
 int hashl(int key, int n){
 
     int i=0,j=1;
@@ -195,11 +192,10 @@ relation* createPsum(relation* r,int n){
     relationDelete(hist);
 
     printf("printing psum\n");
-    printRelation(Psum);
+    //printRelation(Psum);
     return Psum;
 
 }
-
 
 
 relation* relPartitioned(relation *r, relation *Psum, int n){
@@ -215,26 +211,29 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
     int j=0,key,positions,currPos,i;
     key = Psum->tuples[j].key;
-    //printf("this is the key: %d\n",Psum->tuples[7].key);
     positions = Psum->tuples[j+1].payload;      //i topothesia p vrisketai to epomeno bucket
     currPos=0;          //i topothesia p vriskomaste ston newR
-    //printf("positions = %d\n",positions);
     i=0;
 
 
     relation *newR=malloc(sizeof(relation));
     newR->tuples=malloc(r->num_tuples*sizeof(tuple));   /* o R' apo tin ekfonisi */
 
+
+    
+
+
+
+
     newR->num_tuples = 0;
 
     printf("printing r\n");
-    printRelation(r);
+    //printRelation(r);
 
     while ( currPos != r->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
         if (i==r->num_tuples) i=0;
         if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
 
-            //printf("key: %d payload: %d  i: %d\n",r->tuples[i].key,r->tuples[i].payload,i);
 
 
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
@@ -244,7 +243,11 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
             currPos++;
             if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
                 j++;
-                positions=Psum->tuples[j+1].payload;
+                if (j+1 != Psum->num_tuples)        //TODO na exo to nou mou
+                    positions=Psum->tuples[j+1].payload;
+
+
+                //printf(" num tuples %d kai to j+1 : %d\n",Psum->num_tuples,j+1);
                 key =  Psum->tuples[j].key;
 
             }
@@ -262,6 +265,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
     return newR;
 
 }
+
 
 hashMap** createHashForBuckets(relation* r, relation* pSum){
     int bucket = 0;
@@ -296,6 +300,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum){
         return hashMapArray;
     }
 }
+
 
 relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum){
     int bucket = 0;
@@ -398,14 +403,16 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     hashMap** hashMapArray = NULL;
 
     hashMapArray = createHashForBuckets(largerR, largerPSum);
-//
+
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
     printRelation(result);
 
     relationDelete(rPsum);
     relationDelete(sPsum);
-    relationDelete(newR);
-    relationDelete(newS);
+
+
+
+
     relationDelete(result);
     hashDelete(hashMapArray);
 
