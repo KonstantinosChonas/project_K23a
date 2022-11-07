@@ -265,32 +265,42 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 
 hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, int neighborhood_size){
-    int rehash_check = 0;
-    int* myHash = NULL;
+    int rehash_check = 0;       //check to see if hashtable needs to be reconstructed with larger size
     struct hashMap** hashMapArray = NULL;
+
+    /* if pSum exists, that means we have to make a hash table for every partition, otherwise just create one hash table */
     if(pSum != NULL){
+
+        /* get number of partitions from pSum, and get memory for this many hash tables */
         hashMapArray = calloc(pSum->num_tuples,sizeof(struct hashMap));
 
         for(int i = 0; i < pSum->num_tuples; i++){
+
+            /* create the hash table for every partition */
             hashMapArray[i] = hashCreate(hashmap_size,i);
 
+            /* if i + 1 > pSum->num_tuples, that means we have reached the final partition, and we use r->num_tuples to find where it ends */
             if( i + 1 >= pSum->num_tuples){
                 for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
+                    /* insert every tuple into the appropriate hash table */
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
+                    /* check if hash table needs rehashing */
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
-                        printf("rehashing...\n");
+                        printf("rehashing hash table...\n");
                         hashMapArray = NULL;
+                        /* new hash table is created by doubling the size of the original one */
                         hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                         return hashMapArray;
                     }
                 }
             }else
+                /* here we get the starting and ending point of every partition, by using pSum */
                 for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
-                        printf("rehashing...\n");
+                        printf("rehashing hash table...\n");
                         hashMapArray = NULL;
                         hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                         return hashMapArray;
@@ -308,7 +318,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
             rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payloadList->data, neighborhood_size);
             if(rehash_check == -1 && neighborhood_size < 40){
                 hashDelete(hashMapArray);
-                printf("rehashing...\n");
+                printf("rehashing hash table...\n");
                 hashMapArray = NULL;
                 hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                 return hashMapArray;
@@ -319,9 +329,9 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
     }
 }
 
-
+/* same logic as createHashForBuckets but instead of inserting
+ tuples, we search each tuple, and if there's a much, we add the tuple to the result */
 relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum){
-    int bucket = 0;
     int exists = 0;
     int nodeCounter = 0;
     struct tuple* newTuple = NULL;
@@ -330,13 +340,13 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
     result->num_tuples = r->num_tuples;
     result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
 
+    /* we use pSum exactly the same way that we did in createHashForBuckets */
     if(pSum != NULL){
         for(int i = 0; i < pSum->num_tuples; i++){
             if(i+1 >= pSum->num_tuples){
                 for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
                     if(hashMapArray[i]){
                         exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        printf("checked key %d exists %d\n", r->tuples[j].key, exists);
                         if(exists){
                             int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                             newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
@@ -350,7 +360,6 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                 for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     if(hashMapArray[i]) {
                         exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        printf("checked key %d exists %d\n", r->tuples[j].key, exists);
                         if (exists) {
                             int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                             newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
@@ -364,11 +373,11 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
         result->num_tuples = nodeCounter;
         return result;
     }else{
+        /* if there is only 1 partition, check for key in every hash table, top to bottom */
         for(int i = 0; i < r->num_tuples; i++){
             int j = 0;
             while(hashMapArray[j]){
                 exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-                //printf("checked key %d exists %d\n", r->tuples[i].key, exists);
                 if(exists){
                     int newPayload = getPayload(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
                     newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payloadList->data, newPayload);
@@ -410,6 +419,8 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     relation* smallerR = NULL;
     relation* smallerPSum = NULL;
 
+    /* compare the size of the two relations, and use the smaller one to create the hash tables */
+
     if(newR->num_tuples > newS->num_tuples){
         largerR = newR;
         largerPSum = rPsum;
@@ -422,27 +433,25 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         smallerPSum = rPsum;
     }
 
-    printf(" partitioning over\n");
-
-    hashMap** hashMapArray = NULL;
-
+    hashMap** hashMapArray = NULL;  //array that will hold every hash table
     int hash_map_size = 0;
 
     if(!rPsum){
-        hash_map_size = largerR->num_tuples;
+        hash_map_size = smallerR->num_tuples;
     }else{
-        hash_map_size = largerR->num_tuples / rPsum->num_tuples;
+        hash_map_size = smallerR->num_tuples / rPsum->num_tuples;
     }
 
-    double neighborhood_size;
-    neighborhood_size = log2((double)hash_map_size);
-    //printf(" %d %d\n",hash_map_size, (int)neighborhood_size);
+    double neighborhood_size = log2((double)hash_map_size);
 
-    hashMapArray = createHashForBuckets(largerR, largerPSum, hash_map_size, (int)neighborhood_size+1);
+    /* creat hash table for every bucket */
+    hashMapArray = createHashForBuckets(smallerR, smallerPSum, hash_map_size, (int)neighborhood_size+1);
 
-
-    relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
+    /* use the hash table(s) to create the final result (from join) */
+    relation* result = joinRelation(hashMapArray, largerR, largerPSum);
     printRelation(result);
+
+    /* freeing the memory from everything */
 
     if(rPsum){
         relationDelete(rPsum);
