@@ -32,6 +32,7 @@ void hashDelete(hashMap** myHashMap);
 payloadList* createPayloadList(int data);
 void addPayload(payloadList* head, int data);
 int hashSearch(hashMap* hashTable, int key, int payload, int flag);
+int getPayload(hashMap* hashTable, int key, int payload, int flag);
 int checkNeighborhood(hashMap* hashTable, int keyhash);
 void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop);
 int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size);

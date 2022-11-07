@@ -340,7 +340,8 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                         exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         printf("checked key %d exists %d\n", r->tuples[j].key, exists);
                         if(exists){
-                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data);
+                            int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
                             free(newTuple);
@@ -353,7 +354,8 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                         exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         printf("checked key %d exists %d\n", r->tuples[j].key, exists);
                         if (exists) {
-                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data);
+                            int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
                             free(newTuple);
@@ -370,7 +372,8 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                 exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
                 //printf("checked key %d exists %d\n", r->tuples[i].key, exists);
                 if(exists){
-                    newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payloadList->data);
+                    int newPayload = getPayload(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
+                    newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payloadList->data, newPayload);
                     result->tuples[nodeCounter] = *newTuple;
                     nodeCounter++;
                     free(newTuple);

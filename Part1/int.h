@@ -56,7 +56,7 @@ relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
 relationPayloadList* createRelationPayloadList(int data);
 tuple* createTuple(int key);
-tuple* createTupleFromNode(int key, int payload);
+tuple* createTupleFromNode(int key, int payload, int payloadNext);
 relation* createRelation();
 void printRelation(relation* myRelation);
 void printPayload(relationPayloadList* payloadList);

@@ -21,11 +21,12 @@ tuple* createTuple(int key){
     return newTuple;
 }
 
-tuple* createTupleFromNode(int key, int payload){
+tuple* createTupleFromNode(int key, int payload, int payloadNext){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
     newTuple->payloadList = createRelationPayloadList(payload);
+    newTuple->payloadList->next = createRelationPayloadList(payloadNext);
     //newTuple->payloadList->data = payload;
 
     return newTuple;
@@ -81,9 +82,19 @@ void printPayload(relationPayloadList* payloadList){
 void relationDelete(relation* myRelation){
     //printf("deleting relation with %d tuples\n", myRelation->num_tuples);
 
+    struct relationPayloadList* tempPayloadList = NULL;
+    struct relationPayloadList* tempPayloadListNext = NULL;
+
     if(myRelation->tuples){
         for(int i = 0; i < myRelation->num_tuples; i++){
-            free(myRelation->tuples[i].payloadList);
+            tempPayloadList = myRelation->tuples[i].payloadList;
+            tempPayloadListNext = myRelation->tuples[i].payloadList->next;
+            free(tempPayloadList);
+            while(tempPayloadListNext){
+                tempPayloadList = tempPayloadListNext;
+                tempPayloadListNext = tempPayloadListNext->next;
+                free(tempPayloadList);
+            }
         }
         free(myRelation->tuples);
     }
