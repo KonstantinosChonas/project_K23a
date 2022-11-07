@@ -3,17 +3,11 @@
 
 int main (void){
     time_t t;
-    srand((unsigned)time(&t));
-    //relation* relR = inputFromFile("r0.tbl");
-    relation* relR = createRelation(16);
-    //sleep(1);
-    //relation* relS = inputFromFile("r1.tbl");
-    relation* relS = createRelation(15);
-    //printRelation(relR);
-    //printRelation(relS);
-
-
-    //result *r=PartitionedHashJoin(relR,relS);
+    srand((unsigned)time(&t));      //used to create random payload for tuples in our relation
+    relation* relR = inputFromFile("r0.tbl");
+    //relation* relR = createRelation(4);
+    relation* relS = inputFromFile("r1.tbl");
+    //relation* relS = createRelation( 9);
 
     PartitionedHashJoin(relR, relS);
 

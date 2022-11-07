@@ -54,7 +54,7 @@ tuple* SearchKey(relation *r,int key, int n);
 struct hashMap** createHashForBuckets(relation *r, relation *pSum, int hashmap_size, int neighborhood_size);
 relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
-/** Functions used to create input**/
+/** Functions used to create and handle input**/
 
 relationPayloadList* createRelationPayloadList(int data);
 tuple* createTuple(int key);
