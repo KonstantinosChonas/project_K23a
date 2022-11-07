@@ -5,10 +5,10 @@ int main (void){
     time_t t;
     srand((unsigned)time(&t));
     //relation* relR = inputFromFile("r0.tbl");
-    relation* relR = createRelation(3);
+    relation* relR = createRelation(9);
     //sleep(1);
     //relation* relS = inputFromFile("r1.tbl");
-    relation* relS = createRelation(5);
+    relation* relS = createRelation(15);
     //printRelation(relR);
     //printRelation(relS);
 

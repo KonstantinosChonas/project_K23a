@@ -73,7 +73,7 @@ void printRelation(relation* myRelation){
 
 void printPayload(relationPayloadList* payloadList){
 
-    printf(" %d", payloadList->data);
+    printf(" <%d", payloadList->data);
 
     payloadList = payloadList->next;
     while(payloadList != NULL){
@@ -81,7 +81,7 @@ void printPayload(relationPayloadList* payloadList){
         payloadList = payloadList->next;
     }
 
-    printf("\n");
+    printf(">\n");
 }
 
 void relationDelete(relation* myRelation){
