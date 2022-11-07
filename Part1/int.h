@@ -8,9 +8,14 @@
 
 /** Type definition for a tuple */
 
+typedef struct relationPayloadList{
+    int data;
+    struct payloadList *next;
+}relationPayloadList;
+
 typedef struct tuple {
     int32_t key;
-    int32_t payload;
+    relationPayloadList payloadList;
 }tuple;
 
 /**

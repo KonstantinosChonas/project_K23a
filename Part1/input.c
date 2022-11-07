@@ -6,9 +6,9 @@ tuple* createTuple(int key){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
-    newTuple->payload = rand() % 20;
+    newTuple->payloadList.data = rand() % 20;
 
-    printf("new tuple created with key: %d, and payload: %d\n", newTuple->key, newTuple->payload);
+    printf("new tuple created with key: %d, and payload: %d\n", newTuple->key, newTuple->payloadList.data);
 
     return newTuple;
 }
@@ -17,7 +17,7 @@ tuple* createTupleFromNode(int key, int payload){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
-    newTuple->payload = payload;
+    newTuple->payloadList.data = payload;
 
     return newTuple;
 }
@@ -51,7 +51,7 @@ relation* createRelation(){
 void printRelation(relation* myRelation){
     printf("\nPrinting Relation with %d tuples:\n\n", myRelation->num_tuples);
     for(int i = 0; i < myRelation->num_tuples; i++){
-        printf("Tuple with key: %d and payload %d\n", myRelation->tuples[i].key, myRelation->tuples[i].payload);
+        printf("Tuple with key: %d and payload %d\n", myRelation->tuples[i].key, myRelation->tuples[i].payloadList.data);
     }
 }
 
