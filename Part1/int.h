@@ -44,8 +44,10 @@ result* PartitionedHashJoin(relation *relR, relation *relS);
 /**Our Hash Function**/
 int hashl(int x, int n);
 
-relation* createPsum(relation* r,int n);
-relation* relPartitioned(relation *r, relation *Psum, int n);
+
+relation* createHist(relation* r,int n);
+relation* createPsum(relation* r,int n, relation* hist);
+relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist);
 int findNumOfBuckets(relation *r);
 tuple* SearchKey(relation *r,int key, int n);
 

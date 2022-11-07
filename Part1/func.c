@@ -63,7 +63,6 @@ int hashl(int key, int n){
 
 int findNumOfBuckets(relation *r){
 
-    printf("i just entered find num of buckets\n");
     int size;
 
     size = r->num_tuples*sizeof(tuple);
@@ -124,38 +123,49 @@ int findNumOfBuckets(relation *r){
 }
 
 
-relation* createPsum(relation* r,int n){
 
-
-    printf("i just entered psum\n");
-
-    if(n==0) return NULL; 
+relation* createHist(relation* r,int n)
+{
 
     int i,count=0 , histSize=1;
 
-    for ( i = 0 ; i < n ; i++ ){
+        for ( i = 0 ; i < n ; i++ ){
 
-        histSize = 2 * histSize;
-    }
-
-
+            histSize = 2 * histSize;
+        }
 
 
-    relation *hist=malloc(sizeof(relation));
-    hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
 
-    for ( i = 0 ; i < histSize ; i++ ){
 
-        hist->tuples[i].payloadList = createRelationPayloadList(0);                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
-        hist->tuples[i].key=i;
+        relation *hist=malloc(sizeof(relation));
+        hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
 
-    }
+        for ( i = 0 ; i < histSize ; i++ ){
 
-    hist->num_tuples=histSize;
+            hist->tuples[i].payloadList = createRelationPayloadList(0);                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
+            hist->tuples[i].key=i;
 
+        }
+
+        hist->num_tuples=histSize;
+
+
+        return hist;
+
+}
+
+
+relation* createPsum(relation* r,int n,relation* hist){
+
+
+
+    if(n==0) return NULL; 
+
+    
+    int i;
 
     relation *Psum=malloc(sizeof(relation));
-    Psum->tuples = malloc(histSize * sizeof(tuple));       /* to Psum */
+    Psum->tuples = malloc(hist->num_tuples * sizeof(tuple));       /* to Psum */
 
 
 
@@ -171,8 +181,7 @@ relation* createPsum(relation* r,int n){
     }
 
 
-    // printf("printing hist\n");
-    // printRelation(hist);
+
 
 
     Psum->num_tuples=hist->num_tuples;
@@ -189,16 +198,12 @@ relation* createPsum(relation* r,int n){
 
     }
 
-    relationDelete(hist);
-
-    printf("printing psum\n");
-    //printRelation(Psum);
     return Psum;
 
 }
 
 
-relation* relPartitioned(relation *r, relation *Psum, int n){
+relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
 
 
     if (n==0) return r;
@@ -209,10 +214,10 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
     
     /* ftiaxnoume to newR */
 
-    int j=0,key,positions,currPos,i;
+    int j=0,key,positions,currPos,i,HistPointer;
     key = Psum->tuples[j].key;
-    positions = Psum->tuples[j+1].payloadList->data;      //i topothesia p vrisketai to epomeno bucket
-    currPos=0;          //i topothesia p vriskomaste ston newR
+    HistPointer = hist->tuples[j].payloadList->data ;     //i topothesia p vrisketai to epomeno bucket
+    int counter=0;          //i topothesia p vriskomaste ston newR
     i=0;
 
 
@@ -224,41 +229,36 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
     newR->num_tuples = 0;
 
-    printf("printing r\n");
-    //printRelation(r);
 
-    while ( currPos != r->num_tuples) { /*diavazo ena ena stoixeio mexri na mpoun ola*/
-        if (i==r->num_tuples) i=0;
-        if( hashl(r->tuples[i].key,n)==key){         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
-
+    while(counter!=r->num_tuples)
+    {
+        key = Psum->tuples[j].key;
+        HistPointer = hist->tuples[j].payloadList->data;
 
 
-            newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
-            newR->tuples[currPos].payloadList = createRelationPayloadList(r->tuples[i].payloadList->data);
+        if( hashl(r->tuples[i].key,n)==key)         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
+        {
+
+
+
+            newR->tuples[counter].key=r->tuples[i].key;          
+            newR->tuples[counter].payloadList = createRelationPayloadList(r->tuples[i].payloadList->data);
             //newR->tuples[currPos].payloadList->data=r->tuples[i].payloadList->data;
             newR->num_tuples++;
+            counter++;
 
-            currPos++;
-            if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
-                j++;
-                if (j+1 != Psum->num_tuples)        //TODO na exo to nou mou
-                    positions=Psum->tuples[j+1].payloadList->data;
-
-
-                //printf(" num tuples %d kai to j+1 : %d\n",Psum->num_tuples,j+1);
-                key =  Psum->tuples[j].key;
-
-            }
-        }
-        if (i==r->num_tuples){              //ama ftaso sto telos ksanarxizo
-            i=0;
-            continue;
         }
         i++;
+        if (i==r->num_tuples)
+        {
+            i=0;
+            j++;
+
+
+        }
+
     }
 
-    printf("printing new r\n");
-    //printRelation(newR);
     return newR;
 
 }
@@ -411,16 +411,26 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     nR=findNumOfBuckets(relR);
     nS=findNumOfBuckets(relS);
 
-    printf(" nr: %d ns: %d\n",nR,nS);
 
-    relation *newR,*newS,*rPsum,*sPsum;
-
-    rPsum=createPsum(relR,nR);          
-    sPsum=createPsum(relS,nS);
+    relation *newR,*newS,*rPsum,*sPsum,*rHist,*sHist;
 
 
-    newR=relPartitioned(relR, rPsum, nR);   //na do an xreiazontai na n
-    newS=relPartitioned(relS, sPsum, nS);
+    rHist=createHist(relR,nR);
+    sHist=createHist(relS,nS);
+
+
+    rPsum=createPsum(relR,nR,rHist);          
+    sPsum=createPsum(relS,nS,sHist);
+
+
+    newR=relPartitioned(relR, rPsum, nR,rHist); 
+    newS=relPartitioned(relS, sPsum, nS,sHist);
+
+
+    //printRelation(newR);
+
+    relationDelete(sHist);
+    relationDelete(rHist);
 
     relation* largerR = NULL;
     relation* largerPSum = NULL;
