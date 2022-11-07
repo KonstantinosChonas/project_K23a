@@ -144,11 +144,9 @@ relation* createPsum(relation* r,int n){
     relation *hist=malloc(sizeof(relation));
     hist->tuples = malloc(histSize * sizeof(tuple));       /* to histogram */
 
-
-
     for ( i = 0 ; i < histSize ; i++ ){
 
-        hist->tuples[i].payloadList->data=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
+        hist->tuples[i].payloadList = createRelationPayloadList(0);                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
         hist->tuples[i].key=i;
 
     }
@@ -185,7 +183,7 @@ relation* createPsum(relation* r,int n){
     for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
 
         Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
-        Psum->tuples[i].payloadList->data=position;
+        Psum->tuples[i].payloadList = createRelationPayloadList(position);
 
         position+=hist->tuples[i].payloadList->data;
 
@@ -236,7 +234,8 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
-            newR->tuples[currPos].payloadList->data=r->tuples[i].payloadList->data;
+            newR->tuples[currPos].payloadList = createRelationPayloadList(r->tuples[i].payloadList->data);
+            //newR->tuples[currPos].payloadList->data=r->tuples[i].payloadList->data;
             newR->num_tuples++;
 
             currPos++;
@@ -256,11 +255,11 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
             continue;
         }
         i++;
-    
+        printf("%d\n", currPos);
     }           
 
     printf("printing new r\n");
-    printRelation(newR);
+    //printRelation(newR);
     return newR;
 
 }
