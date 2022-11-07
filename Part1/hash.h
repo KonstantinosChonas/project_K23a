@@ -1,8 +1,6 @@
 #ifndef PROJECTIOAN_HASH_H
 #define PROJECTIOAN_HASH_H
 
-#define NEIGHBORHOOD_SIZE 4
-#define HASH_TABLE_SIZE 8000
 
 
 typedef struct payloadList{
