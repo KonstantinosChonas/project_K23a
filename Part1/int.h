@@ -44,7 +44,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n);
 int findNumOfBuckets(relation *r);
 tuple* SearchKey(relation *r,int key, int n);
 
-struct hashMap** createHashForBuckets(relation *r, relation *pSum, int neighborhood_size);
+struct hashMap** createHashForBuckets(relation *r, relation *pSum, int hashmap_size, int neighborhood_size);
 relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
 /** Functions used to create input**/

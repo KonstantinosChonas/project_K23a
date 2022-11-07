@@ -18,13 +18,14 @@ typedef struct hashNode{
 }hashNode;
 
 typedef struct hashMap{
-    hashNode* hashNodes[HASH_TABLE_SIZE];
-    int bitmap[HASH_TABLE_SIZE];
+    int hashSize;
+    hashNode** hashNodes;
+    int* bitmap;
     int nodeCount;
     int bucket;     //which bucket is this hashMap for
 }hashMap;
 
-hashMap* hashCreate(int bucket);
+hashMap* hashCreate(int size,int bucket);
 hashNode* hashNodeCreate(int key, int payload, int hop);
 void hashDelete(hashMap** myHashMap);
 

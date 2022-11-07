@@ -1,5 +1,6 @@
 #include "int.h"
 #include "hash.h"
+#include <math.h>
 
 
 relation* inputFromFile(char* s){
@@ -267,7 +268,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 }
 
 
-hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_size){
+hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, int neighborhood_size){
     int rehash_check = 0;
     int* myHash = NULL;
     struct hashMap** hashMapArray = NULL;
@@ -275,7 +276,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
         hashMapArray = calloc(pSum->num_tuples,sizeof(struct hashMap));
 
         for(int i = 0; i < pSum->num_tuples; i++){
-            hashMapArray[i] = hashCreate(i);
+            hashMapArray[i] = hashCreate(hashmap_size,i);
 
             if( i + 1 >= pSum->num_tuples){
                 for(int j = pSum->tuples[i].payload; j < r->num_tuples; j++){
@@ -283,7 +284,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
                         hashMapArray = NULL;
-                        hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
+                        hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                         return hashMapArray;
                     }
                 }
@@ -293,7 +294,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
                         hashMapArray = NULL;
-                        hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
+                        hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                         return hashMapArray;
                     }
                 }
@@ -303,14 +304,14 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int neighborhood_siz
         return hashMapArray;
     }else{
         hashMapArray = calloc(1,sizeof(struct hashMap));
-        hashMapArray[0] = hashCreate(0);
+        hashMapArray[0] = hashCreate(hashmap_size,0);
 
         for(int i = 0; i < r->num_tuples; i++){
             rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payload, neighborhood_size);
             if(rehash_check == -1 && neighborhood_size < 40){
                 hashDelete(hashMapArray);
                 hashMapArray = NULL;
-                hashMapArray = createHashForBuckets(r, pSum, neighborhood_size * 2);
+                hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                 return hashMapArray;
             }
         }
@@ -420,7 +421,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     hashMap** hashMapArray = NULL;
 
-    hashMapArray = createHashForBuckets(largerR, largerPSum, 4);
+    hashMapArray = createHashForBuckets(largerR, largerPSum, 8000, 4);
 
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
