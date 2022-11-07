@@ -349,7 +349,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                         exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         if(exists){
                             int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                            if(newPayload > 0){
+                            if(newPayload >= 0){
                                 newTuple = createTupleFromNode(r->tuples[j].payloadList->data, r->tuples[j].key, newPayload);
                                 result->tuples[nodeCounter] = *newTuple;
                                 nodeCounter++;
@@ -366,7 +366,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                         exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         if (exists) {
                             int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                            if(newPayload > 0){
+                            if(newPayload >= 0){
                                 newTuple = createTupleFromNode(r->tuples[j].payloadList->data, r->tuples[j].key, newPayload);
                                 result->tuples[nodeCounter] = *newTuple;
                                 nodeCounter++;
@@ -386,7 +386,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                 exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
                 if(exists){
                     int newPayload = getPayload(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-                    if(newPayload > 0){
+                    if(newPayload >= 0){
                         newTuple = createTupleFromNode(r->tuples[i].payloadList->data, r->tuples[i].key, newPayload);
                         result->tuples[nodeCounter] = *newTuple;
                         nodeCounter++;

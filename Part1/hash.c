@@ -78,7 +78,7 @@ int hashSearch(hashMap* hashTable, int key, int payload, int flag){            /
 int getPayload(hashMap* hashTable, int key, int payload, int flag){            //if flag==1 addpayload to payload list
     int keyHash = getHash(key,hashTable->hashSize);
     if(hashTable->hashNodes[keyHash] == NULL)
-        return 0;
+        return -1;
     int hop=hashTable->hashNodes[keyHash]->hop;
 
     for(int i=0; i<hop; i++){
@@ -92,7 +92,7 @@ int getPayload(hashMap* hashTable, int key, int payload, int flag){            /
             }
         }
     }
-    return 0;
+    return -1;
 }
 
 void hashNodeUpdate(hashNode* hashNode, int key, int payload, int hop){
