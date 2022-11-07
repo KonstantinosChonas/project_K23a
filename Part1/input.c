@@ -1,14 +1,22 @@
 #include "int.h"
 
+relationPayloadList* createRelationPayloadList(int data){
+    relationPayloadList *temp;
+    temp = malloc(sizeof(relationPayloadList));
+    temp->data=data;
+    temp->next = NULL;
+    return temp;
+}
 
 tuple* createTuple(int key){
 
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
-    newTuple->payloadList.data = rand() % 20;
+    newTuple->payloadList = createRelationPayloadList(rand() % 20);
+    //newTuple->payloadList->data = rand() % 20;
 
-    printf("new tuple created with key: %d, and payload: %d\n", newTuple->key, newTuple->payloadList.data);
+    printf("new tuple created with key: %d, and payload: %d\n", newTuple->key, newTuple->payloadList->data);
 
     return newTuple;
 }
@@ -17,7 +25,8 @@ tuple* createTupleFromNode(int key, int payload){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
-    newTuple->payloadList.data = payload;
+    newTuple->payloadList = createRelationPayloadList(payload);
+    //newTuple->payloadList->data = payload;
 
     return newTuple;
 }
@@ -51,14 +60,31 @@ relation* createRelation(){
 void printRelation(relation* myRelation){
     printf("\nPrinting Relation with %d tuples:\n\n", myRelation->num_tuples);
     for(int i = 0; i < myRelation->num_tuples; i++){
-        printf("Tuple with key: %d and payload %d\n", myRelation->tuples[i].key, myRelation->tuples[i].payloadList.data);
+        printf("Tuple with key: %d and payload:", myRelation->tuples[i].key);
+        printPayload(myRelation->tuples[i].payloadList);
     }
+}
+
+void printPayload(relationPayloadList* payloadList){
+
+    printf(" %d", payloadList->data);
+
+    payloadList = payloadList->next;
+    while(payloadList != NULL){
+        printf(", %d", payloadList->data);
+        payloadList = payloadList->next;
+    }
+
+    printf("\n");
 }
 
 void relationDelete(relation* myRelation){
     //printf("deleting relation with %d tuples\n", myRelation->num_tuples);
 
     if(myRelation->tuples){
+        for(int i = 0; i < myRelation->num_tuples; i++){
+            free(myRelation->tuples[i].payloadList);
+        }
         free(myRelation->tuples);
     }
 

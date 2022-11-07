@@ -10,12 +10,12 @@
 
 typedef struct relationPayloadList{
     int data;
-    struct payloadList *next;
+    struct relationPayloadList *next;
 }relationPayloadList;
 
 typedef struct tuple {
     int32_t key;
-    relationPayloadList payloadList;
+    relationPayloadList* payloadList;
 }tuple;
 
 /**
@@ -54,10 +54,12 @@ relation* joinRelation(struct hashMap**, relation *r, relation *pSum);
 
 /** Functions used to create input**/
 
+relationPayloadList* createRelationPayloadList(int data);
 tuple* createTuple(int key);
 tuple* createTupleFromNode(int key, int payload);
 relation* createRelation();
 void printRelation(relation* myRelation);
+void printPayload(relationPayloadList* payloadList);
 
 void relationDelete(relation* myRelation);
 void tupleDelete(tuple* myTuple);

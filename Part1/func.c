@@ -36,7 +36,8 @@ relation* inputFromFile(char* s){
 
         fscanf(fp,"%d|%d|%d|\n",&num1,&num2,&num3);
         r->tuples[i].key=num1;
-        r->tuples[i].payloadList.data=num2;
+        r->tuples[i].payloadList = createRelationPayloadList(num2);
+        //r->tuples[i].payloadList->data=num2;
 
     }
 
@@ -147,7 +148,7 @@ relation* createPsum(relation* r,int n){
 
     for ( i = 0 ; i < histSize ; i++ ){
 
-        hist->tuples[i].payloadList.data=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
+        hist->tuples[i].payloadList->data=0;                 /* midenizo oles tis theseis tou histogram gia na mporo na metriso meta */
         hist->tuples[i].key=i;
 
     }
@@ -167,7 +168,7 @@ relation* createPsum(relation* r,int n){
         tuple *t;
 
         if (t = SearchKey(hist,r->tuples[i].key,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
-            t->payloadList.data++;
+            t->payloadList->data++;
       
     }
 
@@ -184,9 +185,9 @@ relation* createPsum(relation* r,int n){
     for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
 
         Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
-        Psum->tuples[i].payloadList.data=position;
+        Psum->tuples[i].payloadList->data=position;
 
-        position+=hist->tuples[i].payloadList.data;
+        position+=hist->tuples[i].payloadList->data;
 
     }
 
@@ -212,7 +213,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
     int j=0,key,positions,currPos,i;
     key = Psum->tuples[j].key;
-    positions = Psum->tuples[j+1].payloadList.data;      //i topothesia p vrisketai to epomeno bucket
+    positions = Psum->tuples[j+1].payloadList->data;      //i topothesia p vrisketai to epomeno bucket
     currPos=0;          //i topothesia p vriskomaste ston newR
     i=0;
 
@@ -235,14 +236,14 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
 
 
             newR->tuples[currPos].key=r->tuples[i].key;          //TODO na to allakso to key gia na mpainei to sosto stoixeio
-            newR->tuples[currPos].payloadList.data=r->tuples[i].payloadList.data;
+            newR->tuples[currPos].payloadList->data=r->tuples[i].payloadList->data;
             newR->num_tuples++;
 
             currPos++;
             if (currPos==positions){            //ama mpoun ola ta stoixeia tou key pao sto epomeno key
                 j++;
                 if (j+1 != Psum->num_tuples)        //TODO na exo to nou mou
-                    positions=Psum->tuples[j+1].payloadList.data;
+                    positions=Psum->tuples[j+1].payloadList->data;
 
 
                 //printf(" num tuples %d kai to j+1 : %d\n",Psum->num_tuples,j+1);
@@ -276,8 +277,8 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
             hashMapArray[i] = hashCreate(hashmap_size,i);
 
             if( i + 1 >= pSum->num_tuples){
-                for(int j = pSum->tuples[i].payloadList.data; j < r->num_tuples; j++){
-                    rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList.data, neighborhood_size);
+                for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
+                    rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
                         printf("rehashing...\n");
@@ -287,8 +288,8 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
                     }
                 }
             }else
-                for(int j = pSum->tuples[i].payloadList.data; j < pSum->tuples[i+1].payloadList.data; j++){
-                    rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList.data, neighborhood_size);
+                for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
+                    rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
                         printf("rehashing...\n");
@@ -306,7 +307,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
         hashMapArray[0] = hashCreate(hashmap_size,0);
 
         for(int i = 0; i < r->num_tuples; i++){
-            rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payloadList.data, neighborhood_size);
+            rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payloadList->data, neighborhood_size);
             if(rehash_check == -1 && neighborhood_size < 40){
                 hashDelete(hashMapArray);
                 printf("rehashing...\n");
@@ -334,12 +335,12 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
     if(pSum != NULL){
         for(int i = 0; i < pSum->num_tuples; i++){
             if(i+1 >= pSum->num_tuples){
-                for(int j = pSum->tuples[i].payloadList.data; j < r->num_tuples; j++){
+                for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
                     if(hashMapArray[i]){
-                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList.data, 0);
+                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         printf("checked key %d exists %d\n", r->tuples[j].key, exists);
                         if(exists){
-                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList.data);
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data);
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
                             free(newTuple);
@@ -347,12 +348,12 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                     }
                 }
             }else
-                for(int j = pSum->tuples[i].payloadList.data; j < pSum->tuples[i+1].payloadList.data; j++){
+                for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     if(hashMapArray[i]) {
-                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList.data, 0);
+                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         printf("checked key %d exists %d\n", r->tuples[j].key, exists);
                         if (exists) {
-                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList.data);
+                            newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data);
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
                             free(newTuple);
@@ -366,10 +367,10 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
         for(int i = 0; i < r->num_tuples; i++){
             int j = 0;
             while(hashMapArray[j]){
-                exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList.data, 0);
+                exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
                 //printf("checked key %d exists %d\n", r->tuples[i].key, exists);
                 if(exists){
-                    newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payloadList.data);
+                    newTuple = createTupleFromNode(r->tuples[i].key, r->tuples[i].payloadList->data);
                     result->tuples[nodeCounter] = *newTuple;
                     nodeCounter++;
                     free(newTuple);
