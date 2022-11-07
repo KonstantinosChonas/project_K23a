@@ -424,7 +424,15 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     hashMap** hashMapArray = NULL;
 
-    hashMapArray = createHashForBuckets(largerR, largerPSum, 8000, 4);
+    int hash_map_size = 0;
+
+    if(!rPsum){
+        hash_map_size = largerR->num_tuples;
+    }else{
+        hash_map_size = largerR->num_tuples / rPsum->num_tuples;
+    }
+
+    hashMapArray = createHashForBuckets(largerR, largerPSum, hash_map_size, 4);
 
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
@@ -438,16 +446,9 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         relationDelete(sPsum);
         relationDelete(newS);
     }
-//    if(newR){
-//        relationDelete(newR);
-//    }
-//    if(newS){
-//        relationDelete(newS);
-//    }
+
     relationDelete(result);
     hashDelete(hashMapArray);
-
-    printf("%d\n", L2);
 
     return NULL;
 
