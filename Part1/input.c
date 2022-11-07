@@ -65,6 +65,7 @@ void printRelation(relation* myRelation){
         printf("Tuple with key: %d and payload:", myRelation->tuples[i].key);
         printPayload(myRelation->tuples[i].payloadList);
     }
+    printf("\nRelation has %d tuples\n", myRelation->num_tuples);
 }
 
 void printPayload(relationPayloadList* payloadList){
