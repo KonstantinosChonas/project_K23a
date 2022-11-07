@@ -84,10 +84,10 @@ int getPayload(hashMap* hashTable, int key, int payload, int flag){            /
     for(int i=0; i<hop; i++){
         if(keyHash + i < hashTable->hashSize){
             if(hashTable->hashNodes[keyHash+i]){
-                if(hashTable->hashNodes[keyHash+i]->key==key){
+                if(hashTable->hashNodes[keyHash+i]->payload->data==payload){
                     if (flag == 1)
                         addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
-                    return hashTable->hashNodes[keyHash+i]->payload->data;
+                    return hashTable->hashNodes[keyHash+i]->key;
                 }
             }
         }
