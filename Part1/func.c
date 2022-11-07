@@ -255,8 +255,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n){
             continue;
         }
         i++;
-        printf("%d\n", currPos);
-    }           
+    }
 
     printf("printing new r\n");
     //printRelation(newR);
