@@ -62,7 +62,7 @@ int hashSearch(hashMap* hashTable, int key, int payload, int flag){            /
     int hop=hashTable->hashNodes[keyHash]->hop;
 
     for(int i=0; i<hop; i++){
-        if(keyHash + i < hashTable->nodeCount){
+        if(keyHash + i < hashTable->hashSize){
             if(hashTable->hashNodes[keyHash+i]){
                 if(hashTable->hashNodes[keyHash+i]->key==key){
                     if (flag == 1)
@@ -100,7 +100,7 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
     int keyHash, jump, step, index, keyHashAlready;
     int hop = neighborhood_size;
 
-    keyHash = getHash(key,HASH_TABLE_SIZE);
+    keyHash = getHash(key, hashTable->hashSize);
     //if the hash is new to the hashTable
 
     if(hashTable->hashNodes[keyHash] == NULL){
@@ -213,6 +213,7 @@ void hashDelete(hashMap** myHashMap){
         while(myHashMap[i] != NULL){
             for(j = 0; j < myHashMap[i]->hashSize; j++){
                 if(myHashMap[i]->hashNodes[j] != NULL){
+                    //printf("deleted key %d payload %d\n", myHashMap[i]->hashNodes[j]->key, myHashMap[i]->hashNodes[j]->payload->data);
                     free(myHashMap[i]->hashNodes[j]->payload);
                     free(myHashMap[i]->hashNodes[j]->bitmap);
                     free(myHashMap[i]->hashNodes[j]);

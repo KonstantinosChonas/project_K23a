@@ -1,5 +1,6 @@
 #include "int.h"
 
+
 tuple* createTuple(int key){
 
     tuple *newTuple = malloc(sizeof(struct tuple));
@@ -39,6 +40,7 @@ relation* createRelation(){
         newRelation->tuples[i] = *newTuple;
         free(newTuple);
     }
+
 
     printf("new relation created with %d tuples\n", newRelation->num_tuples);
 

@@ -12,6 +12,7 @@ int main (void){
     //printRelation(relR);
     //printRelation(relS);
 
+
     //result *r=PartitionedHashJoin(relR,relS);
 
     PartitionedHashJoin(relR, relS);
