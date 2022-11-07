@@ -73,11 +73,11 @@ int findNumOfBuckets(relation *r){
         return 0;
 
     }
-    else{           /* the table does not fit in the L2 cache whole */      //TODO na do gia poliplokotites
+    else{           /* the table does not fit in the L2 cache whole */      
 
         int i,n=1,x,flag=0;
 
-        for(n=2;n<6;n+=2){              //TODO na to kano na stamataei
+        for(n=2;n<6;n+=2){
 
             int j=1;
 
@@ -102,7 +102,7 @@ int findNumOfBuckets(relation *r){
 
 
             for (i = 0 ; i < j; i++){
-                if(count[i]*sizeof(tuple)>L2){          /* if we cant fit it in the L2 cache we increse n by one and we test again */
+                if(count[i]*sizeof(tuple)>L2){          /* if we cant fit it in the L2 cache we increse n and we test again */
                     flag=0;
                     break;
                 }
@@ -209,7 +209,6 @@ relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
     if (n==0) return r;
 
 
-    printf("i just entered relPartitioned\n");
 
     
     /* ftiaxnoume to newR */
@@ -243,13 +242,12 @@ relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
 
             newR->tuples[counter].key=r->tuples[i].key;          
             newR->tuples[counter].payloadList = createRelationPayloadList(r->tuples[i].payloadList->data);
-            //newR->tuples[currPos].payloadList->data=r->tuples[i].payloadList->data;
             newR->num_tuples++;
             counter++;
 
         }
         i++;
-        if (i==r->num_tuples)
+        if (i==r->num_tuples)                       //otan elegksoume olo ton pinaka ksekiname apo tin arxi
         {
             i=0;
             j++;
