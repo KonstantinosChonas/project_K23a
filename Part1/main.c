@@ -7,8 +7,10 @@ int main (void){
     //relation* relR = inputFromFile("r0.tbl");
     relation* relR = createRelation(1);
     //relation* relS = inputFromFile("r1.tbl");
-    relation* relS = createRelation( 2);
+    relation* relS = createRelation( 1);
 
+    //printRelation(relR);
+    //printRelation(relS);
     PartitionedHashJoin(relR, relS);
 
     relationDelete(relR);
