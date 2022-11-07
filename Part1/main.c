@@ -4,7 +4,7 @@
 int main (void){
     time_t t;
     srand((unsigned)time(&t));
-    relation* relR = inputFromFile("r0.tbl");
+    relation* relR = inputFromFile("r1.tbl");
     //relation* relR = createRelation();
     //sleep(1);
     relation* relS = inputFromFile("r1.tbl");

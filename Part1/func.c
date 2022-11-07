@@ -436,7 +436,11 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         hash_map_size = largerR->num_tuples / rPsum->num_tuples;
     }
 
-    hashMapArray = createHashForBuckets(largerR, largerPSum, hash_map_size, 4);
+    double neighborhood_size;
+    neighborhood_size = log2((double)hash_map_size);
+    //printf(" %d %d\n",hash_map_size, (int)neighborhood_size);
+
+    hashMapArray = createHashForBuckets(largerR, largerPSum, hash_map_size, (int)neighborhood_size+1);
 
 
     relation* result = joinRelation(hashMapArray, smallerR, smallerPSum);
