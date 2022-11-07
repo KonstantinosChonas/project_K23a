@@ -62,7 +62,7 @@ relation* createRelation(int hop){
 void printRelation(relation* myRelation){
     printf("\nPrinting Relation with %d tuples:\n\n", myRelation->num_tuples);
     for(int i = 0; i < myRelation->num_tuples; i++){
-        printf("Tuple with key: %d and payload:", myRelation->tuples[i].key);
+        printf("Tuple with value: %d and rowIDs:", myRelation->tuples[i].key);
         printPayload(myRelation->tuples[i].payloadList);
     }
     printf("\nRelation has %d tuples\n", myRelation->num_tuples);
