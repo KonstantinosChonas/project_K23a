@@ -32,8 +32,12 @@ tuple* createTupleFromNode(int key, int payload, int payloadNext){
     return newTuple;
 }
 
-relation* createRelation(){
+relation* createRelation(int hop){
     int relationSize;
+    int j = 0;
+    if(hop < 1){
+        hop = 1;
+    }
     tuple* prevTuple = NULL;
     tuple* newTuple = NULL;
 
@@ -46,9 +50,10 @@ relation* createRelation(){
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){
-        newTuple = createTuple(i);
+        newTuple = createTuple(j);
         newRelation->tuples[i] = *newTuple;
         free(newTuple);
+        j = j + hop;
     }
 
 
