@@ -347,7 +347,8 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                     if(hashMapArray[i]){
                         //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         //if(exists){
-                            int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
+                        printf("looking for %d in bucket %d\n", r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
+                        int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
                                 while(rowIdList[counter] > -1){
@@ -370,6 +371,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                     if(hashMapArray[i]) {
                         //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         //if (exists) {
+                            printf("%d looking for %d in bucket %d\n", j, r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
                             int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
@@ -381,7 +383,6 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                                     free(newTuple);
                                 }
                                 free(rowIdList);
-
                             }
 
                         //}

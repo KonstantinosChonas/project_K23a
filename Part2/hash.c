@@ -64,7 +64,7 @@ int hashSearch(hashMap* hashTable, int key, int payload, int flag){            /
     for(int i=0; i<hop; i++){
         if(keyHash + i < hashTable->hashSize){
             if(hashTable->hashNodes[keyHash+i]){
-                if(hashTable->hashNodes[keyHash+i]->payload->data==payload){
+                if(hashTable->hashNodes[keyHash+i]->payload->data==payload && hashTable->hashNodes[keyHash+i]->key==key){
                     if (flag == 1)
                         addPayload(hashTable->hashNodes[keyHash+1]->payload,payload);
                     return 1;
@@ -95,6 +95,13 @@ int* getKey(hashMap* hashTable, int payload, int flag){
             }
         }
     }
+//    if(hitCounter > 0){
+//        for(int i = 0; i < hitCounter-1; i++){
+//            printf("%d ", rowIdList[i]);
+//        }
+//        printf("\n");
+//    }
+
     rowIdList[hitCounter] = -1; //setting final index to -1 so we know when to stop reading
     return rowIdList;
 }
@@ -135,9 +142,9 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
     }
 
     //if the same key exists    
-//    if(hashSearch(hashTable,key,payload,0) == 1){
-//        return 1;
-//    }
+    if(hashSearch(hashTable,key,payload,0) == 1){
+        return 1;
+    }
 
     //if neighborhood is full
     if(checkNeighborhood(hashTable,keyHash) == 1){
@@ -171,24 +178,26 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
     while((jump-keyHash)% hashTable->hashSize >= hop){
         int flag=0;
         for(y=jump-hop+1; y<jump; y++){
-            keyHashAlready = getHash(hashTable->hashNodes[y]->payload->data,hashTable->hashSize);
-            if ((jump-keyHashAlready)% hashTable->hashSize < hop){
-                if(hashTable->hashNodes[jump] == NULL){
-                    hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);
-                    //hashTable->nodeCount++;
-                    updateBitmapInsert(hashTable->hashNodes[keyHashAlready]->bitmap,jump-keyHashAlready);
-                    updateBitmapInsert(hashTable->bitmap, jump);
-                    updateBitmapRemove(hashTable->hashNodes[keyHashAlready]->bitmap,y-keyHashAlready);
-                    updateBitmapInsert(hashTable->bitmap, y);
-                    if(hashTable->hashNodes[y] != NULL){
-                        free(hashTable->hashNodes[y]->payload);
-                        free(hashTable->hashNodes[y]->bitmap);
-                        free(hashTable->hashNodes[y]);
+            if(hashTable->hashNodes[y] != NULL){
+                keyHashAlready = getHash(hashTable->hashNodes[y]->payload->data,hashTable->hashSize);
+                if ((jump-keyHashAlready)% hashTable->hashSize < hop){
+                    if(hashTable->hashNodes[jump] == NULL){
+                        hashTable->hashNodes[jump] = hashNodeCreate(hashTable->hashNodes[y]->key, hashTable->hashNodes[y]->payload->data, hop);
+                        //hashTable->nodeCount++;
+                        updateBitmapInsert(hashTable->hashNodes[keyHashAlready]->bitmap,jump-keyHashAlready);
+                        updateBitmapInsert(hashTable->bitmap, jump);
+                        updateBitmapRemove(hashTable->hashNodes[keyHashAlready]->bitmap,y-keyHashAlready);
+                        updateBitmapInsert(hashTable->bitmap, y);
+                        if(hashTable->hashNodes[y] != NULL){
+                            free(hashTable->hashNodes[y]->payload);
+                            free(hashTable->hashNodes[y]->bitmap);
+                            free(hashTable->hashNodes[y]);
+                        }
+                        hashTable->hashNodes[y] = NULL;
                     }
-                    hashTable->hashNodes[y] = NULL;
+                    flag=1;
+                    break;
                 }
-                flag=1;
-                break;
             }
         }
         if (flag == 0)
