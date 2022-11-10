@@ -330,13 +330,13 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
 
 /* same logic as createHashForBuckets but instead of inserting
  tuples, we search each tuple, and if there's a much, we add the tuple to the result */
-relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum){
+relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *smallerR, relation *pSum){
     int exists = 0;
     int nodeCounter = 0;
     struct tuple* newTuple = NULL;
 
     relation *result = malloc(sizeof(struct relation));
-    result->num_tuples = r->num_tuples;
+    result->num_tuples = r->num_tuples * smallerR->num_tuples;
     result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
 
     /* we use pSum exactly the same way that we did in createHashForBuckets */
@@ -350,13 +350,15 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                             int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
-                                while(rowIdList[counter]){
+                                while(rowIdList[counter] > -1){
                                     newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
                                     result->tuples[nodeCounter] = *newTuple;
                                     nodeCounter++;
                                     counter++;
                                     free(newTuple);
                                 }
+                                free(rowIdList);
+
                             }
                             //newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
 
@@ -371,13 +373,15 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                             int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
-                                while(rowIdList[counter]){
+                                while(rowIdList[counter] > -1){
                                     newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
                                     result->tuples[nodeCounter] = *newTuple;
                                     nodeCounter++;
                                     counter++;
                                     free(newTuple);
                                 }
+                                free(rowIdList);
+
                             }
 
                         //}
@@ -403,6 +407,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                             counter++;
                             free(newTuple);
                         }
+                        free(rowIdList);
                     }
 
               //  }
@@ -479,7 +484,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     hashMapArray = createHashForBuckets(smallerR, smallerPSum, hash_map_size, (int)neighborhood_size+1);
 
     /* use the hash table(s) to create the final result (from join) */
-    relation* result = joinRelation(hashMapArray, largerR, largerPSum);
+    relation* result = joinRelation(hashMapArray, largerR, smallerR, largerPSum);
     printRelation(result);
 
     /* freeing the memory from everything */

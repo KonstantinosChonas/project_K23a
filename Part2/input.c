@@ -13,7 +13,7 @@ tuple* createTuple(int key){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
-    newTuple->payloadList = createRelationPayloadList(rand() % 15);//createRelationPayloadList(rand() % 50);
+    newTuple->payloadList = createRelationPayloadList(rand() % 5);//createRelationPayloadList(rand() % 50);
     printf("new tuple created with rowID: %d, and payload: %d\n", newTuple->key, newTuple->payloadList->data);
 
     return newTuple;

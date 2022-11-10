@@ -135,9 +135,9 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
     }
 
     //if the same key exists    
-    if(hashSearch(hashTable,key,payload,0) == 1){
-        return 1;
-    }
+//    if(hashSearch(hashTable,key,payload,0) == 1){
+//        return 1;
+//    }
 
     //if neighborhood is full
     if(checkNeighborhood(hashTable,keyHash) == 1){
