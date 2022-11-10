@@ -229,7 +229,7 @@ relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
     while(counter!=r->num_tuples)
     {
         key = Psum->tuples[j].key;
-        HistPointer = hist->tuples[j].payloadList->data;
+        //HistPointer = hist->tuples[j].payloadList->data;      //may cause segfault!
 
 
         if( hashl(r->tuples[i].payloadList->data,n)==key)         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
@@ -254,8 +254,8 @@ relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
 
     }
 
-    printf("printing newr\n");
-    printRelation(newR);
+    //printf("printing newr\n");
+    //printRelation(newR);
 
 
     return newR;
@@ -345,33 +345,42 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
             if(i+1 >= pSum->num_tuples){
                 for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
                     if(hashMapArray[i]){
-                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        if(exists){
-                            int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                            if(newPayload >= 0){
-                                newTuple = createTupleFromNode(r->tuples[j].payloadList->data, newPayload, r->tuples[j].key);
-                                result->tuples[nodeCounter] = *newTuple;
-                                nodeCounter++;
-                                free(newTuple);
+                        //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
+                        //if(exists){
+                            int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
+                            int counter = 0;
+                            if(rowIdList != NULL){
+                                while(rowIdList[counter]){
+                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    result->tuples[nodeCounter] = *newTuple;
+                                    nodeCounter++;
+                                    counter++;
+                                    free(newTuple);
+                                }
                             }
                             //newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
 
-                        }
+                        //}
                     }
                 }
             }else
                 for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     if(hashMapArray[i]) {
-                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        if (exists) {
-                            int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                            if(newPayload >= 0){
-                                newTuple = createTupleFromNode(r->tuples[j].payloadList->data, newPayload, r->tuples[j].key);
-                                result->tuples[nodeCounter] = *newTuple;
-                                nodeCounter++;
-                                free(newTuple);
+                        //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
+                        //if (exists) {
+                            int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
+                            int counter = 0;
+                            if(rowIdList != NULL){
+                                while(rowIdList[counter]){
+                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    result->tuples[nodeCounter] = *newTuple;
+                                    nodeCounter++;
+                                    counter++;
+                                    free(newTuple);
+                                }
                             }
-                        }
+
+                        //}
                     }
                 }
         }
@@ -382,16 +391,21 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
         for(int i = 0; i < r->num_tuples; i++){
             int j = 0;
             while(hashMapArray[j]){
-                exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-                if(exists){
-                    int newPayload = getPayload(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-                    if(newPayload >= 0){
-                        newTuple = createTupleFromNode(r->tuples[i].payloadList->data, newPayload, r->tuples[i].key);
-                        result->tuples[nodeCounter] = *newTuple;
-                        nodeCounter++;
-                        free(newTuple);
+               // exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
+               // if(exists){
+                    int* rowIdList = getKey(hashMapArray[j], r->tuples[i].payloadList->data, 0);
+                    int counter = 0;
+                    if(rowIdList != NULL){
+                        while(rowIdList[counter]){
+                            newTuple = createTupleFromNode(r->tuples[i].payloadList->data, rowIdList[counter], r->tuples[i].key);
+                            result->tuples[nodeCounter] = *newTuple;
+                            nodeCounter++;
+                            counter++;
+                            free(newTuple);
+                        }
                     }
-                }
+
+              //  }
                 j++;
             }
         }
@@ -461,12 +475,13 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     double neighborhood_size = log2((double)hash_map_size);
 
+    printf("hash size %d, neigh %d", hash_map_size, (int)neighborhood_size);
     /* creat hash table for every bucket */
     hashMapArray = createHashForBuckets(smallerR, smallerPSum, hash_map_size, (int)neighborhood_size+1);
 
     /* use the hash table(s) to create the final result (from join) */
     relation* result = joinRelation(hashMapArray, largerR, largerPSum);
-    //printRelation(result);
+    printRelation(result);
 
     /* freeing the memory from everything */
 
