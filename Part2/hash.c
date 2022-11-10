@@ -82,7 +82,7 @@ int* getKey(hashMap* hashTable, int payload, int flag){
         return NULL;
     int hop=hashTable->hashNodes[keyHash]->hop;
     int hitCounter = 0;
-    int* rowIdList = malloc(sizeof(int) * hop);
+    int* rowIdList = malloc(sizeof(int) * (hop+1));
 
     for(int i=0; i<hop; i++){
         if(keyHash + i < hashTable->hashSize){
@@ -95,6 +95,7 @@ int* getKey(hashMap* hashTable, int payload, int flag){
             }
         }
     }
+    rowIdList[hitCounter] = -1; //setting final index to -1 so we know when to stop reading
     return rowIdList;
 }
 

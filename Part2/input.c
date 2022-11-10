@@ -43,7 +43,7 @@ relation* createRelation(int hop){
 
     relation *newRelation = malloc(sizeof(struct relation));
 
-    newRelation->num_tuples = rand() % 5 + 50;        //use for random number of tuples in relation
+    newRelation->num_tuples = rand() % 5 + 5;        //use for random number of tuples in relation
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){

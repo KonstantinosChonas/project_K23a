@@ -396,7 +396,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
                     int* rowIdList = getKey(hashMapArray[j], r->tuples[i].payloadList->data, 0);
                     int counter = 0;
                     if(rowIdList != NULL){
-                        while(rowIdList[counter]){
+                        while(rowIdList[counter] > -1){
                             newTuple = createTupleFromNode(r->tuples[i].payloadList->data, rowIdList[counter], r->tuples[i].key);
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
@@ -475,7 +475,6 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     double neighborhood_size = log2((double)hash_map_size);
 
-    printf("hash size %d, neigh %d", hash_map_size, (int)neighborhood_size);
     /* creat hash table for every bucket */
     hashMapArray = createHashForBuckets(smallerR, smallerPSum, hash_map_size, (int)neighborhood_size+1);
 
