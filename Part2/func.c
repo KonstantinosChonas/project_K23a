@@ -353,7 +353,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                             int counter = 0;
                             if(rowIdList != NULL){
                                 while(rowIdList[counter] > -1){
-                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, r->tuples[j].key, rowIdList[counter]);
                                     result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
                                     result->tuples[nodeCounter] = *newTuple;
                                     nodeCounter++;
@@ -378,7 +378,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                             int counter = 0;
                             if(rowIdList != NULL){
                                 while(rowIdList[counter] > -1){
-                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, r->tuples[j].key, rowIdList[counter]);
                                     result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
                                     result->tuples[nodeCounter] = *newTuple;
                                     nodeCounter++;
@@ -405,7 +405,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                     int counter = 0;
                     if(rowIdList != NULL){
                         while(rowIdList[counter] > -1){
-                            newTuple = createTupleFromNode(r->tuples[i].payloadList->data, rowIdList[counter], r->tuples[i].key);
+                            newTuple = createTupleFromNode(r->tuples[i].payloadList->data, r->tuples[i].key, rowIdList[counter]);
                             result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
