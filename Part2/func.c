@@ -156,7 +156,7 @@ relation* createHist(relation* r,int n)
 
         if (t = SearchKey(hist,r->tuples[i].payloadList->data,n))        //psaxno to key an to vro epistefo pointer se auto allios NULL
             t->payloadList->data++;
-    
+
     }
 
 
@@ -188,7 +188,7 @@ relation* createPsum(relation* r,int n,relation* hist){
 
     for ( i = 0 ; i < hist->num_tuples ; i++ ){             /* etoimazoume to Psum */
 
-        Psum->tuples[i].key=hashl(hist->tuples[i].payloadList->data,n);
+        Psum->tuples[i].key=hashl(hist->tuples[i].key,n);
         Psum->tuples[i].payloadList = createRelationPayloadList(position);
 
         position+=hist->tuples[i].payloadList->data;
@@ -221,15 +221,12 @@ relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
     newR->tuples=malloc(r->num_tuples*sizeof(tuple));   /* o R' apo tin ekfonisi */
 
 
-
-
     newR->num_tuples = 0;
 
 
     while(counter!=r->num_tuples)
     {
         key = Psum->tuples[j].key;
-        HistPointer = hist->tuples[j].payloadList->data;
 
 
         if( hashl(r->tuples[i].payloadList->data,n)==key)         //arxika psaxno mono to proto key molis ta vro ola to epomeno etc
@@ -499,7 +496,7 @@ tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an d
 
     for ( i = 0 ; i < r->num_tuples ; i++ ){
 
-        if (hashl(r->tuples[i].payloadList->data,n)==hashl(key,n)){
+        if (hashl(r->tuples[i].key,n)==hashl(key,n)){
 
             return &r->tuples[i];
 
