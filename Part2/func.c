@@ -251,8 +251,8 @@ relation* relPartitioned(relation *r, relation *Psum, int n,relation* hist){
 
     }
 
-    printf("printing newr\n");
-    printRelation(newR);
+    //printf("printing newr\n");
+    //printRelation(newR);
 
 
     return newR;
@@ -327,13 +327,13 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
 
 /* same logic as createHashForBuckets but instead of inserting
  tuples, we search each tuple, and if there's a much, we add the tuple to the result */
-relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSum){
+relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *smallerR, relation *pSum){
     int exists = 0;
     int nodeCounter = 0;
     struct tuple* newTuple = NULL;
 
     relation *result = malloc(sizeof(struct relation));
-    result->num_tuples = r->num_tuples;
+    result->num_tuples = r->num_tuples * smallerR->num_tuples;
     result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
 
     /* we use pSum exactly the same way that we did in createHashForBuckets */
@@ -342,33 +342,47 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
             if(i+1 >= pSum->num_tuples){
                 for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
                     if(hashMapArray[i]){
-                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        if(exists){
-                            int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                            if(newPayload >= 0){
-                                newTuple = createTupleFromNode(r->tuples[j].payloadList->data, newPayload, r->tuples[j].key);
-                                result->tuples[nodeCounter] = *newTuple;
-                                nodeCounter++;
-                                free(newTuple);
+                        //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
+                        //if(exists){
+                        printf("looking for %d in bucket %d\n", r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
+                        int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
+                            int counter = 0;
+                            if(rowIdList != NULL){
+                                while(rowIdList[counter] > -1){
+                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    result->tuples[nodeCounter] = *newTuple;
+                                    nodeCounter++;
+                                    counter++;
+                                    free(newTuple);
+                                }
+                                free(rowIdList);
+
                             }
                             //newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
 
-                        }
+                        //}
                     }
                 }
             }else
                 for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     if(hashMapArray[i]) {
-                        exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        if (exists) {
-                            int newPayload = getPayload(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                            if(newPayload >= 0){
-                                newTuple = createTupleFromNode(r->tuples[j].payloadList->data, newPayload, r->tuples[j].key);
-                                result->tuples[nodeCounter] = *newTuple;
-                                nodeCounter++;
-                                free(newTuple);
+                        //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
+                        //if (exists) {
+                            printf("%d looking for %d in bucket %d\n", j, r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
+                            int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
+                            int counter = 0;
+                            if(rowIdList != NULL){
+                                while(rowIdList[counter] > -1){
+                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    result->tuples[nodeCounter] = *newTuple;
+                                    nodeCounter++;
+                                    counter++;
+                                    free(newTuple);
+                                }
+                                free(rowIdList);
                             }
-                        }
+
+                        //}
                     }
                 }
         }
@@ -379,16 +393,22 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *pSu
         for(int i = 0; i < r->num_tuples; i++){
             int j = 0;
             while(hashMapArray[j]){
-                exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-                if(exists){
-                    int newPayload = getPayload(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-                    if(newPayload >= 0){
-                        newTuple = createTupleFromNode(r->tuples[i].payloadList->data, newPayload, r->tuples[i].key);
-                        result->tuples[nodeCounter] = *newTuple;
-                        nodeCounter++;
-                        free(newTuple);
+               // exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
+               // if(exists){
+                    int* rowIdList = getKey(hashMapArray[j], r->tuples[i].payloadList->data, 0);
+                    int counter = 0;
+                    if(rowIdList != NULL){
+                        while(rowIdList[counter] > -1){
+                            newTuple = createTupleFromNode(r->tuples[i].payloadList->data, rowIdList[counter], r->tuples[i].key);
+                            result->tuples[nodeCounter] = *newTuple;
+                            nodeCounter++;
+                            counter++;
+                            free(newTuple);
+                        }
+                        free(rowIdList);
                     }
-                }
+
+              //  }
                 j++;
             }
         }
@@ -462,8 +482,8 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
     hashMapArray = createHashForBuckets(smallerR, smallerPSum, hash_map_size, (int)neighborhood_size+1);
 
     /* use the hash table(s) to create the final result (from join) */
-    relation* result = joinRelation(hashMapArray, largerR, largerPSum);
-    //printRelation(result);
+    relation* result = joinRelation(hashMapArray, largerR, smallerR, largerPSum);
+    printRelation(result);
 
     /* freeing the memory from everything */
 

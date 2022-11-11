@@ -13,18 +13,18 @@ tuple* createTuple(int key){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
     newTuple->key = key;
-    newTuple->payloadList = createRelationPayloadList(key+1);//createRelationPayloadList(rand() % 50);
-    printf("new tuple created with key: %d, and payload: %d\n", newTuple->key, newTuple->payloadList->data);
+    newTuple->payloadList = createRelationPayloadList(rand() % 3500);//createRelationPayloadList(rand() % 50);
+    printf("new tuple created with rowID: %d, and payload: %d\n", newTuple->key, newTuple->payloadList->data);
 
     return newTuple;
 }
 
-tuple* createTupleFromNode(int key, int payload, int payloadNext){
+tuple* createTupleFromNode(int value, int rowId1, int rowId2){
     tuple *newTuple = malloc(sizeof(struct tuple));
 
-    newTuple->key = key;
-    newTuple->payloadList = createRelationPayloadList(payload);
-    newTuple->payloadList->next = createRelationPayloadList(payloadNext);
+    newTuple->key = value;
+    newTuple->payloadList = createRelationPayloadList(rowId1);
+    newTuple->payloadList->next = createRelationPayloadList(rowId2);
     //newTuple->payloadList->data = payload;
 
     return newTuple;
@@ -43,7 +43,7 @@ relation* createRelation(int hop){
 
     relation *newRelation = malloc(sizeof(struct relation));
 
-    newRelation->num_tuples = rand() % 100 + 100;        //use for random number of tuples in relation
+    newRelation->num_tuples = rand() % 5 + 300;        //use for random number of tuples in relation
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){

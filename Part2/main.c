@@ -15,4 +15,5 @@ int main (void){
 
     relationDelete(relR);
     relationDelete(relS);
+    printf("%d\n",L2);
 }
