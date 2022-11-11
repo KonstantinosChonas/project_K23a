@@ -333,8 +333,12 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
     struct tuple* newTuple = NULL;
 
     relation *result = malloc(sizeof(struct relation));
-    result->num_tuples = r->num_tuples * smallerR->num_tuples;
+    result->num_tuples = r->num_tuples;
     result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
+    if(result->tuples == NULL){
+        printf("not enough memory\n");
+        return NULL;
+    }
 
     /* we use pSum exactly the same way that we did in createHashForBuckets */
     if(pSum != NULL){
@@ -344,12 +348,13 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                     if(hashMapArray[i]){
                         //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         //if(exists){
-                        printf("looking for %d in bucket %d\n", r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
+                        //printf("looking for %d in bucket %d\n", r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
                         int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
                                 while(rowIdList[counter] > -1){
                                     newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
                                     result->tuples[nodeCounter] = *newTuple;
                                     nodeCounter++;
                                     counter++;
@@ -368,12 +373,13 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                     if(hashMapArray[i]) {
                         //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
                         //if (exists) {
-                            printf("%d looking for %d in bucket %d\n", j, r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
+                            //printf("%d looking for %d in bucket %d\n", j, r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
                             int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
                                 while(rowIdList[counter] > -1){
                                     newTuple = createTupleFromNode(r->tuples[j].payloadList->data, rowIdList[counter], r->tuples[j].key);
+                                    result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
                                     result->tuples[nodeCounter] = *newTuple;
                                     nodeCounter++;
                                     counter++;
@@ -400,6 +406,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                     if(rowIdList != NULL){
                         while(rowIdList[counter] > -1){
                             newTuple = createTupleFromNode(r->tuples[i].payloadList->data, rowIdList[counter], r->tuples[i].key);
+                            result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
                             result->tuples[nodeCounter] = *newTuple;
                             nodeCounter++;
                             counter++;
@@ -474,6 +481,9 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         hash_map_size = smallerR->num_tuples;
     }else{
         hash_map_size = smallerR->num_tuples / rPsum->num_tuples;
+        if(rPsum->num_tuples > smallerR->num_tuples){
+            hash_map_size = smallerR->num_tuples;
+        }
     }
 
     double neighborhood_size = log2((double)hash_map_size);
