@@ -28,7 +28,13 @@ typedef struct relation {
     uint32_t num_tuples;
 }relation;
 
+typedef struct relationInfo{
 
+    int num_tuples;
+    int num_cols;
+    int **columns;
+
+}relationInfo;
 
 typedef struct result {  //NOTE: katholou sigouros gia to ti tha prepe na einai to struct result to vala etsi gia arxi pisteuo thelei allagi
     relation *r;
@@ -62,6 +68,8 @@ tuple* createTupleFromNode(int key, int payload, int payloadNext);
 relation* createRelation(int hop);
 void printRelation(relation* myRelation);
 void printPayload(relationPayloadList* payloadList);
+int* pruneRelation(relation* myRelation, char operand, int value);
+int getSumRelation(relation* myRelation);
 
 void relationDelete(relation* myRelation);
 void tupleDelete(tuple* myTuple);

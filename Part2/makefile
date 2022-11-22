@@ -1,5 +1,5 @@
-main: main.c input.c func.c hash.c
-	gcc  -o main main.c input.c func.c hash.c -I.  -g -lm
+main: main.c input.c func.c hash.c queries.c
+	gcc  -o main main.c input.c func.c hash.c queries.c -I.  -g -lm
 
 all: run
 

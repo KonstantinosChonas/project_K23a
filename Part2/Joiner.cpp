@@ -58,7 +58,7 @@ static QueryGraphProvides analyzeInputOfJoin(set<unsigned>& usedRelations,Select
 string Joiner::join(QueryInfo& query)
   // Executes a join query
 {
-  //cerr << query.dumpText() << endl;
+  cerr << query.dumpText() << endl;
   set<unsigned> usedRelations;
 
   // We always start with the first join predicate and append the other joins to it (--> left-deep join trees)

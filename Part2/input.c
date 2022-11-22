@@ -43,7 +43,7 @@ relation* createRelation(int hop){
 
     relation *newRelation = malloc(sizeof(struct relation));
 
-    newRelation->num_tuples = rand() % 5 + 5;        //use for random number of tuples in relation
+    newRelation->num_tuples = rand() % 5 + 20;        //use for random number of tuples in relation
     newRelation->tuples = malloc(sizeof(struct tuple) * newRelation->num_tuples);
 
     for(int i = 0; i < newRelation->num_tuples; i++){
@@ -109,4 +109,43 @@ void relationDelete(relation* myRelation){
 
 void tupleDelete(tuple* myTuple){
     free(myTuple);
+}
+
+int* pruneRelation(relation* myRelation, char operand, int value){
+    int* keyList = malloc(sizeof(int) * myRelation->num_tuples + 1);
+    int counter = 0;
+
+    if(operand == '>'){
+        for(int i = 0; i < myRelation->num_tuples; i++){
+            if(myRelation->tuples[i].payloadList->data > value){
+                keyList[counter++] = myRelation->tuples[i].key;
+            }
+        }
+    }else if(operand == '<'){
+        for(int i = 0; i < myRelation->num_tuples; i++){
+            if(myRelation->tuples[i].payloadList->data < value){
+                keyList[counter++] = myRelation->tuples[i].key;
+            }
+        }
+    }else if(operand == '='){
+        for(int i = 0; i < myRelation->num_tuples; i++){
+            if(myRelation->tuples[i].payloadList->data == value){
+                keyList[counter++] = myRelation->tuples[i].key;
+            }
+        }
+    }
+
+    //-1 so we know where keyList ends
+    keyList[counter] = -1;
+    return keyList;
+}
+
+int getSumRelation(relation* myRelation){
+    int sum = 0;
+
+    for(int i = 0; i < myRelation->num_tuples; i++){
+        sum += myRelation->tuples[i].payloadList->data;
+    }
+
+    return sum;
 }

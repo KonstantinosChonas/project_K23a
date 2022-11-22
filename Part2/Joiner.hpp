@@ -21,4 +21,12 @@ class Joiner {
   /// Joins a given set of relations
   std::string join(QueryInfo& i);
 };
+
+typedef struct relationInfo{
+
+    int num_tuples;
+    int num_cols;
+    int **columns;
+
+}relationInfo;
 //---------------------------------------------------------------------------
