@@ -538,4 +538,59 @@ tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an d
     return NULL;
 
 }
+void addToPayloadList(payloadList* p,int data){
 
+
+    payloadList* temp=p;
+
+    if(p==NULL){
+
+        p=malloc(sizeof(payloadList));
+        p->next=NULL;
+        p->data=data;
+        return;
+    }
+
+    while(temp->next!=NULL)
+        temp=temp->next;
+
+
+    temp->next=malloc(sizeof(payloadList));
+    temp->next->next=NULL;
+    temp->next->data=data;
+
+    return;
+
+}
+
+int getNumRelations(char* str){
+
+    int count = 1;
+
+
+	char* token = strtok(str," ");
+
+
+	while(token!=NULL){
+		token = strtok(NULL, " ");
+		if(token != NULL){
+			count++;
+		}
+	}
+    return count;
+}
+
+
+relation* relationInfoToRelation(relationInfo* relin){           // metatrepei ena relation info se relation (voithitiko gia phj)
+
+    relation* rel=createEmptyRelation(relin->num_tuples);
+
+
+    for (int i=0 ; i<relin->num_tuples ; i++){
+        for ( int j=0 ; j<relin->num_cols ; j++){
+            addToPayloadList(rel->tuples[i].payloadList, relin->columns[i][j]);
+        }
+    }
+
+
+}

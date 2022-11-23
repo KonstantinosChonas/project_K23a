@@ -36,6 +36,19 @@ typedef struct relationInfo{
 
 }relationInfo;
 
+
+typedef struct intermediate{
+
+    int** array;
+    int num_cols;
+    int num_rows;
+
+
+}intermediate;
+
+
+
+
 typedef struct result {  //NOTE: katholou sigouros gia to ti tha prepe na einai to struct result to vala etsi gia arxi pisteuo thelei allagi
     relation *r;
 }result;
@@ -73,3 +86,9 @@ int getSumRelation(relation* myRelation);
 
 void relationDelete(relation* myRelation);
 void tupleDelete(tuple* myTuple);
+
+
+int getNumRelations(char* str);
+/**     functions for intermediate arrays   **/
+
+intermediate** intermediateCreate(int numOfRelations );

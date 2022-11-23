@@ -30,6 +30,18 @@ tuple* createTupleFromNode(int value, int rowId1, int rowId2){
     return newTuple;
 }
 
+relation* createEmptyRelation(int num_tuples){
+
+    relation* rel=malloc(sizeof(relation));
+
+    rel->num_tuples=num_tuples;
+
+    rel->tuples=malloc(num_tuples*sizeof(tuple));
+
+
+
+}
+
 relation* createRelation(int hop){
     int relationSize;
     int j = 0;
