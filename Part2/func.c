@@ -538,7 +538,7 @@ tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an d
     return NULL;
 
 }
-void addToPayloadList(payloadList* p,int data){
+void addToPayloadList(payloadList* p,int data){             // adds data to list
 
 
     payloadList* temp=p;
@@ -563,7 +563,7 @@ void addToPayloadList(payloadList* p,int data){
 
 }
 
-int getNumRelations(char* str){
+int getNumRelations(char* str){             // returns number of relations in str
 
     int count = 1;
 
@@ -593,4 +593,21 @@ relation* relationInfoToRelation(relationInfo* relin){           // metatrepei e
     }
 
 
+}
+
+
+int isFilter(char* str){            //      if str is filter returns 1
+
+    int flag=0;
+    for ( int i=0 ; str[i] ; i++)
+    {
+        if(str[i]=='<' || str[i]=='>' || str[i]=='=')
+            flag = 1;
+
+        if (flag)
+            if (str[i]=='.')
+                return 1;
+    }
+
+    return 0;
 }
