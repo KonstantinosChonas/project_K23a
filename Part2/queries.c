@@ -48,6 +48,9 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
 
         /* code for relation handling */
 
+        printf("Start of relation handling\n");
+
+
         int relationCounter = 0;
         char tempRelations[20];
         strcpy(tempRelations, relations);
@@ -73,16 +76,15 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
                 break;
             }
             relationsArray[i] = atoi(token);
-            printf("%d\n", relationsArray[i]);
             i++;
         }
 
         /* code for predicates handling */
 
-        printf("start of predicate handling\n");
+        printf("Start of predicate handling\n");
 
         int predicateCounter = 0;
-        char tempPredicates[20];
+        char tempPredicates[50];
         strcpy(tempPredicates, predicates);
         printf("%s\n", predicates);
 
@@ -98,7 +100,7 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
         char* predicatesArray[predicateCounter+1];
 
         token = strtok(predicates, "&");
-        predicatesArray[0] = malloc(20 * sizeof(char));
+        predicatesArray[0] = malloc(50 * sizeof(char));
         strcpy(predicatesArray[0], token);
         //predicatesArray[0] = token;
 
@@ -108,7 +110,7 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
             if(token == NULL){
                 break;
             }
-            predicatesArray[i] = malloc(20 * sizeof(char));
+            predicatesArray[i] = malloc(50 * sizeof(char));
             strcpy(predicatesArray[i], token);
             printf("%s\n", predicatesArray[i]);
             i++;
@@ -117,7 +119,45 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
         for(i = 0; i < predicateCounter; i++){
             free(predicatesArray[i]);
         }
+
+        /* code for projection handling */
+
+        printf("Start of projection handling\n");
+
+        int projectionCounter = 0;
+        char tempProjections[50];
+        strcpy(tempProjections, projections);
+        token = strtok(tempProjections, " \t");
+        projectionCounter++;
+        while(token != NULL){
+            token = strtok(NULL, " \t");
+            if(token == NULL){
+                break;
+            }
+            projectionCounter++;
+        }
+        char* projectionsArray[projectionCounter];
+
+        token = strtok(projections, " \t");
+        projectionsArray[0] = malloc(50 * sizeof(char));
+        strcpy(projectionsArray[0], token);
+
+        printf("%s\n", projectionsArray[0]);
+
+
+        i = 1;
+        while(token != NULL){
+            token = strtok(NULL, " \t");
+            if(token == NULL){
+                break;
+            }
+            projectionsArray[i] = malloc(50 * sizeof(char));
+            strcpy(projectionsArray[i], token);
+            printf("%s\n", projectionsArray[i]);
+            i++;
+        }
     }
+
 
     printf("all done with query handling\n");
 
