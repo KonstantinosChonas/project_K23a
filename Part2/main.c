@@ -1,35 +1,23 @@
-#include "queries.h"
+//#include "queries.h"
+#include "intermediate.h"
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>
 
 int main (int argc, char* argv[]){
-     time_t t;
-    srand((unsigned)time(&t));      //used to create random payload for tuples in our relation
-    printf("hello\n");
-    //relation* relR = inputFromFile("r0.tbl");
-    relation* relR = createRelation(1);
-    //relation* relS = inputFromFile("r1.tbl");
-    relation* relS = createRelation( 1);
 
-    //printRelation(relR);
-    //printRelation(relS);
-    //PartitionedHashJoin(relR, relS);
+    printf("starting main\n");
+    char work[50]="3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
 
-    //int* keyList = pruneRelation(relS, '<', 5);
 
-    //int sum = getSumRelation(relS);
-    //printf("result: %d\n", sum);
+    char* token=strtok(work,"|");
 
-    sleep(1);
-    /* start of query reading */
-    FILE* queryFile = NULL;
-    char* queries = argv[1];
+    printf("%d num of relations \n",getNumRelations(token));
 
-    int i = parseQueries("build/release/workloads/small/small.work", NULL);
 
-    //free(keyList);
+    intermediate* rowids=intermediateCreate(getNumRelations(token));
 
-    relationDelete(relR);
-    relationDelete(relS);
+
+
+    printf("same rel returned: %d\n",sameRel("0.1=0.1")); 
 }

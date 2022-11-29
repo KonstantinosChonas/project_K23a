@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+
 #define L2 1000      /* bits of information stored in L2 cache memory */
 
 
@@ -37,14 +38,6 @@ typedef struct relationInfo{
 }relationInfo;
 
 
-typedef struct intermediate{
-
-    int** array;
-    int num_cols;
-    int num_rows;
-
-
-}intermediate;
 
 
 
@@ -89,6 +82,9 @@ void tupleDelete(tuple* myTuple);
 
 
 int getNumRelations(char* str);
-/**     functions for intermediate arrays   **/
 
-intermediate** intermediateCreate(int numOfRelations );
+
+relation* createEmptyRelation(int num_tuples);
+
+int sameRel(char* predicate);
+void addToPayloadList(relationPayloadList* p,int data);

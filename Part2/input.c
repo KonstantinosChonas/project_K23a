@@ -38,8 +38,6 @@ relation* createEmptyRelation(int num_tuples){
 
     rel->tuples=malloc(num_tuples*sizeof(tuple));
 
-
-
 }
 
 relation* createRelation(int hop){

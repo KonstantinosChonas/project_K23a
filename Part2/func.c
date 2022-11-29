@@ -538,10 +538,12 @@ tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an d
     return NULL;
 
 }
-void addToPayloadList(payloadList* p,int data){             // adds data to list
 
 
-    payloadList* temp=p;
+void addToPayloadList(relationPayloadList* p,int data){             // adds data to list
+
+
+    relationPayloadList* temp=p;
 
     if(p==NULL){
 
@@ -610,4 +612,71 @@ int isFilter(char* str){            //      if str is filter returns 1
     }
 
     return 0;
+}
+
+
+ int sameRel(char* predicate){              /*      an eiani idio relation epistrefei 1 an einai idio relation kai idio column epistrefei 2 allios epistrefei 0     */
+
+    int rel1=0,rel2=0,dot=0,op=0,col1=0,col2=0;
+    int i=0;
+
+    while(predicate[i]){
+        if (predicate[i]=='.'){
+            dot++;
+            i++;
+            continue;
+        }
+        if (predicate[i]=='=' || predicate[i]=='<' || predicate[i]=='>'){
+            op++;
+            i++;
+            continue;
+        }
+        if(dot==0 && predicate==0)
+            rel1=10*rel1+predicate[i]-'0';
+
+        if (op==1 && dot==1)
+            rel2=10*rel2+predicate[i]-'0';
+        if (dot==1 && op==0)
+            col1=10*col1+predicate[i]-'0';
+        if (dot==2 && op==1)
+            col2=10*col2+predicate[i]-'0';
+
+
+        i++;
+    }
+    
+
+    if (rel1==rel2 && col1==col2)
+        return 2;
+
+    return rel1==rel2;
+
+ }
+
+
+
+
+relation* relColumn(relation* rel, int col){            /*      dexetai os orisma ena relation kai ena column kai epistrefei relation me mono auto to column        */
+
+    relation* new=createEmptyRelation(rel->num_tuples);
+
+    int data=0;
+    payloadList* temp;
+
+    for(int i=0 ; i<rel->num_tuples ; i++){
+
+        temp=rel->tuples[i].payloadList;
+
+        for(int j=0; j<col ; j++){
+            
+            temp=temp->next;
+
+        }
+
+        addToPayloadList(new->tuples[i].payloadList,temp->data);
+
+    }
+
+    return new;
+
 }
