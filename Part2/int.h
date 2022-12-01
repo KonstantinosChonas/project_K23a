@@ -1,3 +1,6 @@
+#ifndef INT
+#define INT
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,3 +92,5 @@ relation* createEmptyRelation(int num_tuples);
 
 int sameRel(char* predicate);
 void addToPayloadList(relationPayloadList* p,int data);
+
+#endif

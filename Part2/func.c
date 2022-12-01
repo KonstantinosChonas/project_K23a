@@ -661,7 +661,7 @@ relation* relColumn(relation* rel, int col){            /*      dexetai os orism
     relation* new=createEmptyRelation(rel->num_tuples);
 
     int data=0;
-    payloadList* temp;
+    relationPayloadList* temp;
 
     for(int i=0 ; i<rel->num_tuples ; i++){
 

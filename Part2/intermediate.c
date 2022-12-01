@@ -142,7 +142,7 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
         rowidarray->relArray[relname1].num_tuples=phjRel->num_tuples;
     }
     else{
-        tuplesDelete(&rowidarray->relArray[relname1]);
+        deleteTuples(&rowidarray->relArray[relname1]);
         rowidarray->relArray[relname1].tuples=tuples_of_rel1;
         rowidarray->relArray[relname1].num_tuples=phjRel->num_tuples;
     }
@@ -154,7 +154,7 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
         rowidarray->relArray[relname2].num_tuples=phjRel->num_tuples;
     }
     else{
-        tuplesDelete(&rowidarray->relArray[relname2]);
+        deleteTuples(&rowidarray->relArray[relname2]);
         rowidarray->relArray[relname2].tuples=tuples_of_rel2;
         rowidarray->relArray[relname2].num_tuples=phjRel->num_tuples;
     }

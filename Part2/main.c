@@ -20,5 +20,13 @@ int main (int argc, char* argv[]){
 
 
 
-    printf("same rel returned: %d\n",sameRel("0.1=0.1")); 
+    printf("same rel returned: %d\n",sameRel("0.1=0.1"));
+
+    sleep(1);
+    /* start of query reading */
+    FILE* queryFile = NULL;
+    char* queries = argv[1];
+
+    int i = parseQueries("workloads/small/small.work", NULL);
+
 }
