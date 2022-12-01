@@ -19,5 +19,6 @@ int main (int argc, char* argv[]){
 
 
 
+
     printf("same rel returned: %d\n",sameRel("0.1=0.1")); 
 }
