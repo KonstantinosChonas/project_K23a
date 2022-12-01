@@ -78,6 +78,7 @@ int* pruneRelation(relation* myRelation, char operand, int value);
 int getSumRelation(relation* myRelation);
 
 void relationDelete(relation* myRelation);
+void deleteTuples(relation* myRelation);
 void tupleDelete(tuple* myTuple);
 
 

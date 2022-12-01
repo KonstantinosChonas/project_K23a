@@ -9,7 +9,7 @@
 
 typedef struct intermediate{
 
-    relation *rel;
+    relation *relArray;
     int num_relations;
 
 

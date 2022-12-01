@@ -117,6 +117,29 @@ void relationDelete(relation* myRelation){
 
 }
 
+void deleteTuples(relation* myRelation){
+
+    struct relationPayloadList* tempPayloadList = NULL;
+    struct relationPayloadList* tempPayloadListNext = NULL;
+
+    if(myRelation->tuples){
+        for(int i = 0; i < myRelation->num_tuples; i++){
+            tempPayloadList = myRelation->tuples[i].payloadList;
+            tempPayloadListNext = myRelation->tuples[i].payloadList->next;
+            free(tempPayloadList);
+            while(tempPayloadListNext){
+                tempPayloadList = tempPayloadListNext;
+                tempPayloadListNext = tempPayloadListNext->next;
+                free(tempPayloadList);
+            }
+        }
+        free(myRelation->tuples);
+    }
+
+}
+
+
+
 void tupleDelete(tuple* myTuple){
     free(myTuple);
 }
