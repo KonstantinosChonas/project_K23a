@@ -1,10 +1,13 @@
+#ifndef INTERMEDIATE
+#define INTERMEDIATE
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include "int.h"
-
+#include "queries.h"
 
 
 typedef struct intermediate{
@@ -21,5 +24,5 @@ typedef struct intermediate{
 
 void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter);
 intermediate* intermediateCreate(int numOfRelations );
-void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2);
-void intermediateDelete(intermediate* inter);
+
+#endif //INTERMEDIATE

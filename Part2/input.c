@@ -14,7 +14,7 @@ tuple* createTuple(int key){
 
     newTuple->key = key;
     newTuple->payloadList = createRelationPayloadList(rand() % 10);//createRelationPayloadList(rand() % 50);
-    printf("new tuple created with rowID: %d, and payload: %d\n", newTuple->key, newTuple->payloadList->data);
+    //printf("new tuple created with rowID: %d, and payload: %d\n", newTuple->key, newTuple->payloadList->data);
 
     return newTuple;
 }
