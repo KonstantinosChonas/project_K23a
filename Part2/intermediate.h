@@ -21,3 +21,5 @@ typedef struct intermediate{
 
 void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter);
 intermediate* intermediateCreate(int numOfRelations );
+void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2);
+void intermediateDelete(intermediate* inter);

@@ -163,3 +163,20 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
 }
 
+
+
+void intermediateDelete(intermediate* inter){
+
+    for (int i=0; i<inter->num_relations ; i++){
+        relationDelete(&inter->relArray[i]);
+    
+    }
+
+    free(inter->relArray);
+    free(inter);
+
+    return;
+
+
+}
+
