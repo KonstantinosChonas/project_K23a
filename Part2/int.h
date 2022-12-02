@@ -90,7 +90,6 @@ int getNumRelations(char* str);
 
 relation* createEmptyRelation(int num_tuples);
 
-int sameRel(char* predicate);
 void addToPayloadList(relationPayloadList* p,int data);
 
 #endif
