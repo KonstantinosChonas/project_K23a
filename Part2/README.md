@@ -1,5 +1,7 @@
 # project_K23a
 
+#Part 1
+
 Για το πρόγραμμα έχουμε φτιάξει την βοηθητική συνάρτηση createRelation(int hop), η οποία κατασκευάζει ένα relation με τυχαίο αριθμό από tuples, και ως key αποθηκεύεται το rowID με τη σειρά (0,1,2,3 κλπ.), και ως payload το value το οποίο είναι ένας τυχαίος αριθμός μέσα σε ένα range. Αν το hop > 1, τότε τα rowID θα πηγαίνουν άνα hop, πχ. αν hop == 3, τότε τα rowID θα είναι με τη σειρά (0, 3, 6, 9). Αυτό το κάναμε για διάφορους ελέγχους.
 
 Όσο αναφορά το partitioning έχει υλοποιηθεί το histogram  και το Psum όπως γράφει η εκφώνηση και εχει δημιουργηθεί ο νέος πίνακας με την βοήθεια αυτών των δομών. Γίνεται έλεγχος για την χωριτηκότητα του μεγαλύτερου bucket στην L2 2 επαναλήψεις (n=2 ή n=4).  
@@ -22,3 +24,11 @@
  make run
  
  (δημιουργείται το executable main)
+
+#Part 2
+
+./compile.sh to make executable main
+
+./run.sh or ./main to run it
+
+currently getting relations from workloads/small/small.init, and queries from workloads/small/small.work
