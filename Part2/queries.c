@@ -220,7 +220,6 @@ int sameRel(char* predicate){              /*      an eiani idio relation epistr
         if (dot==2 && op==1)
             col2=10*col2+predicate[i]-'0';
 
-
         i++;
     }
 
