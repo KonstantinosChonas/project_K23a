@@ -18,4 +18,5 @@ relation* relationInfoToRelation(relationInfo* relin);
 
 predicate* createPredicate(char* predicateStr, int order);
 
+
 #endif //SIG18_QUERIES_H

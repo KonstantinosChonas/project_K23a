@@ -175,6 +175,25 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             printf("%s\n", projectionsArray[i]);
             i++;
         }
+
+
+        //freeing memory used in query
+        if(projectionsArray != NULL){
+            for(int j = 0; j < i; j++){
+                free(projectionsArray[j]);
+            }
+        }
+
+        for(i = 0; i < predicateCounter; i++){
+            if(predicateStructArray[i]->rightRelation != NULL){
+                tupleDelete(predicateStructArray[i]->rightRelation);
+            }
+
+            if(predicateStructArray[i]->leftRelation != NULL){
+                tupleDelete(predicateStructArray[i]->leftRelation);
+            }
+            free(predicateStructArray[i]);
+        }
     }
 
 
