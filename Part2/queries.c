@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "queries.h"
 
-int parseQueries(char* queryFileName, relationInfo* usedRelations){
+int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
@@ -18,6 +18,7 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
 
     printf("Start of parsing the query file %s...\n", queryFileName);
 
+    printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
     fp = fopen(queryFileName, "r");
     if(fp == NULL){
         exit(EXIT_FAILURE);
@@ -77,6 +78,14 @@ int parseQueries(char* queryFileName, relationInfo* usedRelations){
             }
             relationsArray[i] = atoi(token);
             i++;
+        }
+
+        relationInfo usedRelations[relationCounter];
+
+        //get appropriate relations from relInfo and put them in usedRelations in correct order
+        for(i = 0; i < relationCounter; i++){
+            usedRelations[i] = relInfo[relationsArray[i]];
+//            printf("PRINTING VALUE %d FROM RELATION: %d\n", usedRelations[i].columns[0][100], relationsArray[i]);
         }
 
         /* code for predicates handling */

@@ -36,11 +36,13 @@ int main (int argc, char* argv[]){
     FILE* queryFile = NULL;
     char* queries = argv[1];
 
+    int i = parseQueries("workloads/small/small.work", relInfo, relationNum);
+
+
     //these should be a function
     free(rowids->relArray);
     free(rowids);
 
     relationInfoDelete(relInfo, relationNum);
-    //int i = parseQueries("workloads/small/small.work", NULL);
 
 }
