@@ -5,7 +5,7 @@
 
 //to do: Make it so files don't need to be in same directory as main
 
-relationInfo* parseRelations(){
+relationInfo* parseRelations(char* workPath, int* numRel){
     printf("entered parser\n");
     FILE* fp;
     char* line = NULL;
@@ -16,7 +16,11 @@ relationInfo* parseRelations(){
     char* lineStr = NULL;
     int numRelations = 0;
     printf("Start entering relation files one by one, and enter Done, to end\n");
-    fp = stdin;
+
+    if(workPath == NULL){
+        fp = stdin;
+    }else
+        fp = fopen(workPath, "r");
 
     relationInfo* relInfo = NULL;
     char** fileLocations = NULL;
@@ -33,6 +37,8 @@ relationInfo* parseRelations(){
 
        numRelations++;
     }
+    fclose(fp);
+    *numRel = numRelations;
 
     relInfo = malloc(numRelations * sizeof(struct relationInfo));
 
@@ -40,7 +46,7 @@ relationInfo* parseRelations(){
         char* currFile = fileLocations[i];
 
         //start reading the binary file
-        printf("start reading the files\n");
+        printf("parsing file: %s\n", fileLocations[i]);
         FILE* relationFile = NULL;
         relationFile = fopen(currFile, "rb");
 
@@ -60,11 +66,31 @@ relationInfo* parseRelations(){
             }
         }
 
+        fclose(relationFile);
     }
 
 //    for(int i = 0; i < numRelations; i++){
 //        printf("relation %s loaded\n", fileLocations[i]);
 //    }
 
+    for(int i = 0; i < numRelations; i++){
+        free(fileLocations[i]);
+    }
+    free(fileLocations);
+    if(line){
+        free(line);
+    }
+
     return relInfo;
+}
+
+void relationInfoDelete(relationInfo* relInfo, int relationNum){
+    for(int i = 0; i < relationNum; i++){
+        for(int j = 0; j < relInfo[i].num_cols; j++){
+            free(relInfo[i].columns[j]);
+        }
+        free(relInfo[i].columns);
+    }
+    free(relInfo);
+    return;
 }

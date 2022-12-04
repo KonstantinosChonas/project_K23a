@@ -89,6 +89,7 @@ relation* createEmptyRelation(int num_tuples);
 void addToPayloadList(relationPayloadList* p,int data);
 
 
-relationInfo* parseRelations();
+relationInfo* parseRelations(char* workPath, int* numRelations);
+void relationInfoDelete(relationInfo* relInfo, int relationNum);
 
 #endif

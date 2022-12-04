@@ -9,12 +9,13 @@ int main (int argc, char* argv[]){
     printf("startingg main\n");
 
     relationInfo* relInfo = NULL;
-    relInfo = parseRelations();
+    int relationNum;
 
-    printf("pls: %d\n", relInfo[3].columns[0][1000]);
+    relInfo = parseRelations("workloads/small/small.init", &relationNum);
+
+    printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
 
     char work[50]="3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
-
 
     char* token=strtok(work,"|");
 
@@ -35,6 +36,11 @@ int main (int argc, char* argv[]){
     FILE* queryFile = NULL;
     char* queries = argv[1];
 
+    //these should be a function
+    free(rowids->relArray);
+    free(rowids);
+
+    relationInfoDelete(relInfo, relationNum);
     //int i = parseQueries("workloads/small/small.work", NULL);
 
 }
