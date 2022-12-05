@@ -597,3 +597,12 @@ relation* relationInfoToRelation(relationInfo* relin){           // metatrepei e
 
 }
 
+
+int biggerRel(relation* rel1,relation* rel2){
+
+
+    if (rel1->num_tuples > rel2->num_tuples)    return 0;
+    return 1;
+
+}
+

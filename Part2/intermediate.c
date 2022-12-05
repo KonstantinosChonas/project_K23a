@@ -114,7 +114,7 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 
 
 
-void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      rel1 rel2 o arithmos tis kathe sxesis       */
+void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis       */
 
 
     relation *rel1=malloc(sizeof(relation)),*rel2=malloc(sizeof(relation));
