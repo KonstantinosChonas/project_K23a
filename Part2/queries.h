@@ -11,11 +11,12 @@ typedef struct predicate{
     int order;
 } predicate;
 
-int parseQueries(char* queryFileName, relationInfo* usedRelations);
+int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum);
 int isFilter(char* str);
 int sameRel(char* predicate);
 relation* relationInfoToRelation(relationInfo* relin);
 
 predicate* createPredicate(char* predicateStr, int order);
+
 
 #endif //SIG18_QUERIES_H

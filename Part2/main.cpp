@@ -64,17 +64,20 @@ int main(int argc, char* argv[]) {
 
     cerr << relIn[2].columns[5][3] << endl;
 
+    //FILE *f = fopen("relation.data", "wb");
+    //fwrite(relIn, sizeof(char), sizeof(relationInfo), f);
+
+//    FILE *ifp = fopen("relation.data", "rb");
+//    fread(relIn, sizeof(char), sizeof(relationInfo), ifp);
+
+    cerr << relIn[2].columns[5][1] << endl;
+
+    //fclose(ifp);
+
    // Preparation phase (not timed)
    // Build histograms, indexes,...
    //
-   QueryInfo i;
-   while (getline(cin, line)) {
-       if (line == "F") continue; // End of a batch
-       i.parseQuery(line);
-       //cerr << line << endl;
-       //cerr << i.relationIds[1] << endl;
-       cout << joiner.join(i);
-   }
+
 
 
 

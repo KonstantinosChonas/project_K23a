@@ -117,6 +117,7 @@ void relationDelete(relation* myRelation){
 
 }
 
+//used to free memory from every tuple of a relation
 void deleteTuples(relation* myRelation){
 
     struct relationPayloadList* tempPayloadList = NULL;
@@ -139,8 +140,20 @@ void deleteTuples(relation* myRelation){
 }
 
 
-
+//used to free memory from single given tuple
 void tupleDelete(tuple* myTuple){
+    struct relationPayloadList* tempPayloadList = NULL;
+    struct relationPayloadList* tempPayloadListNext = NULL;
+
+    tempPayloadList = myTuple->payloadList;
+    tempPayloadListNext = myTuple->payloadList->next;
+    free(tempPayloadList);
+    while(tempPayloadListNext){
+        tempPayloadList = tempPayloadListNext;
+        tempPayloadListNext = tempPayloadListNext->next;
+        free(tempPayloadList);
+    }
+
     free(myTuple);
 }
 

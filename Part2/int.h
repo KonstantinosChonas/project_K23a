@@ -41,10 +41,6 @@ typedef struct relationInfo{
 }relationInfo;
 
 
-
-
-
-
 typedef struct result {  //NOTE: katholou sigouros gia to ti tha prepe na einai to struct result to vala etsi gia arxi pisteuo thelei allagi
     relation *r;
 }result;
@@ -91,5 +87,9 @@ int getNumRelations(char* str);
 relation* createEmptyRelation(int num_tuples);
 
 void addToPayloadList(relationPayloadList* p,int data);
+
+
+relationInfo* parseRelations(char* workPath, int* numRelations);
+void relationInfoDelete(relationInfo* relInfo, int relationNum);
 
 #endif
