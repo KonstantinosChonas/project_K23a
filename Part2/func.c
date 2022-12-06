@@ -583,26 +583,8 @@ int getNumRelations(char* str){             // returns number of relations in st
 }
 
 
-relation* relationInfoToRelation(relationInfo* relin){           // metatrepei ena relation info se relation (voithitiko gia phj)
-
-    relation* rel=createEmptyRelation(relin->num_tuples);
 
 
-    for (int i=0 ; i<relin->num_tuples ; i++){
-        for ( int j=0 ; j<relin->num_cols ; j++){
-            addToPayloadList(rel->tuples[i].payloadList, relin->columns[i][j]);
-        }
-    }
 
 
-}
-
-
-int biggerRel(relation* rel1,relation* rel2){
-
-
-    if (rel1->num_tuples > rel2->num_tuples)    return 0;
-    return 1;
-
-}
 

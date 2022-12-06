@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "queries.h"
+#include "intermediate.h"
 
 int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
     char *line = NULL;
@@ -18,7 +19,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
     printf("Start of parsing the query file %s...\n", queryFileName);
 
-    printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
+    // printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
     fp = fopen(queryFileName, "r");
     if(fp == NULL){
         exit(EXIT_FAILURE);
@@ -30,32 +31,32 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         endCheck = strtok(line, "\n");
 
         if(strcmp(endCheck,"F") == 0){
-           printf("continuing to next query set...\n");
+        //    printf("continuing to next query set...\n");
             continue;
         }
 
         token = strtok(line, "|");
         relations = token;
-        printf("relations: %s\n", relations);
+        // printf("relations: %s\n", relations);
 
         token = strtok(NULL, "|");
         predicates = token;
-        printf("predicates: %s\n", predicates);
+        // printf("predicates: %s\n", predicates);
 
         token = strtok(NULL, "\n");
         projections = token;
-        printf("projections: %s\n", projections);
+        // printf("projections: %s\n", projections);
 
 
         /* code for relation handling */
 
-        printf("Start of relation handling\n");
+        // printf("Start of relation handling\n");
 
 
         int relationCounter = 0;
         char tempRelations[20];
         strcpy(tempRelations, relations);
-        printf("%s\n", tempRelations);
+        // printf("%s\n", tempRelations);
         token = strtok(tempRelations, " \t");
         relationCounter++;
         while(token != NULL){
@@ -90,12 +91,12 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         /* code for predicates handling */
 
-        printf("Start of predicate handling\n");
+        // printf("Start of predicate handling\n");
 
         int predicateCounter = 0;
         char tempPredicates[50];
         strcpy(tempPredicates, predicates);
-        printf("%s\n", predicates);
+        // printf("%s\n", predicates);
 
         token = strtok(tempPredicates, "&");
         predicateCounter++;
@@ -121,11 +122,11 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             }
             predicatesArray[i] = malloc(50 * sizeof(char));
             strcpy(predicatesArray[i], token);
-            printf("%s\n", predicatesArray[i]);
+            // printf("%s\n", predicatesArray[i]);
             if(isFilter(predicatesArray[i])){
-                printf("predicate: %s, is filter\n", predicatesArray[i]);
+                // printf("predicate: %s, is filter\n", predicatesArray[i]);
             }else
-                printf("predicate: %s, is not filter\n", predicatesArray[i]);
+                // printf("predicate: %s, is not filter\n", predicatesArray[i]);
             i++;
         }
 
@@ -133,15 +134,16 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         for(i = 0; i < predicateCounter; i++){
             predicateStructArray[i] = createPredicate(predicatesArray[i], i);
+            // printf("predicate: %s, isFilter: %d\n",predicateStructArray[i]->predicate,predicateStructArray[i]->isFilter);
         }
 
-        for(i = 0; i < predicateCounter; i++){
-            free(predicatesArray[i]);
-        }
+        // for(i = 0; i < predicateCounter; i++){               //TODO edo prokalei thema na to eleutheroso argotera
+        //     free(predicatesArray[i]);
+        // }
 
         /* code for projection handling */
 
-        printf("Start of projection handling\n");
+        // printf("Start of projection handling\n");
 
         int projectionCounter = 0;
         char tempProjections[50];
@@ -161,7 +163,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         projectionsArray[0] = malloc(50 * sizeof(char));
         strcpy(projectionsArray[0], token);
 
-        printf("%s\n", projectionsArray[0]);
+        // printf("%s\n", projectionsArray[0]);
 
 
         i = 1;
@@ -172,11 +174,38 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             }
             projectionsArray[i] = malloc(50 * sizeof(char));
             strcpy(projectionsArray[i], token);
-            printf("%s\n", projectionsArray[i]);
+            // printf("%s\n", projectionsArray[i]);
             i++;
         }
+        /*          adding to inermediate           */
+/*----------------------------------------------------------------*/
+        intermediate *rowidarray=intermediateCreate(relationCounter);
 
+        printf("NUM OF RELATIONS=%d\n",relationCounter);
 
+        for(int i=0 ; i<predicateCounter ; i++)                 // apply filter first
+        {
+            if ( predicateStructArray[i]->isFilter==1)
+            {
+                // printf("relationid: %d, filter: %s\n",predicateStructArray[i]->leftRel,predicateStructArray[i]->predicate);
+                applyFilter(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],rowidarray,predicateStructArray[i]->predicate);
+            }
+        }
+
+        // printIntermediate(rowidarray);
+
+        return 1;                                       //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
+        // for(int i=0 ; i<predicateCounter ; i++)
+        // {
+        //     if ( predicateStructArray[i]->isFilter==1)
+        //     {
+        //         applyFilter(relInfo,rowidarray,predicateStructArray[i]->predicate);
+        //     }
+        // }
+
+        // intermediateDelete(rowidarray);
+/*----------------------------------------------------------------*/
+        /*            end of  intermediate          */
         //freeing memory used in query
         if(projectionsArray != NULL){
             for(int j = 0; j < i; j++){
@@ -195,6 +224,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             free(predicateStructArray[i]);
         }
     }
+
 
 
     printf("all done with query handling\n");
@@ -295,6 +325,9 @@ predicate* createPredicate(char* predicateStr, int order){
     char tempPredicates[50];
     strcpy(tempPredicates, predicateStr);
 
+
+    newPredicate->predicate=predicateStr;
+
     for ( int i=0 ; predicateStr[i] ; i++)
     {
         if(predicateStr[i]=='<' || predicateStr[i]=='>' || predicateStr[i]=='='){
@@ -321,8 +354,9 @@ predicate* createPredicate(char* predicateStr, int order){
     char* leftToken;
     char* rightToken;
     leftToken = strtok(tempPredicates, "><=");
+    newPredicate->leftRel=returnRelation(leftToken);
     rightToken = strtok(NULL, "\0");
-
+    newPredicate->rightRel=returnRelation(rightToken);
     char* leftRelationStr = strtok(leftToken, ".");
     tuple* leftRelation = createTuple(atoi(leftRelationStr));
     char* leftRelationColumnStr = strtok(NULL, "\0");
@@ -354,3 +388,63 @@ predicate* createPredicate(char* predicateStr, int order){
 
     return newPredicate;
 }
+
+
+
+
+int biggerRel(relation* rel1,relation* rel2){               /* rel1>rel2 return 0 else return 1*/
+
+
+    if (rel1->num_tuples > rel2->num_tuples)    return 0;
+    return 1;
+
+}
+
+
+
+int returnRelation(char *str){      // str is of type 0.1
+    int rel=0;
+
+    for (int i=0 ; str[i] ; i++){
+        if (str[i]=='.')
+            return rel;
+    rel=10*rel + str[i]-'0';
+    }
+
+
+}
+
+
+relation* relationInfoToRelation(relationInfo* relin){           // metatrepei ena relation info se relation (voithitiko gia phj)
+
+    relation* rel=createEmptyRelation(relin->num_tuples);
+
+
+    for (int i=0 ; i<relin->num_tuples ; i++){
+        for ( int j=0 ; j<relin->num_cols ; j++){
+            addToPayloadList(rel->tuples[i].payloadList, relin->columns[i][j]);
+        }
+    }
+
+}
+
+
+
+relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
+
+
+    relation *rel=createEmptyRelation(rowidarray->num_rows);
+
+
+    for( int i=0; i<rowidarray->num_rows ; i++){
+
+        rel->tuples[i].key=i;
+        rel->tuples[i].payloadList->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
+
+    }
+
+    return rel;
+
+
+}
+

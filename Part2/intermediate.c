@@ -3,14 +3,14 @@
 intermediate* intermediateCreate(int numOfRelations ){
 
     intermediate* array=malloc(sizeof(intermediate));
-    array->relArray=malloc(numOfRelations*sizeof(relation));
+    array->row_ids=malloc(numOfRelations*sizeof(int*));
 
     for (int i=0 ; i<numOfRelations ; i++)
-    {
-        array->relArray[i].tuples=NULL;
-        array->relArray[i].num_tuples=0;
-        array->num_relations=numOfRelations;
-    }
+        array->row_ids[i]=NULL;
+
+
+    array->num_relations=numOfRelations;
+    array->num_rows=0;
 
     return array;
 
@@ -19,7 +19,7 @@ intermediate* intermediateCreate(int numOfRelations ){
 
 
 void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){         /*        topothetei sto rowidarray to apotelesma tou filter      */
-
+                                                                                    //TODO thelei diorthosi gia perissotera filtra 
     int i=0;
     int rel=0;
     int column=0;
@@ -58,106 +58,155 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
         i++;
     }                                                   /*      if filter is 1.0>3000 then filter_num=3000 and operator = '>'       */
     int count=0;
-
-    for (int i=0 ; i<r->num_tuples ; i++)
+    printf("applyFilter\n");
+    for (int i=0 ; i<r->num_tuples ; i++){
+        // printf("operator in switch : %d\n",r->columns[column][i]);
         switch (operator)
         {
         case '>':
-            if ( r->columns[i][column]>filter_num)  count++;
+            if ( r->columns[column][i]>filter_num)  count++;
             break;
         case '<':
-            if ( r->columns[i][column]<filter_num)  count++;
+            if ( r->columns[column][i]<filter_num)  count++;
             break;
         case '=':
-            if ( r->columns[i][column]==filter_num)  count++;
+            if ( r->columns[column][i]==filter_num)  count++;
             break;
         default:
             break;
         }
+    }
+    int total=count;
+    
+    printf("applyFilter0\n");
 
-        int total=count;
-        // rowidarray->array[rel]=malloc(count*sizeof(int));
-        // rowidarray->num_rows=count;
-        rowidarray->relArray[rel].num_tuples=count;
-        rowidarray->relArray[rel].tuples=malloc(count*sizeof(tuple));
 
-    for (int i=0 ; i<r->num_tuples ; i++)
+
+    rowidarray->num_rows=count;
+    rowidarray->row_ids[rel]=malloc(count*sizeof(int));
+
+    printf("applyFilter1\n");
+
+    for (int i=0 ; i<r->num_tuples ; i++){
+        // printf("i:%d, value : %d, num tuples:%d, count:%d\n",i,r->columns[column][i],r->num_tuples,count);
+
+
         switch (operator)
         {
         case '>':
-            if ( r->columns[i][column]>filter_num){
-                rowidarray->relArray[rel].tuples[total-count].key=i;
-                addToPayloadList(rowidarray->relArray[rel].tuples[total-count].payloadList,r->columns[i][column]);
+            if ( r->columns[column][i]>filter_num){
+                rowidarray->row_ids[rel][total-count]=i;
+                // printf("id added to array: %d, with value: %d\n",i,r->columns[column][i]);
                 count--;
             }
 
             break;
         case '<':
-            if ( r->columns[i][column]<filter_num){
-                rowidarray->relArray[rel].tuples[total-count].key=i;
-                addToPayloadList(rowidarray->relArray[rel].tuples[total-count].payloadList,r->columns[i][column]);
+            if ( r->columns[column][i]<filter_num){
+                rowidarray->row_ids[rel][total-count]=i;
+                // rowidarray->relArray[rel].tuples[total-count].key=i;
+                // addToPayloadList(rowidarray->relArray[rel].tuples[total-count].payloadList,r->columns[i][column]);
                 count--;
             }
             break;
         case '=':
-            if ( r->columns[i][column]==filter_num){
-                rowidarray->relArray[rel].tuples[total-count].key=i;
-                addToPayloadList(rowidarray->relArray[rel].tuples[total-count].payloadList,r->columns[i][column]);
+            if ( r->columns[column][i]==filter_num){
+                rowidarray->row_ids[rel][total-count]=i;
                 count--;
             }
             break;
         default:
             break;
         }
+    }
 
 }
 
 
+void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
 
-void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis       */
+    if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
+        int *table1[phjRel->num_tuples],*table2[phjRel->num_tuples];
+        for (int i=0 ; i<phjRel->num_tuples ; i++){
 
+            table1[i]=phjRel->tuples[i].payloadList->data;
+            table2[i]=phjRel->tuples[i].payloadList->next->data;
+        }
 
-    relation *rel1=malloc(sizeof(relation)),*rel2=malloc(sizeof(relation));
+        rowidarray->row_ids[relname1]=table1;
+        rowidarray->row_ids[relname2]=table2;
 
-    tuple *tuples_of_rel1=malloc(phjRel->num_tuples*sizeof(tuple)),*tuples_of_rel2=malloc(phjRel->num_tuples*sizeof(tuple));
-
-
-    // rel1->num_tuples=phjRel->num_tuples;
-    // rel2->num_tuples=phjRel->num_tuples;
-
-    // rel1->tuples=malloc(phjRel->num_tuples*sizeof(tuple));
-    // rel2->tuples=malloc(phjRel->num_tuples*sizeof(tuple));
-
-    for (int i=0 ; i<phjRel->num_tuples ; i++){
-
-        tuples_of_rel1[i].key=phjRel->tuples[i].payloadList->data;
-        tuples_of_rel2[i].key=phjRel->tuples[i].payloadList->next->data;
-
-        addToPayloadList(tuples_of_rel1[i].payloadList,phjRel->tuples[i].key);
-        addToPayloadList(tuples_of_rel2[i].payloadList,phjRel->tuples[i].key);
+        return;
     }
+    else if (rowidarray->row_ids[relname1]=!NULL && rowidarray->row_ids[relname2]==NULL){
 
-    if(rowidarray->relArray[relname1].tuples==NULL){
-        rowidarray->relArray[relname1].tuples=tuples_of_rel1;
-        rowidarray->relArray[relname1].num_tuples=phjRel->num_tuples;
-    }
-    else{
-        deleteTuples(&rowidarray->relArray[relname1]);
-        rowidarray->relArray[relname1].tuples=tuples_of_rel1;
-        rowidarray->relArray[relname1].num_tuples=phjRel->num_tuples;
-    }
+        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
+        newidarray->num_rows=phjRel->num_tuples;
+
+        for( int i=0 ; i<rowidarray->num_relations ; i++){
+
+            if(rowidarray->row_ids[i]!=NULL)
+                newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
+
+        }
 
 
+        int *table[phjRel->num_tuples];
 
-    if(rowidarray->relArray[relname2].tuples==NULL){
-        rowidarray->relArray[relname2].tuples=tuples_of_rel2;
-        rowidarray->relArray[relname2].num_tuples=phjRel->num_tuples;
+        for( int i=0 ; i<phjRel->num_tuples ; i++){
+
+            table[i]=phjRel->tuples[i].payloadList->next->data;     // to kainourgio table gia to null relation ston rowid array 
+
+            for(int j=0 ; j<rowidarray->num_relations ; j++){
+                if (newidarray->row_ids[j]!=NULL){
+                    newidarray->row_ids[j][i]=rowidarray->row_ids[j][phjRel->tuples[i].payloadList->data];
+
+                }
+            }
+
+
+        }
+        newidarray->row_ids[relname2]=table;
+
+
+        intermediateDelete(rowidarray);
+        return;
+
     }
-    else{
-        deleteTuples(&rowidarray->relArray[relname2]);
-        rowidarray->relArray[relname2].tuples=tuples_of_rel2;
-        rowidarray->relArray[relname2].num_tuples=phjRel->num_tuples;
+    else if (  rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]!=NULL)
+    {
+
+        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
+        newidarray->num_rows=phjRel->num_tuples;
+
+        for( int i=0 ; i<rowidarray->num_relations ; i++){
+
+            if(rowidarray->row_ids[i]!=NULL)
+                newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
+
+        }
+
+
+        for( int i=0 ; i<phjRel->num_tuples ; i++){
+
+
+            for(int j=0 ; j<rowidarray->num_relations ; j++){
+                if (newidarray->row_ids[j]!=NULL){
+
+                    newidarray->row_ids[j][i]=rowidarray->row_ids[j][phjRel->tuples[i].payloadList->data];
+
+                }
+            }
+
+
+        }
+
+
     }
+    
+
+    
+
 
 
 
@@ -168,15 +217,32 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 void intermediateDelete(intermediate* inter){
 
     for (int i=0; i<inter->num_relations ; i++){
-        relationDelete(&inter->relArray[i]);
+        if (inter->row_ids[i]!=NULL)
+            free(inter->row_ids[i]);
     
     }
 
-    free(inter->relArray);
     free(inter);
 
     return;
+}
 
 
+void printIntermediate(intermediate *rowidarray){
+
+    printf("printing intermediate \n");
+
+
+
+
+    for(int i=0 ; i<rowidarray->num_rows ; i++){
+
+        for (int j=0 ; j<rowidarray->num_relations ; j++){
+            if(rowidarray->row_ids[j]!=NULL)
+                printf("%-5d    |",rowidarray->row_ids[j][i]);
+            else printf("         |");
+        }
+        printf("\n");
+    }
 }
 

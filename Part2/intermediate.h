@@ -12,8 +12,9 @@
 
 typedef struct intermediate{
 
-    relation *relArray;
+    int **row_ids;
     int num_relations;
+    int num_rows;
 
 
 }intermediate;
@@ -24,5 +25,7 @@ typedef struct intermediate{
 
 void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter);
 intermediate* intermediateCreate(int numOfRelations );
-
+void intermediateDelete(intermediate* inter);
+void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2);
+void printIntermediate(intermediate *rowidarray);
 #endif //INTERMEDIATE

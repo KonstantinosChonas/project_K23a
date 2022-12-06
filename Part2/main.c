@@ -13,6 +13,8 @@ int main (int argc, char* argv[]){
 
     relInfo = parseRelations("workloads/small/small.init", &relationNum);
 
+
+
     printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
 
     char work[50]="3 0 1|0.2=1.0&0.1=2.0&0.2>3499|1.2 0.1";
@@ -40,8 +42,8 @@ int main (int argc, char* argv[]){
 
 
     //these should be a function
-    free(rowids->relArray);
-    free(rowids);
+    // free(rowids->relArray);
+    // free(rowids);
 
     relationInfoDelete(relInfo, relationNum);
 

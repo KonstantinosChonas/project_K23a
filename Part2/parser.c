@@ -39,7 +39,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
     }
     fclose(fp);
     *numRel = numRelations;
-
+    printf("numrel: %d\n",*numRel);
     relInfo = malloc(numRelations * sizeof(struct relationInfo));
 
     for(int i = 0; i < numRelations; i++){
@@ -49,9 +49,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         printf("parsing file: %s\n", fileLocations[i]);
         FILE* relationFile = NULL;
         relationFile = fopen(currFile, "rb");
-
         fread(&relInfo[i].num_tuples, sizeof(uint64_t), 1, relationFile);
-
         fread(&relInfo[i].num_cols, sizeof(uint64_t), 1, relationFile);
         relInfo[i].columns = malloc(relInfo[i].num_cols * sizeof(uint64_t));
 
