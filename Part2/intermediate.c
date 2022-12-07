@@ -58,7 +58,6 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
         i++;
     }                                                   /*      if filter is 1.0>3000 then filter_num=3000 and operator = '>'       */
     int count=0;
-    printf("applyFilter\n");
     for (int i=0 ; i<r->num_tuples ; i++){
         // printf("operator in switch : %d\n",r->columns[column][i]);
         switch (operator)
@@ -78,14 +77,12 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
     }
     int total=count;
     
-    printf("applyFilter0\n");
 
 
 
     rowidarray->num_rows=count;
     rowidarray->row_ids[rel]=malloc(count*sizeof(int));
 
-    printf("applyFilter1\n");
 
     for (int i=0 ; i<r->num_tuples ; i++){
         // printf("i:%d, value : %d, num tuples:%d, count:%d\n",i,r->columns[column][i],r->num_tuples,count);
@@ -126,7 +123,7 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
 
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
-        int *table1[phjRel->num_tuples],*table2[phjRel->num_tuples];
+        int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
         for (int i=0 ; i<phjRel->num_tuples ; i++){
 
             table1[i]=phjRel->tuples[i].payloadList->data;
@@ -135,10 +132,10 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
         rowidarray->row_ids[relname1]=table1;
         rowidarray->row_ids[relname2]=table2;
-
+        rowidarray->num_rows=phjRel->num_tuples;
         return;
     }
-    else if (rowidarray->row_ids[relname1]=!NULL && rowidarray->row_ids[relname2]==NULL){
+    else if (rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]==NULL){
 
         intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
@@ -151,7 +148,7 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
         }
 
 
-        int *table[phjRel->num_tuples];
+        int table[phjRel->num_tuples];
 
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 

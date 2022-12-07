@@ -182,26 +182,68 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         intermediate *rowidarray=intermediateCreate(relationCounter);
 
         printf("NUM OF RELATIONS=%d\n",relationCounter);
-
+        int empty=1;
         for(int i=0 ; i<predicateCounter ; i++)                 // apply filter first
         {
             if ( predicateStructArray[i]->isFilter==1)
             {
-                // printf("relationid: %d, filter: %s\n",predicateStructArray[i]->leftRel,predicateStructArray[i]->predicate);
+                empty=0;
                 applyFilter(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],rowidarray,predicateStructArray[i]->predicate);
+                predicateStructArray[i]->done=1;
             }
         }
+
+        printf("key %d, payload %d\n",predicateStructArray[0]->leftRelation->key,predicateStructArray[0]->leftRelation->payloadList->data);
+
+        for(int i=0 ; i<predicateCounter ; i++){
+
+            if (empty==0){
+                if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL){
+                    if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
+                        continue;
+                    }
+                                                                    //only left is null
+
+
+                    relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,relationsArray[predicateStructArray[i]->rightRel]);
+                    
+                    
+                    result *res=PartitionedHashJoin(rel1,rel2);
+                    if(biggerRel(rel1,rel2)){
+
+                    }
+                    else
+
+                }
+                else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
+                    //only right is null
+
+
+                }
+            }
+            else{
+                relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
+
+                if (biggerRel(rel1,rel2)){
+                    result *res=PartitionedHashJoin(rel1,rel2);
+                    addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+
+                }
+                else{
+                    result *res=PartitionedHashJoin(rel1,rel2);
+                    addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                }
+                predicateStructArray[i]->done=1;
+                empty=0;
+            }
+
+        }
+
+
 
         // printIntermediate(rowidarray);
 
         return 1;                                       //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
-        // for(int i=0 ; i<predicateCounter ; i++)
-        // {
-        //     if ( predicateStructArray[i]->isFilter==1)
-        //     {
-        //         applyFilter(relInfo,rowidarray,predicateStructArray[i]->predicate);
-        //     }
-        // }
 
         // intermediateDelete(rowidarray);
 /*----------------------------------------------------------------*/
@@ -323,6 +365,9 @@ predicate* createPredicate(char* predicateStr, int order){
     int flag = 0;
     int filterFlag = 1;
     char tempPredicates[50];
+
+    newPredicate->done=0;
+
     strcpy(tempPredicates, predicateStr);
 
 
@@ -415,14 +460,14 @@ int returnRelation(char *str){      // str is of type 0.1
 }
 
 
-relation* relationInfoToRelation(relationInfo* relin){           // metatrepei ena relation info se relation (voithitiko gia phj)
+relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
     relation* rel=createEmptyRelation(relin->num_tuples);
 
 
     for (int i=0 ; i<relin->num_tuples ; i++){
         for ( int j=0 ; j<relin->num_cols ; j++){
-            addToPayloadList(rel->tuples[i].payloadList, relin->columns[i][j]);
+            addToPayloadList(rel->tuples[i].payloadList, relin->columns[column][j]);
         }
     }
 
@@ -447,4 +492,24 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
 
 
 }
+
+
+
+int returnColumn(char* predicate){
+
+    int col=0;
+
+    int flag=0;
+
+    for (int i=0 ; predicate[i] ; i++){
+        if (predicate[i]=='.'){
+            flag=1;
+        }
+    col=10*col + predicate[i]-'0';
+    }
+
+
+    return col;
+}
+
 
