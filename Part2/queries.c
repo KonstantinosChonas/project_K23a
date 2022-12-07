@@ -96,39 +96,54 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         int predicateCounter = 0;
         char tempPredicates[50];
         strcpy(tempPredicates, predicates);
-        // printf("%s\n", predicates);
+        printf("TEMPPEICAT$ES:%s\n", tempPredicates);
 
         token = strtok(tempPredicates, "&");
         predicateCounter++;
         while(token != NULL){
+            
             token = strtok(NULL, "&");
+
             if(token == NULL){
                 break;
             }
             predicateCounter++;
         }
+
         char* predicatesArray[predicateCounter+1];
+        for(int j = 0; j <= predicateCounter; j++){
+            predicatesArray[j] = malloc(50 * sizeof(char));
+        }
+
+        i = 0;
 
         token = strtok(predicates, "&");
-        predicatesArray[0] = malloc(50 * sizeof(char));
         strcpy(predicatesArray[0], token);
-        //predicatesArray[0] = token;
-
-        i = 1;
+        printf("PREDICATESARRAY[%d]= %s \n",i,token);
+        if(isFilter(predicatesArray[i])){
+                    printf("predicate: %s, is filter\n", predicatesArray[i]);
+                }else
+                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
+            
+        
         while(token != NULL){
+            
             token = strtok(NULL, "&");
+
             if(token == NULL){
                 break;
             }
-            predicatesArray[i] = malloc(50 * sizeof(char));
-            strcpy(predicatesArray[i], token);
-            // printf("%s\n", predicatesArray[i]);
-            if(isFilter(predicatesArray[i])){
-                // printf("predicate: %s, is filter\n", predicatesArray[i]);
-            }else
-                // printf("predicate: %s, is not filter\n", predicatesArray[i]);
-            i++;
+            else{
+                i++;
+                strcpy(predicatesArray[i], token);
+                printf("PREDICATESARRAY[%d]= %s \n",i,token);
+                if(isFilter(predicatesArray[i])){
+                    printf("predicate: %s, is filter\n", predicatesArray[i]);
+                }else
+                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
+            }
         }
+        
 
         predicate* predicateStructArray[predicateCounter];
 
@@ -495,8 +510,8 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
 
     for( int i=0; i<rowidarray->num_rows ; i++){
 
-        rel->tuples[i].key=i;
-        rel->tuples[i].payloadList->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
+        //rel->tuples[i].key=i;
+        //rel->tuples[i].payloadList->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
 
     }
 
