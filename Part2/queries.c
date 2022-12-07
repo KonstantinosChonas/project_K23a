@@ -204,20 +204,32 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     }
                                                                     //only left is null
 
-
-                    relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,relationsArray[predicateStructArray[i]->rightRel]);
+                    predicateStructArray[i]->done=1;
+                    relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
+                    *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,relationsArray[predicateStructArray[i]->rightRel]);
                     
                     
                     result *res=PartitionedHashJoin(rel1,rel2);
                     if(biggerRel(rel1,rel2)){
-
+                        addToArray(rowidarray,res->r,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                     }
-                    else
+                    else    addToArray(rowidarray,res->r,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
 
                 }
                 else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
+                    
                     //only right is null
 
+                    predicateStructArray[i]->done=1;
+                    relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,relationsArray[predicateStructArray[i]->leftRel]),
+                    *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
+                    
+
+                    result *res=PartitionedHashJoin(rel1,rel2);
+                    if(biggerRel(rel1,rel2)){
+                        addToArray(rowidarray,res->r,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+                    }
+                    else    addToArray(rowidarray,res->r,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
 
                 }
             }
@@ -226,12 +238,12 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
                 if (biggerRel(rel1,rel2)){
                     result *res=PartitionedHashJoin(rel1,rel2);
-                    addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+                    addToArray(rowidarray,res->r,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
 
                 }
                 else{
                     result *res=PartitionedHashJoin(rel1,rel2);
-                    addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                    addToArray(rowidarray,res->r,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
                 }
                 predicateStructArray[i]->done=1;
                 empty=0;

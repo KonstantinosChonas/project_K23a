@@ -170,6 +170,44 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
         return;
 
     }
+    else if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]!=NULL){
+
+        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
+        newidarray->num_rows=phjRel->num_tuples;
+
+        for( int i=0 ; i<rowidarray->num_relations ; i++){
+
+            if(rowidarray->row_ids[i]!=NULL)
+                newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
+
+        }
+
+
+        int table[phjRel->num_tuples];
+
+        for( int i=0 ; i<phjRel->num_tuples ; i++){
+
+            table[i]=phjRel->tuples[i].payloadList->data;     // to kainourgio table gia to null relation ston rowid array 
+
+            for(int j=0 ; j<rowidarray->num_relations ; j++){
+                if (newidarray->row_ids[j]!=NULL){
+                    newidarray->row_ids[j][i]=rowidarray->row_ids[j][phjRel->tuples[i].payloadList->next->data];
+
+                }
+            }
+
+
+        }
+        newidarray->row_ids[relname1]=table;
+
+
+        intermediateDelete(rowidarray);
+        return;
+
+
+
+
+    }
     else if (  rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]!=NULL)
     {
 
@@ -201,11 +239,6 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
     }
     
-
-    
-
-
-
 
 }
 
