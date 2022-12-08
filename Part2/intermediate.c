@@ -120,7 +120,9 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 }
 
 
-void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
+intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
+
+    printf("just entered add to array\n");
 
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
         int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
@@ -133,27 +135,29 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
         rowidarray->row_ids[relname1]=table1;
         rowidarray->row_ids[relname2]=table2;
         rowidarray->num_rows=phjRel->num_tuples;
-        return;
+        return rowidarray;
     }
     else if (rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]==NULL){
-
+        printf("hello add to array\n");
         intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
-
+        newidarray->num_relations=rowidarray->num_relations;
+        printf("AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
             if(rowidarray->row_ids[i]!=NULL)
                 newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
 
         }
-
-
+        printf("2AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
+        printf("hello add to array2\n");
         int table[phjRel->num_tuples];
-
+        printf("hello add to array22\n");
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
             table[i]=phjRel->tuples[i].payloadList->next->data;     // to kainourgio table gia to null relation ston rowid array 
-
+            // if(table[i]<=0 || table[i]>=100000)
+                // printf("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH table[i]: %d, i: %d\n",table[i],i);
             for(int j=0 ; j<rowidarray->num_relations ; j++){
                 if (newidarray->row_ids[j]!=NULL){
                     newidarray->row_ids[j][i]=rowidarray->row_ids[j][phjRel->tuples[i].payloadList->data];
@@ -163,18 +167,19 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
 
         }
+        printf("3AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
+        printf("hello add to array3\n");
         newidarray->row_ids[relname2]=table;
-
-
+        // printIntermediate(newidarray);
         intermediateDelete(rowidarray);
-        return;
+        printIntermediate(newidarray);
+        return newidarray;
 
     }
     else if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]!=NULL){
-
         intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
-
+        newidarray->num_relations=rowidarray->num_relations;
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
             if(rowidarray->row_ids[i]!=NULL)
@@ -202,7 +207,7 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
 
         intermediateDelete(rowidarray);
-        return;
+        return newidarray;
 
 
 
@@ -213,7 +218,7 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
         intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
-
+        newidarray->num_relations=rowidarray->num_relations;
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
             if(rowidarray->row_ids[i]!=NULL)
@@ -236,9 +241,11 @@ void addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int rel
 
         }
 
-
+        return newidarray;
     }
     
+
+    printf("exiting add to array\n");
 
 }
 
@@ -262,11 +269,11 @@ void printIntermediate(intermediate *rowidarray){
 
     printf("printing intermediate \n");
 
-
+    printf("num relations: %d\n",rowidarray->num_relations);
 
 
     for(int i=0 ; i<rowidarray->num_rows ; i++){
-
+        // printf("printing rows\n");
         for (int j=0 ; j<rowidarray->num_relations ; j++){
             if(rowidarray->row_ids[j]!=NULL)
                 printf("%-5d    |",rowidarray->row_ids[j][i]);

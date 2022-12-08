@@ -49,7 +49,7 @@ relation* inputFromFile(char* s);
 
 
 /** Partitioned Hash Join**/
-result* PartitionedHashJoin(relation *relR, relation *relS);
+relation* PartitionedHashJoin(relation *relR, relation *relS);
 
 
 /**Our Hash Function**/

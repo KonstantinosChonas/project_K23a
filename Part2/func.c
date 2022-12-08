@@ -425,7 +425,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
 }
 
 
-result* PartitionedHashJoin(relation *relR, relation *relS){
+relation* PartitionedHashJoin(relation *relR, relation *relS){
 
     /**     Step 1. Partitioning        **/
     int nR,nS;
@@ -493,7 +493,7 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
 
     /* use the hash table(s) to create the final result (from join) */
     relation* result = joinRelation(hashMapArray, largerR, smallerR, largerPSum);
-    printRelation(result);
+    // printRelation(result);
 
     /* freeing the memory from everything */
 
@@ -506,10 +506,10 @@ result* PartitionedHashJoin(relation *relR, relation *relS){
         relationDelete(newS);
     }
 
-    relationDelete(result);
+    // relationDelete(result);          //TODO free this
     hashDelete(hashMapArray);
 
-    return NULL;
+    return result;
 
         /*tha mporouse olo auto na mpei se mia sinartisi p apla na epistrefei to newR alla tha thela na doume prota pos tha ginei me to L2*/
 
