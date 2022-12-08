@@ -172,7 +172,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         newidarray->row_ids[relname2]=table;
         // printIntermediate(newidarray);
         intermediateDelete(rowidarray);
-        printIntermediate(newidarray);
+        printIntermediate(newidarray);      // auto to print vgainei mia xara
         return newidarray;
 
     }

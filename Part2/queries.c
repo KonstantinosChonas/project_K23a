@@ -219,7 +219,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
                         continue;
                     }
-                                                                    //only left is null
+                    //only left is null
 
                     predicateStructArray[i]->done=1;
                     relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
@@ -254,7 +254,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     else    rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
                     printf("done with everything\n");
                     printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-                    printIntermediate(rowidarray);
+                    printIntermediate(rowidarray);      //auto to print psilovgainei oti na nai!!
                     return 1;
                 }
             }
