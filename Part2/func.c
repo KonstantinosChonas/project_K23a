@@ -543,13 +543,13 @@ tuple* SearchKey(relation *r,int key,int n){              /*psaxnei ena key an d
 void addToPayloadList(relationPayloadList* p,int data){             // adds data to list
 
 
-    relationPayloadList* temp=p;
+    relationPayloadList *temp=p;
 
     if(p==NULL){
-
-        p=malloc(sizeof(payloadList));
-        p->next=NULL;
-        p->data=data;
+        temp=malloc(sizeof(relationPayloadList));
+        temp->next=NULL;
+        temp->data=data;
+        p=temp;
         return;
     }
 
@@ -557,7 +557,7 @@ void addToPayloadList(relationPayloadList* p,int data){             // adds data
         temp=temp->next;
 
 
-    temp->next=malloc(sizeof(payloadList));
+    temp->next=malloc(sizeof(relationPayloadList));
     temp->next->next=NULL;
     temp->next->data=data;
 

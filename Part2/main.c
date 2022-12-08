@@ -13,7 +13,7 @@ int main (int argc, char* argv[]){
 
     relInfo = parseRelations("workloads/small/small.init", &relationNum);
 
-
+    printf("relationinfo[0][0][1]:%d\n",relInfo[0].columns[0][1]);
 
     printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
 

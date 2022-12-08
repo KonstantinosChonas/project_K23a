@@ -238,9 +238,11 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     predicateStructArray[i]->done=1;
                     relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
                     *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-                    
+                    printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
+                    // printRelation(rel2);
 
                     result *res=PartitionedHashJoin(rel1,rel2);
+                    printf("hello2\n");
                     if(biggerRel(rel1,rel2)){
                         addToArray(rowidarray,res->r,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                     }
@@ -489,14 +491,27 @@ int returnRelation(char *str){      // str is of type 0.1
 
 relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
+    printf("THIS IS RELATIONINFOTOREALTION\n");
+    printf("relin->numtuples: %d\n",relin->num_tuples);
+
     relation* rel=createEmptyRelation(relin->num_tuples);
 
-
+    printf("rel->numtuples: %d\n",rel->num_tuples);
     for (int i=0 ; i<relin->num_tuples ; i++){
-        for ( int j=0 ; j<relin->num_cols ; j++){
-            addToPayloadList(rel->tuples[i].payloadList, relin->columns[column][j]);
-        }
+        rel->tuples[i].key=i;
+        printf("relin->columns[column][i] : %d, i:%d, column:%d\n",relin->columns[column][i],i,column);
+        relationPayloadList *new=malloc(sizeof(relationPayloadList));
+        new->data=relin->columns[column][i];
+        new->next=NULL;
+        rel->tuples[i].payloadList=new;
+        printf("payload is :%d\n",rel->tuples[i].payloadList->data);
+    
     }
+
+    printf("exiting relation info to relation\n");
+
+    return rel;
+
 
 }
 
@@ -509,13 +524,15 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
 
 
     for( int i=0; i<rowidarray->num_rows ; i++){
-        printf("itr1\n");
         rel->tuples[i].key=i;
-        printf("itr2\n");
-        addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
+        relationPayloadList *new=malloc(sizeof(relationPayloadList));
+        new->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
+        new->next=NULL;
+        rel->tuples[i].payloadList=new;
+        // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
 
     }
-    printf("itr3\n");
+    printf("exiting injtermediate to relation\n");
     return rel;
 
 

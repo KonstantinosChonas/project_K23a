@@ -38,6 +38,13 @@ relation* createEmptyRelation(int num_tuples){
 
     rel->tuples=malloc(num_tuples*sizeof(tuple));
 
+    for (int i=0 ; i<num_tuples ; i++){
+        rel->tuples[i].payloadList=NULL;
+
+    }
+
+    return rel;
+
 }
 
 relation* createRelation(int hop){
