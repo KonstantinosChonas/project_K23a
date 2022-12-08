@@ -221,7 +221,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
                     predicateStructArray[i]->done=1;
                     relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
-                    *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,relationsArray[predicateStructArray[i]->rightRel]);
+                    *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
                     
                     
                     result *res=PartitionedHashJoin(rel1,rel2);
@@ -236,7 +236,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     //only right is null
 
                     predicateStructArray[i]->done=1;
-                    relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,relationsArray[predicateStructArray[i]->leftRel]),
+                    relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
                     *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
                     
 
@@ -504,17 +504,18 @@ relation* relationInfoToRelation(relationInfo* relin,int column){           // m
 
 relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
 
-
+    printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN: %d RELNAME :%d\n",column,relname);
     relation *rel=createEmptyRelation(rowidarray->num_rows);
 
 
     for( int i=0; i<rowidarray->num_rows ; i++){
-
-        //rel->tuples[i].key=i;
-        //rel->tuples[i].payloadList->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
+        printf("itr1\n");
+        rel->tuples[i].key=i;
+        printf("itr2\n");
+        addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
 
     }
-
+    printf("itr3\n");
     return rel;
 
 
