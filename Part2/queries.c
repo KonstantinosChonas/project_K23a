@@ -219,6 +219,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
 
             for(int i=0 ; i<predicateCounter ; i++){
+                printf("CURRENT PREDICATE %s %d\n", predicateStructArray[i]->predicate, predicateCounter);
                 printf("first\n");
                 if (empty==0){
                     printf("2\n");
@@ -266,9 +267,8 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
                         printf("done with everything\n");
                         printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-                        
-                        printIntermediate(rowidarray);      
-                        return 1;
+
+                        //printIntermediate(rowidarray);
                     }
                 }
                 else{
@@ -292,7 +292,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
 
         printIntermediate(rowidarray);
-                                      //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
+        //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
         //intermediateDelete(rowidarray);
         return 1;

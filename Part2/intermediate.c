@@ -128,7 +128,6 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
         int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
         for (int i=0 ; i<phjRel->num_tuples ; i++){
-
             table1[i]=phjRel->tuples[i].payloadList->data;
             table2[i]=phjRel->tuples[i].payloadList->next->data;
         }
@@ -171,7 +170,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         printf("3AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         printf("hello add to array3\n");
         newidarray->row_ids[relname2]=table;
-        printIntermediate(newidarray);
+        //printIntermediate(newidarray);
         //intermediateDelete(rowidarray);
         //printIntermediate(newidarray);      // auto to print vgainei mia xara
         return newidarray;
@@ -192,6 +191,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
+            printf("ADDED VALUE IS %d\n", phjRel->tuples[i].payloadList->data);
             table[i]=phjRel->tuples[i].payloadList->data;     // to kainourgio table gia to null relation ston rowid array 
 
             for(int j=0 ; j<rowidarray->num_relations ; j++){
@@ -205,7 +205,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         }
         newidarray->row_ids[relname1]=table;
 
-        free(table);
+        //free(table);      //prokalei thema giati eleutherwnei xwro pou xrhsimopoieitai meta
         intermediateDelete(rowidarray);
         //printIntermediate(newidarray); 
         return newidarray;
