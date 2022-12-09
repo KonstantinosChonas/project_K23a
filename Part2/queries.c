@@ -214,11 +214,11 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             printf("first\n");
             if (empty==0){
                 printf("2\n");
-                if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL){
+                if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL && (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL)){
                     printf("3\n");
-                    if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
+                   /* if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
                         continue;
-                    }
+                    }*/
                     //only left is null
 
                     predicateStructArray[i]->done=1;
@@ -230,10 +230,11 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     if(biggerRel(rel1,rel2)){
                         rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                     }
-                    else    rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                    else    
+                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
 
                 }
-                else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
+                else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
                     printf("4\n");
                     //only right is null
 
@@ -251,10 +252,12 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         printf("hello3\n");
                         rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                     }
-                    else    rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                    else    
+                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
                     printf("done with everything\n");
                     printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-                    printIntermediate(rowidarray);      //auto to print psilovgainei oti na nai!!
+                    
+                    printIntermediate(rowidarray);      
                     return 1;
                 }
             }
@@ -276,11 +279,11 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
 
 
-        // printIntermediate(rowidarray);
+        printIntermediate(rowidarray);
+                                      //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
-        return 1;                                       //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
-
-        // intermediateDelete(rowidarray);
+        //intermediateDelete(rowidarray);
+        return 1;
 /*----------------------------------------------------------------*/
         /*            end of  intermediate          */
         //freeing memory used in query
@@ -495,54 +498,11 @@ int returnRelation(char *str){      // str is of type 0.1
 }
 
 
-relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
-
-    printf("THIS IS RELATIONINFOTOREALTION\n");
-    printf("relin->numtuples: %d\n",relin->num_tuples);
-
-    relation* rel=createEmptyRelation(relin->num_tuples);
-
-    printf("rel->numtuples: %d\n",rel->num_tuples);
-    for (int i=0 ; i<relin->num_tuples ; i++){
-        rel->tuples[i].key=i;
-        // printf("relin->columns[column][i] : %d, i:%d, column:%d\n",relin->columns[column][i],i,column);
-        relationPayloadList *new=malloc(sizeof(relationPayloadList));
-        new->data=relin->columns[column][i];
-        new->next=NULL;
-        rel->tuples[i].payloadList=new;
-        // printf("payload is :%d\n",rel->tuples[i].payloadList->data);
-    
-    }
-
-    printf("exiting relation info to relation\n");
-
-    return rel;
-
-
-}
 
 
 
-relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
-
-    printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN: %d RELNAME :%d\n",column,relname);
-    relation *rel=createEmptyRelation(rowidarray->num_rows);
 
 
-    for( int i=0; i<rowidarray->num_rows ; i++){
-        rel->tuples[i].key=i;
-        relationPayloadList *new=malloc(sizeof(relationPayloadList));
-        new->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
-        new->next=NULL;
-        rel->tuples[i].payloadList=new;
-        // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
-
-    }
-    printf("exiting injtermediate to relation\n");
-    return rel;
-
-
-}
 
 
 

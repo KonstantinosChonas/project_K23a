@@ -123,7 +123,8 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
 
     printf("just entered add to array\n");
-
+   // printIntermediate(rowidarray);
+    intermediate *newidarray;
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
         int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
         for (int i=0 ; i<phjRel->num_tuples ; i++){
@@ -139,19 +140,19 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
     }
     else if (rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]==NULL){
         printf("hello add to array\n");
-        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
+        newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
         printf("AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
-            if(rowidarray->row_ids[i]!=NULL)
+           if(rowidarray->row_ids[i]!=NULL)
                 newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
 
         }
         printf("2AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         printf("hello add to array2\n");
-        int table[phjRel->num_tuples];
+        int* table=malloc(phjRel->num_tuples*sizeof(int));
         printf("hello add to array22\n");
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
@@ -170,25 +171,24 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         printf("3AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         printf("hello add to array3\n");
         newidarray->row_ids[relname2]=table;
-        // printIntermediate(newidarray);
-        intermediateDelete(rowidarray);
-        printIntermediate(newidarray);      // auto to print vgainei mia xara
-        return newidarray;
-
+        printIntermediate(newidarray);
+        //intermediateDelete(rowidarray);
+        //printIntermediate(newidarray);      // auto to print vgainei mia xara
+        //return newidarray;
+        free(table);
     }
     else if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]!=NULL){
-        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
+        newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
-            if(rowidarray->row_ids[i]!=NULL)
+             if(rowidarray->row_ids[i]!=NULL)
                 newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
 
         }
 
-
-        int table[phjRel->num_tuples];
+        int* table=malloc(phjRel->num_tuples*sizeof(int));
 
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
@@ -205,18 +205,16 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         }
         newidarray->row_ids[relname1]=table;
 
-
+        free(table);
         intermediateDelete(rowidarray);
-        return newidarray;
-
-
-
+        //printIntermediate(newidarray); 
+        //return newidarray;
 
     }
     else if (  rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]!=NULL)
     {
 
-        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
+        newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
         for( int i=0 ; i<rowidarray->num_relations ; i++){
@@ -240,12 +238,13 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
 
         }
-
-        return newidarray;
+        //printIntermediate(newidarray); 
+        //return newidarray;
     }
     
-
+    //printIntermediate(newidarray); 
     printf("exiting add to array\n");
+    return newidarray;
 
 }
 
@@ -283,3 +282,53 @@ void printIntermediate(intermediate *rowidarray){
     }
 }
 
+
+relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
+
+    printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN: %d RELNAME :%d\n",column,relname);
+    relation *rel=createEmptyRelation(rowidarray->num_rows);
+
+
+    for( int i=0; i<rowidarray->num_rows ; i++){
+        rel->tuples[i].key=i;
+        relationPayloadList *new=malloc(sizeof(relationPayloadList));
+        new->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
+        new->next=NULL;
+        rel->tuples[i].payloadList=new;
+        // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
+
+    }
+    printf("exiting injtermediate to relation\n");
+    return rel;
+
+
+}
+
+
+relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
+
+    printf("THIS IS RELATIONINFOTOREALTION\n");
+    printf("relin->numtuples: %d\n",relin->num_tuples);
+
+    relation* rel=createEmptyRelation(relin->num_tuples);
+
+
+    printf("rel->numtuples: %d\n",rel->num_tuples);
+    for (int i=0 ; i<relin->num_tuples ; i++){
+        rel->tuples[i].key=i;
+        // printf("relin->columns[column][i] : %d, i:%d, column:%d\n",relin->columns[column][i],i,column);
+        relationPayloadList *new=malloc(sizeof(relationPayloadList));
+        new->data=relin->columns[column][i];
+
+        new->next=NULL;
+        rel->tuples[i].payloadList=new;
+        // printf("payload is :%d\n",rel->tuples[i].payloadList->data);
+    
+    }
+
+    printf("exiting relation info to relation\n");
+
+    return rel;
+
+
+}
