@@ -174,7 +174,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         printIntermediate(newidarray);
         //intermediateDelete(rowidarray);
         //printIntermediate(newidarray);      // auto to print vgainei mia xara
-        //return newidarray;
+        return newidarray;
         free(table);
     }
     else if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]!=NULL){
@@ -208,7 +208,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         free(table);
         intermediateDelete(rowidarray);
         //printIntermediate(newidarray); 
-        //return newidarray;
+        return newidarray;
 
     }
     else if (  rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]!=NULL)
@@ -239,12 +239,11 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
         }
         //printIntermediate(newidarray); 
-        //return newidarray;
+        return newidarray;
     }
     
     //printIntermediate(newidarray); 
     printf("exiting add to array\n");
-    return newidarray;
 
 }
 

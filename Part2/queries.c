@@ -198,6 +198,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         printf("NUM OF RELATIONS=%d\n",relationCounter);
         int empty=1;
+
+        int done_counter=0;
+
+
         for(int i=0 ; i<predicateCounter ; i++)                 // apply filter first
         {
             if ( predicateStructArray[i]->isFilter==1)
@@ -205,76 +209,84 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 empty=0;
                 applyFilter(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],rowidarray,predicateStructArray[i]->predicate);
                 predicateStructArray[i]->done=1;
+                done_counter++;
             }
         }
 
         printf("key %d, payload %d\n",predicateStructArray[0]->leftRelation->key,predicateStructArray[0]->leftRelation->payloadList->data);
 
-        for(int i=0 ; i<predicateCounter ; i++){
-            printf("first\n");
-            if (empty==0){
-                printf("2\n");
-                if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL && (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL)){
-                    printf("3\n");
-                   /* if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
-                        continue;
-                    }*/
-                    //only left is null
+        while(done_counter!=predicateCounter){
 
-                    predicateStructArray[i]->done=1;
-                    relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
-                    *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
-                    
-                    
-                    relation *res=PartitionedHashJoin(rel1,rel2);
-                    if(biggerRel(rel1,rel2)){
-                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+
+            for(int i=0 ; i<predicateCounter ; i++){
+                printf("first\n");
+                if (empty==0){
+                    printf("2\n");
+                    if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL && (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL)){
+                        printf("3\n");
+                        if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
+                            continue;
+                        }
+                        //only left is null
+
+                        predicateStructArray[i]->done=1;
+                        done_counter++;
+                        relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
+                        *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
+                        
+                        
+                        relation *res=PartitionedHashJoin(rel1,rel2);
+                        if(biggerRel(rel1,rel2)){
+                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+                        }
+                        else    
+                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+
                     }
-                    else    
-                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                    else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
+                        printf("4\n");
+                        //only right is null
 
-                }
-                else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
-                    printf("4\n");
-                    //only right is null
+                        predicateStructArray[i]->done=1;
+                        done_counter++;
+                        relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
+                        *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
+                        printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
+                        // printRelation(rel2);
 
-                    predicateStructArray[i]->done=1;
-                    relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
-                    *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-                    printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
-                    // printRelation(rel2);
-
-                    relation *res=PartitionedHashJoin(rel1,rel2);
-                    // printRelation(res);
-                    printf("hello2\n");
-                    printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-                    if(biggerRel(rel1,rel2)){
-                        printf("hello3\n");
-                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+                        relation *res=PartitionedHashJoin(rel1,rel2);
+                        // printRelation(res);
+                        printf("hello2\n");
+                        printf("rowidarray num relations : %d\n",rowidarray->num_relations);
+                        if(biggerRel(rel1,rel2)){
+                            printf("hello3\n");
+                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
+                        }
+                        else    
+                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                        printf("done with everything\n");
+                        printf("rowidarray num relations : %d\n",rowidarray->num_relations);
+                        
+                        printIntermediate(rowidarray);      
+                        return 1;
                     }
-                    else    
-                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
-                    printf("done with everything\n");
-                    printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-                    
-                    printIntermediate(rowidarray);      
-                    return 1;
-                }
-            }
-            else{
-                relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-                relation *res=PartitionedHashJoin(rel1,rel2);
-                if (biggerRel(rel1,rel2)){
-                    rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
-
                 }
                 else{
-                    rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
-                }
-                predicateStructArray[i]->done=1;
-                empty=0;
-            }
+                    relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
+                    relation *res=PartitionedHashJoin(rel1,rel2);
+                    if (biggerRel(rel1,rel2)){
+                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
 
+                    }
+                    else{
+                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
+                    }
+                    predicateStructArray[i]->done=1;
+                    done_counter++;
+                    empty=0;
+                }
+
+            }
         }
 
 
