@@ -5,7 +5,6 @@
 
 relation* inputFromFile(char* s){
 
-
     FILE *fp;
     int count=0,num1,num2,num3;
     relation* r;

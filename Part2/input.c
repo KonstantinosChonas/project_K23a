@@ -198,6 +198,7 @@ int getSumRelation(relation* myRelation){
 
     for(int i = 0; i < myRelation->num_tuples; i++){
         if(myRelation->tuples[i].payloadList != NULL){
+            //printf("VALUE IS %d\n", myRelation->tuples[i].payloadList->data);
             sum += myRelation->tuples[i].payloadList->data;
 
         }

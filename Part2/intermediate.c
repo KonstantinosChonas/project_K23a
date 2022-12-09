@@ -317,11 +317,11 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
     int keyCounter = 0;
 
     for( int i=0; i<rowidarray->num_rows ; i++){
-        printf("NUMBER %d\n", rowidarray->row_ids[relname][i]);
+        //printf("NUMBER %d WITH VALUE %d\n", rowidarray->row_ids[relname][i], relInfo->columns[column][rowidarray->row_ids[relname][i]]);
         for(int j = 0; j< rowidarray->num_rows; j++){
             if(keyCheck[j] == rowidarray->row_ids[relname][i]){
                 exists = 1;
-                printf("DOUBLE %d\n", rowidarray->row_ids[relname][i]);
+          //      printf("DOUBLE %d WITH VALUE %d\n", rowidarray->row_ids[relname][i], relInfo->columns[column][rowidarray->row_ids[relname][i]]);
                 break;
             }
         }
