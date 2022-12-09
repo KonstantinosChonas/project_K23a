@@ -292,7 +292,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
 
         //printIntermediate(rowidarray);
-        relation* result = intermediateToRelationSum(rowidarray, &relInfo[0], 2, 1);
+        relation* result = intermediateToRelationSum(rowidarray, &relInfo[3], 1, 0);
         getSumRelation(result);
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
