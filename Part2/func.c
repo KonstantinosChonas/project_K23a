@@ -307,7 +307,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
 
         return hashMapArray;
     }else{
-        hashMapArray = calloc(1,sizeof(struct hashMap));
+        hashMapArray = calloc(r->num_tuples,sizeof(struct hashMap));
         hashMapArray[0] = hashCreate(hashmap_size,0);
 
         for(int i = 0; i < r->num_tuples; i++){
