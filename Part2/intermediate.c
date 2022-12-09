@@ -303,6 +303,46 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
 
 }
 
+relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
+
+    printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN FOR SUM: %d RELNAME :%d\n",column,relname);
+    relation *rel=createEmptyRelation(rowidarray->num_rows);
+
+    int keyCheck[rowidarray->num_rows];
+    for(int j = 0; j< rowidarray->num_rows; j++) {
+        keyCheck[j] = -1;
+    }
+
+    int exists = 0;
+    int keyCounter = 0;
+
+    for( int i=0; i<rowidarray->num_rows ; i++){
+        printf("NUMBER %d\n", rowidarray->row_ids[relname][i]);
+        for(int j = 0; j< rowidarray->num_rows; j++){
+            if(keyCheck[j] == rowidarray->row_ids[relname][i]){
+                exists = 1;
+                printf("DOUBLE %d\n", rowidarray->row_ids[relname][i]);
+                break;
+            }
+        }
+        if(exists == 1){
+            exists = 0;
+            continue;
+        }
+        keyCheck[i] = rowidarray->row_ids[relname][i];
+        rel->tuples[keyCounter].key=keyCounter;
+        relationPayloadList *new=malloc(sizeof(relationPayloadList));
+        new->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
+        new->next=NULL;
+        rel->tuples[keyCounter++].payloadList=new;
+        // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
+
+    }
+    printf("exiting intermediate to relation\n");
+    return rel;
+
+
+}
 
 relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
