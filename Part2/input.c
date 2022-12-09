@@ -200,5 +200,6 @@ int getSumRelation(relation* myRelation){
         sum += myRelation->tuples[i].payloadList->data;
     }
 
+    printf("SUM: %d\n", sum);
     return sum;
 }
