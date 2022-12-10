@@ -23,6 +23,7 @@ relation* relationInfoToRelation(relationInfo* relin,int column);
 
 predicate* createPredicate(char* predicateStr, int order);
 int returnRelation(char *str);
+int returnColumn(char* predicate);
 int biggerRel(relation* rel1,relation* rel2);
 
 #endif //SIG18_QUERIES_H

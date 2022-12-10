@@ -325,6 +325,7 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
                 break;
             }
         }
+
         if(exists == 1){
             exists = 0;
             continue;

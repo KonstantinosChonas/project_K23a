@@ -194,7 +194,7 @@ int* pruneRelation(relation* myRelation, char operand, int value){
 }
 
 int getSumRelation(relation* myRelation){
-    int sum = 0;
+    long int sum = 0;
 
     for(int i = 0; i < myRelation->num_tuples; i++){
         if(myRelation->tuples[i].payloadList != NULL){
@@ -204,6 +204,6 @@ int getSumRelation(relation* myRelation){
         }
     }
 
-    printf("SUM: %d\n", sum);
+    printf("SUM: %ld\n", sum);
     return sum;
 }

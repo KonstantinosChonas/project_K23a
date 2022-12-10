@@ -290,10 +290,16 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         }
 
 
-
+        int projRel = 0;
+        int projCol = 0;
         //printIntermediate(rowidarray);
-        relation* result = intermediateToRelationSum(rowidarray, &relInfo[3], 1, 0);
-        getSumRelation(result);
+        for(int i = 0; i < projectionCounter; i++){
+            projRel = atoi(strtok(projectionsArray[i], "."));
+            projCol = atoi(strtok(NULL, "\0"));
+            //printf("GET SUM OF COLUMN %d FROM RELATION %d OF FILE r%d\n", projCol, projRel, relationsArray[projRel]);
+            relation* result = intermediateToRelationSum(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
+            getSumRelation(result);
+        }
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
         //intermediateDelete(rowidarray);
