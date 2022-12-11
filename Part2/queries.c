@@ -111,7 +111,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         }
 
         char* predicatesArray[predicateCounter+1];
-        for(int j = 0; j <= predicateCounter; j++){
+        for(int j = 0; j < predicateCounter; j++){
             predicatesArray[j] = malloc(50 * sizeof(char));
         }
 
@@ -124,10 +124,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 //                    printf("predicate: %s, is filter\n", predicatesArray[i]);
 //                }else
 //                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
-
-
+            
+        
         while(token != NULL){
-
+            
             token = strtok(NULL, "&");
 
             if(token == NULL){
@@ -143,7 +143,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 //                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
             }
         }
-
+        
 
         predicate* predicateStructArray[predicateCounter];
 
@@ -234,7 +234,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         done_counter++;
                         relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
                         *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
-
+                        
 
                         relation *res=PartitionedHashJoin(rel1,rel2);
                         if(res == NULL){
@@ -246,6 +246,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         else
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
 
+                        relationDelete(rel1);
+                        relationDelete(rel2);
+                        relationDelete(res);
                     }
                     else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
                         //printf("4\n");
@@ -271,12 +274,15 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                             //printf("hello3\n");
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                         }
-                        else
+                        else    
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
                         //printf("done with everything\n");
                         //printf("rowidarray num relations : %d\n",rowidarray->num_relations);
 
                         //printIntermediate(rowidarray);
+                        relationDelete(rel1);
+                        relationDelete(rel2);
+                        relationDelete(res);
                     }
                 }
                 else{
@@ -295,11 +301,13 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                     predicateStructArray[i]->done=1;
                     done_counter++;
                     empty=0;
+                    relationDelete(rel1);
+                    relationDelete(rel2);
+                    relationDelete(res);
                 }
 
             }
         }
-
 
         int projRel = 0;
         int projCol = 0;
@@ -316,6 +324,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 continue;
             }
             printf("%d ", checksum);
+            relationDelete(result);
         }
         printf("\n");
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
@@ -340,10 +349,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 tupleDelete(predicateStructArray[i]->leftRelation);
             }
             free(predicateStructArray[i]);
+            free(predicatesArray[i]);
         }
+        intermediateDelete(rowidarray);
     }
-
-
 
     printf("all done with query handling\n");
 
