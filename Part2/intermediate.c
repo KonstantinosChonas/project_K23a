@@ -93,7 +93,7 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
         case '>':
             if ( r->columns[column][i]>filter_num){
                 rowidarray->row_ids[rel][total-count]=i;
-                // printf("id added to array: %d, with value: %d\n",i,r->columns[column][i]);
+
                 count--;
             }
 
@@ -101,8 +101,7 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
         case '<':
             if ( r->columns[column][i]<filter_num){
                 rowidarray->row_ids[rel][total-count]=i;
-                // rowidarray->relArray[rel].tuples[total-count].key=i;
-                // addToPayloadList(rowidarray->relArray[rel].tuples[total-count].payloadList,r->columns[i][column]);
+                // printf("%d\n",i);
                 count--;
             }
             break;
@@ -198,41 +197,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         intermediateDelete(rowidarray);
         return newidarray;
 
-    }
-    else if (  rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]!=NULL)
-    {
-
-        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
-        newidarray->num_rows=phjRel->num_tuples;
-        newidarray->num_relations=rowidarray->num_relations;
-        for( int i=0 ; i<rowidarray->num_relations ; i++){
-
-            if(rowidarray->row_ids[i]!=NULL)
-                newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
-
-        }
-
-        int* table=malloc(phjRel->num_tuples*sizeof(int));
-        for( int i=0 ; i<phjRel->num_tuples ; i++){
-            
-            table[i]=rowidarray->row_ids[relname2][phjRel->tuples[i].payloadList->next->data];
-            for(int j=0 ; j<rowidarray->num_relations ; j++){
-                if (newidarray->row_ids[j]!=NULL){
-
-                    newidarray->row_ids[j][i]=rowidarray->row_ids[j][phjRel->tuples[i].payloadList->data];
-
-                }
-            }
-
-
-        }
-        free(newidarray->row_ids[relname2]);
-        newidarray->row_ids[relname2]=table;
-        intermediateDelete(rowidarray);
-        return newidarray;
-    }
-    
-
+    }   
     return rowidarray;
 }
 
