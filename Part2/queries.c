@@ -320,21 +320,19 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
                         int insert=0;
                         for( int i=0 ; i<rowidarray->num_rows ; i++){
-            
-                            for(int j=0 ; j<newidarray->num_relations ; j++){
-                                if (newidarray->row_ids[j]!=NULL){
-                                    if (rel1->tuples[i].payloadList->data==rel2->tuples[i].payloadList->data){
-                                        newidarray->row_ids[j][insert]=rowidarray->row_ids[j][i];
-                                        insert++;
-                                    }
+                            if (rel1->tuples[i].payloadList->data==rel2->tuples[i].payloadList->data){
 
+                                for(int j=0 ; j<newidarray->num_relations ; j++){
+                                    if (newidarray->row_ids[j]!=NULL){
+                                            newidarray->row_ids[j][insert]=rowidarray->row_ids[j][i];
+                                            // printf("%d\n",newidarray->row_ids[j][insert]);
+                                    }
+    
                                 }
+                                insert++;
                             }
 
-
                         }
-                        //printf("wtf\n");
-                        //printIntermediate(newidarray);
                         intermediateDelete(rowidarray);
                         rowidarray=newidarray;
 
