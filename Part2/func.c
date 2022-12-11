@@ -263,6 +263,8 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
     int rehash_check = 0;       //check to see if hashtable needs to be reconstructed with larger size
     struct hashMap** hashMapArray = NULL;
 
+    //printf("AT START size %d  neigh %d\n",hashmap_size, neighborhood_size);
+
     /* if pSum exists, that means we have to make a hash table for every partition, otherwise just create one hash table */
     if(pSum != NULL){
 
@@ -280,7 +282,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
                     /* insert every tuple into the appropriate hash table */
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
                     /* check if hash table needs rehashing */
-                    if(rehash_check == -1 && neighborhood_size < 40){
+                    if(rehash_check == -1 && neighborhood_size < 640){
                         hashDelete(hashMapArray);
                         //printf("rehashing hash table...\n");
                         hashMapArray = NULL;
@@ -293,7 +295,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
                 /* here we get the starting and ending point of every partition, by using pSum */
                 for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
-                    if(rehash_check == -1 && neighborhood_size < 40){
+                    if(rehash_check == -1 && neighborhood_size < 640){
                         hashDelete(hashMapArray);
                         //printf("rehashing hash table...\n");
                         hashMapArray = NULL;
@@ -310,11 +312,13 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
         hashMapArray[0] = hashCreate(hashmap_size,0);
 
         for(int i = 0; i < r->num_tuples; i++){
+            //printf("%d\n", hashmap_size);
             rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payloadList->data, neighborhood_size);
-            if(rehash_check == -1 && neighborhood_size < 40){
+            if(rehash_check == -1 && neighborhood_size < 640){
                 hashDelete(hashMapArray);
                 //printf("rehashing hash table...\n");
                 hashMapArray = NULL;
+                //printf("size %d  neigh %d\n",hashmap_size, neighborhood_size);
                 hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                 return hashMapArray;
             }
@@ -428,6 +432,9 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
 
 relation* PartitionedHashJoin(relation *relR, relation *relS){
 
+    if(relR->num_tuples <= 0 || relS->num_tuples <= 0){
+        return NULL;
+    }
     /**     Step 1. Partitioning        **/
     int nR,nS;
 

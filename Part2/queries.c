@@ -235,12 +235,15 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
                         *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
                         
-                        
+
                         relation *res=PartitionedHashJoin(rel1,rel2);
+                        if(res == NULL){
+                            break;
+                        }
                         if(biggerRel(rel1,rel2)){
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                         }
-                        else    
+                        else
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
 
                     }
@@ -258,6 +261,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         // printRelation(rel2);
 
                         relation *res=PartitionedHashJoin(rel1,rel2);
+                        if(res == NULL){
+                            break;
+                        }
                         // printRelation(res);
                         //printf("hello2\n");
                         //printf("rowidarray num relations : %d\n",rowidarray->num_relations);
@@ -276,6 +282,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 else{
                     relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
                     relation *res=PartitionedHashJoin(rel1,rel2);
+                    if(res == NULL){
+                        break;
+                    }
                     if (biggerRel(rel1,rel2)){
                         rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
 
@@ -302,6 +311,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             //printf("GET SUM OF COLUMN %d FROM RELATION %d OF FILE r%d\n", projCol, projRel, relationsArray[projRel]);
             relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
             checksum = getSumRelation(result);
+            if(checksum <= 0){
+                printf("NULL ");
+                continue;
+            }
             printf("%d ", checksum);
         }
         printf("\n");
