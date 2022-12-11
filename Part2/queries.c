@@ -17,7 +17,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
     char* predicates;
     char* projections;
 
-    printf("Start of parsing the query file %s...\n", queryFileName);
+    //printf("Start of parsing the query file %s...\n", queryFileName);
 
     // printf("Value in r10, column 2, row 191: %d\n", relInfo[10].columns[1][190]);
     fp = fopen(queryFileName, "r");
@@ -225,9 +225,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         continue;}
                 printf("first\n");
                 if (empty==0){
-                    printf("2\n");
+                    //printf("2\n");
                     if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL && (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL)){
-                        printf("3\n");
+                       // printf("3\n");
                         if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
                             continue;
                         }
@@ -238,21 +238,26 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
                         *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
                         
-                        
+
                         relation *res=PartitionedHashJoin(rel1,rel2);
+                        if(res == NULL){
+                            break;
+                        }
                         if(biggerRel(rel1,rel2)){
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                         }
-                        else    
+                        else
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
 
                     }
                     else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
-                        printf("4\n");
+                        //printf("4\n");
                         //only right is null
 
                         predicateStructArray[i]->done=1;
                         done_counter++;
+                        //printIntermediate(rowidarray);
+                        //printf("%d\n", rowidarray->num_rows);
                         relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
                         *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
 
@@ -262,10 +267,14 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
                         printf("before join\n");
                         relation *res=PartitionedHashJoin(rel1,rel2);
-                        printf("after join\n");
-
+                        if(res == NULL){
+                            break;
+                        }
+                        // printRelation(res);
+                        //printf("hello2\n");
+                        //printf("rowidarray num relations : %d\n",rowidarray->num_relations);
                         if(biggerRel(rel1,rel2)){
-                            printf("hello3\n");
+                            //printf("hello3\n");
                             rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
                         }
                         else    
@@ -277,6 +286,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 else{
                     relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
                     relation *res=PartitionedHashJoin(rel1,rel2);
+                    if(res == NULL){
+                        break;
+                    }
                     if (biggerRel(rel1,rel2)){
                         rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
 
@@ -295,18 +307,22 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         int projRel = 0;
         int projCol = 0;
-        // printIntermediate(rowidarray);
+        int checksum = 0;
+        //printIntermediate(rowidarray);
         for(int i = 0; i < projectionCounter; i++){
             // printf("projection : %s\n",projectionsArray[i]);
             projRel = atoi(strtok(projectionsArray[i], "."));
             projCol = atoi(strtok(NULL, "\0"));
             //printf("GET SUM OF COLUMN %d FROM RELATION %d OF FILE r%d\n", projCol, projRel, relationsArray[projRel]);
-            // relation* result = intermediateToRelationSum(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
-            relation *result=intermediateToRelation(rowidarray,&relInfo[relationsArray[projRel]],projCol,projRel);
-            printf("%d ",getSumRelation(result));
+            relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
+            checksum = getSumRelation(result);
+            if(checksum <= 0){
+                printf("NULL ");
+                continue;
+            }
+            printf("%d ", checksum);
         }
         printf("\n");
-        // intermediateDelete(rowidarray);
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
         // return 1;
         //intermediateDelete(rowidarray);

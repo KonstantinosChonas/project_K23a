@@ -122,11 +122,13 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 
 intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
 
-    printf("just entered add to array\n");
+    //printf("just entered add to array\n");
    // printIntermediate(rowidarray);
     intermediate *newidarray;
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
-        int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
+        //int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
+        int* table1 = malloc(sizeof(int) * phjRel->num_tuples);
+        int* table2 = malloc(sizeof(int) * phjRel->num_tuples);
         for (int i=0 ; i<phjRel->num_tuples ; i++){
             table1[i]=phjRel->tuples[i].payloadList->data;
             table2[i]=phjRel->tuples[i].payloadList->next->data;
@@ -138,21 +140,21 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         return rowidarray;
     }
     else if (rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]==NULL){
-        printf("hello add to array\n");
+        //printf("hello add to array\n");
         newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
-        printf("AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
+        //printf("AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
            if(rowidarray->row_ids[i]!=NULL)
                 newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
 
         }
-        printf("2AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
-        printf("hello add to array2\n");
+        //printf("2AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
+        //printf("hello add to array2\n");
         int* table=malloc(phjRel->num_tuples*sizeof(int));
-        printf("hello add to array22\n");
+        //printf("hello add to array22\n");
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
             table[i]=phjRel->tuples[i].payloadList->next->data;     // to kainourgio table gia to null relation ston rowid array 
@@ -167,8 +169,8 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
 
         }
-        printf("3AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
-        printf("hello add to array3\n");
+        //printf("3AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
+        //printf("hello add to array3\n");
         newidarray->row_ids[relname2]=table;
         //printIntermediate(newidarray);
         //intermediateDelete(rowidarray);
@@ -191,8 +193,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
-            printf("ADDED VALUE IS %d\n", phjRel->tuples[i].payloadList->data);
-            table[i]=phjRel->tuples[i].payloadList->data;     // to kainourgio table gia to null relation ston rowid array 
+            table[i]=phjRel->tuples[i].payloadList->data;     // to kainourgio table gia to null relation ston rowid array
 
             for(int j=0 ; j<rowidarray->num_relations ; j++){
                 if (newidarray->row_ids[j]!=NULL){
@@ -243,7 +244,7 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
     }
     
     //printIntermediate(newidarray); 
-    printf("exiting add to array\n");
+    //printf("exiting add to array\n");
 
 }
 
@@ -284,7 +285,7 @@ void printIntermediate(intermediate *rowidarray){
 
 relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
 
-    printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN: %d RELNAME :%d\n",column,relname);
+    //printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN: %d RELNAME :%d\n",column,relname);
     relation *rel=createEmptyRelation(rowidarray->num_rows);
 
 
@@ -297,7 +298,7 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
         // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
 
     }
-    printf("exiting injtermediate to relation\n");
+    //printf("exiting injtermediate to relation\n");
     return rel;
 
 
@@ -321,7 +322,7 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
         for(int j = 0; j< rowidarray->num_rows; j++){
             if(keyCheck[j] == rowidarray->row_ids[relname][i]){
                 exists = 1;
-          //      printf("DOUBLE %d WITH VALUE %d\n", rowidarray->row_ids[relname][i], relInfo->columns[column][rowidarray->row_ids[relname][i]]);
+                //printf("DOUBLE %d WITH VALUE %d\n", rowidarray->row_ids[relname][i], relInfo->columns[column][rowidarray->row_ids[relname][i]]);
                 break;
             }
         }
@@ -339,7 +340,7 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
         // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
 
     }
-    printf("exiting intermediate to relation\n");
+    //printf("exiting intermediate to relation\n");
     return rel;
 
 
@@ -347,13 +348,13 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
 
 relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
-    printf("THIS IS RELATIONINFOTOREALTION\n");
-    printf("relin->numtuples: %d\n",relin->num_tuples);
+    //printf("THIS IS RELATIONINFOTOREALTION\n");
+    //printf("relin->numtuples: %d\n",relin->num_tuples);
 
     relation* rel=createEmptyRelation(relin->num_tuples);
 
 
-    printf("rel->numtuples: %d\n",rel->num_tuples);
+    //printf("rel->numtuples: %d\n",rel->num_tuples);
     for (int i=0 ; i<relin->num_tuples ; i++){
         rel->tuples[i].key=i;
         // printf("relin->columns[column][i] : %d, i:%d, column:%d\n",relin->columns[column][i],i,column);
@@ -366,7 +367,7 @@ relation* relationInfoToRelation(relationInfo* relin,int column){           // m
     
     }
 
-    printf("exiting relation info to relation\n");
+    //printf("exiting relation info to relation\n");
 
     return rel;
 

@@ -6,7 +6,7 @@
 //to do: Make it so files don't need to be in same directory as main
 
 relationInfo* parseRelations(char* workPath, int* numRel){
-    printf("entered parser\n");
+    //printf("entered parser\n");
     FILE* fp;
     char* line = NULL;
     size_t len = 0;
@@ -15,7 +15,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
     char* file = NULL;
     char* lineStr = NULL;
     int numRelations = 0;
-    printf("Start entering relation files one by one, and enter Done, to end\n");
+    //printf("Start entering relation files one by one, and enter Done, to end\n");
 
     if(workPath == NULL){
         fp = stdin;
@@ -39,14 +39,13 @@ relationInfo* parseRelations(char* workPath, int* numRel){
     }
     fclose(fp);
     *numRel = numRelations;
-    printf("numrel: %d\n",*numRel);
     relInfo = malloc(numRelations * sizeof(struct relationInfo));
 
     for(int i = 0; i < numRelations; i++){
         char* currFile = fileLocations[i];
 
         //start reading the binary file
-        printf("parsing file: %s\n", fileLocations[i]);
+        //printf("parsing file: %s\n", fileLocations[i]);
         FILE* relationFile = NULL;
         relationFile = fopen(currFile, "rb");
         fread(&relInfo[i].num_tuples, sizeof(uint64_t), 1, relationFile);
