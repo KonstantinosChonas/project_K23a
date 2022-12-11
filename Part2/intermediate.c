@@ -212,10 +212,10 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
         }
 
-
+        int* table=malloc(phjRel->num_tuples*sizeof(int));
         for( int i=0 ; i<phjRel->num_tuples ; i++){
-
-
+            
+            table[i]=rowidarray->row_ids[relname2][phjRel->tuples[i].payloadList->next->data];
             for(int j=0 ; j<rowidarray->num_relations ; j++){
                 if (newidarray->row_ids[j]!=NULL){
 
@@ -226,6 +226,8 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
 
         }
+        free(newidarray->row_ids[relname2]);
+        newidarray->row_ids[relname2]=table;
         intermediateDelete(rowidarray);
         return newidarray;
     }
