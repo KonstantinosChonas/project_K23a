@@ -27,8 +27,13 @@
 
 # Part 2
 
-./compile.sh to make executable main
+Εντολές:
+make run για compiling και executing του main, μαζί με time
+Με το make run δίνονται τα default directories workloads/small/small.init και workloads/small/small.work
 
-./run.sh or ./main to run it
+Το πρόγραμμα επιστρέφει σωστά αποτελέσματα για 34/50 queries του small.work και ελευθερώνει όλο το χώρο που δεσμεύει.
 
-currently getting relations from workloads/small/small.init, and queries from workloads/small/small.work
+Στην αρχή του προγράμματος γίνεται parsing των bitwise αρχείων r0,r1,r2..., και τα αποτέσματα τοποθετούνται σε δομή relationInfo, οπού μέσω πολυδιάστατου array μπορούμε να λαμβάνουμε τα payloads από κάθε column κάθε relation.
+Έπειτα αρχίζει το parsing των queries, οπού όλα τα στοιχεία από τα 3 πεδία τοποθετούνται σε κατάλληλες δομές. Χρησιμοποιούμε το βοηθητικό struct predicate για να διαχειριζόμαστε τα predicates και τις διαφορετικές μορφές που μπορεί να έχουν.
+
+Στην ενδιάμεση δομή, αποθηκεύονται μόνο rowIDs από κάθε δομή, μέσω των οποίων λαμβάνουμε τις τιμές από τα relations όποτε αυτές χρειάζονται. Στην περίπτωση που υπάρχει self-join (πχ. 0.1=0.2), το διαχειριζόμαστε ως φίλτρο (δηλαδή δεν κάνουμε join).
