@@ -333,8 +333,8 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
 
                         }
-                        printf("wtf\n");
-                        printIntermediate(newidarray);
+                        //printf("wtf\n");
+                        //printIntermediate(newidarray);
                         intermediateDelete(rowidarray);
                         rowidarray=newidarray;
 
@@ -388,7 +388,6 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         printf("\n");
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
-        intermediateDelete(rowidarray);
         // return 1;
 /*----------------------------------------------------------------*/
         /*            end of  intermediate          */
