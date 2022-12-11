@@ -265,6 +265,8 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
                         relation *res=PartitionedHashJoin(rel1,rel2);
                         if(res == NULL){
+                            relationDelete(rel1);
+                            relationDelete(rel2);
                             break;
                         }
                         // printRelation(res);
@@ -321,6 +323,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             checksum = getSumRelation(result);
             if(checksum <= 0){
                 printf("NULL ");
+                relationDelete(result);
                 continue;
             }
             printf("%d ", checksum);
