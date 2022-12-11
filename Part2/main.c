@@ -11,7 +11,9 @@ int main (int argc, char* argv[]){
     relationInfo* relInfo = NULL;
     int relationNum;
 
-    relInfo = parseRelations("workloads/small/small.init", &relationNum);
+    char* relations = argv[1];
+    relInfo = parseRelations(relations, &relationNum);
+    //relInfo = parseRelations("workloads/small/small.init", &relationNum);
 
 //    relationInfo* relInfo = NULL;
 //    relInfo = (relationInfo*) malloc(15*sizeof(relationInfo));
@@ -22,9 +24,10 @@ int main (int argc, char* argv[]){
     sleep(1);
     /* start of query reading */
     FILE* queryFile = NULL;
-    char* queries = argv[1];
+    char* queries = argv[2];
 
-    int i = parseQueries("workloads/small/small.work", relInfo, relationNum);
+    int i = parseQueries(queries, relInfo, relationNum);
+    //int i = parseQueries("workloads/small/small.work", relInfo, relationNum);
 
 
     //these should be a function

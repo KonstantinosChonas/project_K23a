@@ -4,6 +4,6 @@ main: main.c input.c func.c hash.c queries.c intermediate.c parser.c
 all: run
 
 run: main
-	time ./main
+	time ./main workloads/small/small.init workloads/small/small.work
 
 .PHONY: all run
