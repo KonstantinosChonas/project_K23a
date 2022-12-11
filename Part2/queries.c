@@ -12,6 +12,8 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
     char *token;
     char *endCheck;
     FILE *fp;
+    char resultBuffer[1000] = "";
+    char numBuffer[20] = "";
 
     char* relations;
     char* predicates;
@@ -32,6 +34,8 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         if(strcmp(endCheck,"F") == 0){
         //    printf("continuing to next query set...\n");
+            printf("%s", resultBuffer);
+            resultBuffer[0] = '\0';
             continue;
         }
 
@@ -223,6 +227,12 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 if (predicateStructArray[i]->done==1) continue;
                 //printf("first\n");
                 if (empty==0){
+//                    if(sameRel(predicatesArray[i])){
+//                        selfJoin(relInfo, rowidarray, predicateStructArray[i]);
+//                        predicateStructArray[i]->done=1;
+//                        done_counter++;
+//                        continue;
+//                    }
                     // printf("2\n");
                     // if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL)
                     // printf("blabla\n");
@@ -376,14 +386,19 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
             checksum = getSumRelation(result);
             if(checksum <= 0){
-                printf("NULL ");
+                //printf("NULL ");
+                strcat(resultBuffer, "NULL ");
                 relationDelete(result);
                 continue;
             }
-            printf("%d ", checksum);
+            //printf("%d ", checksum);
+            numBuffer[0] = '\0';
+            sprintf(numBuffer, "%d ", checksum);
+            strcat(resultBuffer, numBuffer);
             relationDelete(result);
         }
-        printf("\n");
+        strcat(resultBuffer, "\n");
+        //printf("\n");
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
         intermediateDelete(rowidarray);
@@ -435,7 +450,7 @@ int isFilter(char* str){            //      if str is filter returns 1
     return 1;
 }
 
-int sameRel(char* predicate){              /*      an eiani idio relation epistrefei 1 an einai idio relation kai idio column epistrefei 2 allios epistrefei 0     */
+int sameRel(char* predicate){              /*      an einai idio relation epistrefei 1 an einai idio relation kai idio column epistrefei 2 allios epistrefei 0     */
 
     int rel1=0,rel2=0,dot=0,op=0,col1=0,col2=0;
     int i=0;
