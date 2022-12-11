@@ -124,7 +124,6 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
     //printf("just entered add to array\n");
    // printIntermediate(rowidarray);
-    intermediate *newidarray;
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
         //int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
         int* table1 = malloc(sizeof(int) * phjRel->num_tuples);
@@ -140,26 +139,21 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         return rowidarray;
     }
     else if (rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]==NULL){
-        //printf("hello add to array\n");
-        newidarray=intermediateCreate(rowidarray->num_relations);
+        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
-        //printf("AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
         for( int i=0 ; i<rowidarray->num_relations ; i++){
 
            if(rowidarray->row_ids[i]!=NULL)
                 newidarray->row_ids[i]=malloc(phjRel->num_tuples*sizeof(int));
 
         }
-        //printf("2AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
-        //printf("hello add to array2\n");
+
         int* table=malloc(phjRel->num_tuples*sizeof(int));
-        //printf("hello add to array22\n");
         for( int i=0 ; i<phjRel->num_tuples ; i++){
 
             table[i]=phjRel->tuples[i].payloadList->next->data;     // to kainourgio table gia to null relation ston rowid array 
-            // if(table[i]<=0 || table[i]>=100000)
-                // printf("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH table[i]: %d, i: %d\n",table[i],i);
+
             for(int j=0 ; j<rowidarray->num_relations ; j++){
                 if (newidarray->row_ids[j]!=NULL){
                     newidarray->row_ids[j][i]=rowidarray->row_ids[j][phjRel->tuples[i].payloadList->data];
@@ -169,17 +163,12 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
 
         }
-        //printf("3AAAAAAAAAAAAA new id array num relations : %d \n",newidarray->num_relations);
-        //printf("hello add to array3\n");
+        intermediateDelete(rowidarray);
         newidarray->row_ids[relname2]=table;
-        //printIntermediate(newidarray);
-        //intermediateDelete(rowidarray);
-        //printIntermediate(newidarray);      // auto to print vgainei mia xara
         return newidarray;
-        free(table);
     }
     else if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]!=NULL){
-        newidarray=intermediateCreate(rowidarray->num_relations);
+        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
         for( int i=0 ; i<rowidarray->num_relations ; i++){
@@ -206,16 +195,14 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
         }
         newidarray->row_ids[relname1]=table;
 
-        //free(table);      //prokalei thema giati eleutherwnei xwro pou xrhsimopoieitai meta
         intermediateDelete(rowidarray);
-        //printIntermediate(newidarray); 
         return newidarray;
 
     }
     else if (  rowidarray->row_ids[relname1]!=NULL && rowidarray->row_ids[relname2]!=NULL)
     {
 
-        newidarray=intermediateCreate(rowidarray->num_relations);
+        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
         newidarray->num_rows=phjRel->num_tuples;
         newidarray->num_relations=rowidarray->num_relations;
         for( int i=0 ; i<rowidarray->num_relations ; i++){
@@ -239,13 +226,12 @@ intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1
 
 
         }
-        //printIntermediate(newidarray); 
+        intermediateDelete(rowidarray);
         return newidarray;
     }
     
-    //printIntermediate(newidarray); 
-    //printf("exiting add to array\n");
 
+    return rowidarray;
 }
 
 
@@ -257,7 +243,7 @@ void intermediateDelete(intermediate* inter){
             free(inter->row_ids[i]);
     
     }
-
+    free(inter->row_ids);
     free(inter);
 
     return;
