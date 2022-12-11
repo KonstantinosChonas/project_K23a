@@ -282,7 +282,7 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
                     /* check if hash table needs rehashing */
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
-                        printf("rehashing hash table...\n");
+                        //printf("rehashing hash table...\n");
                         hashMapArray = NULL;
                         /* new hash table is created by doubling the size of the original one */
                         hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
@@ -295,13 +295,13 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
                     rehash_check = hashInsert(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, neighborhood_size);
                     if(rehash_check == -1 && neighborhood_size < 40){
                         hashDelete(hashMapArray);
-                        printf("rehashing hash table...\n");
+                        //printf("rehashing hash table...\n");
                         hashMapArray = NULL;
                         hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                         return hashMapArray;
                     }
                 }
-                printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
+                //printf("created hash map for bucket:%d\n", hashMapArray[i]->bucket);
         }
 
         return hashMapArray;
@@ -313,13 +313,13 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
             rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payloadList->data, neighborhood_size);
             if(rehash_check == -1 && neighborhood_size < 40){
                 hashDelete(hashMapArray);
-                printf("rehashing hash table...\n");
+                //printf("rehashing hash table...\n");
                 hashMapArray = NULL;
                 hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                 return hashMapArray;
             }
         }
-        printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
+        //printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
         return hashMapArray;
     }
 }
@@ -333,6 +333,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
 
     relation *result = malloc(sizeof(struct relation));
     result->num_tuples = r->num_tuples;
+
     result->tuples = malloc(sizeof(struct tuple) * result->num_tuples);
     if(result->tuples == NULL){
         printf("not enough memory\n");
@@ -420,6 +421,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
         }
     }
     result->num_tuples = nodeCounter;
+    //printRelation(result);
     return result;
 }
 

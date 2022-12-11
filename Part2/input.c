@@ -204,6 +204,6 @@ int getSumRelation(relation* myRelation){
         }
     }
 
-    printf("SUM: %ld\n", sum);
+    //printf("SUM: %ld\n", sum);
     return sum;
 }
