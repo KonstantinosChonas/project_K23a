@@ -30,6 +30,7 @@
 Εντολές:
 make run για compiling και executing του main, μαζί με time
 Με το make run δίνονται τα default directories workloads/small/small.init και workloads/small/small.work
+Τα αρχεία r0,r1,r2... πρέπει να βρίσκονται στο ίδιο directory με τη main
 
 Το πρόγραμμα επιστρέφει σωστά αποτελέσματα για 34/50 queries του small.work και ελευθερώνει όλο το χώρο που δεσμεύει.
 
