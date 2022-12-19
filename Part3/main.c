@@ -1,5 +1,7 @@
-//#include "queries.h"
+#include "queries.h"
 #include "intermediate.h"
+#include "int.h"
+#include "statistics.h"
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>

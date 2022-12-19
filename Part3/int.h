@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+#include "statistics.h"
 
 #define L2 256000      /* bits of information stored in L2 cache memory */
 #define N_DISCRETE 50000000   /* maximum value of discrete values (50.000.000) apo ekfwnish */
@@ -31,13 +32,6 @@ typedef struct relation {
     tuple *tuples;
     uint32_t num_tuples;
 }relation;
-
-typedef struct columnStatistics{
-    uint64_t min_value;
-    uint64_t max_value;
-    uint64_t value_count;
-    uint64_t discrete_values;
-}columnStatistics;
 
 typedef struct relationInfo{
     int num_tuples;

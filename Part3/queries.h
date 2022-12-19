@@ -2,8 +2,10 @@
 #define SIG18_QUERIES_H
 #include "int.h"
 #include "intermediate.h"
+#include "statistics.h"
 
 typedef struct predicate{
+    /* for predicate tuples, data contains column, and payload contains relation */
     tuple* leftRelation;
     tuple* rightRelation;
     int leftRel;        //if predicate is 0.1=3.2 then leftRel=0

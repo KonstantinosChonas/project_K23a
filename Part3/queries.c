@@ -153,6 +153,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         for(i = 0; i < predicateCounter; i++){
             predicateStructArray[i] = createPredicate(predicatesArray[i], i);
+            if(predicateStructArray[i]->operation == '<'){
+                columnStatistics* newStats = malloc(sizeof(struct columnStatistics));
+                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key], newStats);
+            }
             // printf("predicate: %s, isFilter: %d\n",predicateStructArray[i]->predicate,predicateStructArray[i]->isFilter);
         }
 

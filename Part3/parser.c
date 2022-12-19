@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "int.h"
+#include "statistics.h"
 
 //to do: Make it so files don't need to be in same directory as main
 
