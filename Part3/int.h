@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <pthread.h>
+#include "statistics.h"
 
 
 #define L2 256000      /* bits of information stored in L2 cache memory */
