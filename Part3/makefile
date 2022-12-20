@@ -7,3 +7,8 @@ run: main
 	time ./main workloads/small/small.init workloads/small/small.work
 
 .PHONY: all run
+
+.PHONY: clean
+
+clean:
+	rm -f main
