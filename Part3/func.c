@@ -429,6 +429,52 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
     return result;
 }
 
+relation* histArrayToHist(relation **hArray,int size)
+{
+    int count_size=0;
+    for (int i=0 ; i<size ; i++)
+    {
+
+        count_size+=hArray[i]->num_tuples;
+
+    }
+
+
+    relation* hist=createEmptyRelation(count_size);
+    for( int i=0 ; i<count_size ; i++)
+    {
+        hist->tuples[i].key=i;
+
+    }
+
+    for( int i=0 ; i<size ; i++)
+    {
+        for(int j=0 ; j<hArray[i]->num_tuples ; j++)
+        {
+
+            hist->tuples[hArray[i]->tuples[j].key].payloadList->data+=hArray[i]->tuples[j].payloadList->data;
+
+        }
+
+    }
+
+    return hist;
+
+
+}
+
+
+void * histWithThread(void *args)
+{
+
+    histThreadArgs* h= (histThreadArgs*) args;
+
+
+    h->histR=createHist(h->relR,h->nR);
+    h->histS=createHist(h->relS,h->nS);
+
+}
+
 
 relation* PartitionedHashJoin(relation *relR, relation *relS){
 
@@ -442,12 +488,103 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
     nR=findNumOfBuckets(relR);
     nS=findNumOfBuckets(relS);
 
+/*      threading       */
+    int numOfThreads=2;
+
+    threadArray *tarray=malloc(sizeof(threadArray));
+
+    tarray->noThreads=numOfThreads;
+
+    tarray->threads=malloc(numOfThreads*sizeof(pthread_t));
+
+    int indexR=0;
+    int indexS=0;
+
+    int Rcounter=relR->num_tuples/numOfThreads;
+    int Scounter=relS->num_tuples/numOfThreads;
+
+    relation **threadRelationsR=malloc(numOfThreads*sizeof(relation*));
+    relation **threadRelationsS=malloc(numOfThreads*sizeof(relation*));
+
+    for (int i=0 ; i< numOfThreads ; i++)       // just to get everything ready, no thread creation yet
+    {
+        indexR+=Rcounter;
+        indexS+=Scounter;
+
+
+        if (indexR>relR->num_tuples)
+            threadRelationsR[i]=createEmptyRelation(Rcounter-(indexR-relR->num_tuples));
+        else
+            threadRelationsR[i]=createEmptyRelation(Rcounter);
+
+
+        if (indexS>relS->num_tuples)
+            threadRelationsS[i]=createEmptyRelation(Scounter-(indexS-relS->num_tuples));
+        else
+            threadRelationsS[i]=createEmptyRelation(Scounter);    
+
+
+
+        for (int j=0 ; j<Rcounter ; j++)
+        {
+            if (relR->num_tuples==indexR+j) break;
+
+            threadRelationsR[i]->tuples[j]=relR->tuples[indexR+j];
+
+
+        }
+
+        for (int j=0 ; j<Scounter ; j++)
+        {
+            if (relS->num_tuples==indexR+j) break;
+
+            threadRelationsS[i]->tuples[j]=relS->tuples[indexS+j];
+
+
+        }
+
+
+    }
+
+    relation **histResultR;
+    relation **histResultS;
+
+
+    histResultR=malloc(numOfThreads*sizeof(relation*));
+    histResultS=malloc(numOfThreads*sizeof(relation*));
+
+    for (int i=0 ; i<numOfThreads ; i++)
+    {
+        histThreadArgs h;
+        h.relR=threadRelationsR[i];
+        h.relS=threadRelationsS[i];
+
+        h.nR=nR;
+        h.nS=nS;
+
+        h.histR=&histResultR[i];
+        h.histS=&histResultS[i];
+
+        pthread_create(tarray , NULL, histWithThread, (void *)&h);
+
+    }
+
+    pthread_exit(NULL);
+
+
+
+    /*      end of threading       */
+
 
     relation *newR,*newS,*rPsum,*sPsum,*rHist,*sHist;
 
 
-    rHist=createHist(relR,nR);
-    sHist=createHist(relS,nS);
+    // rHist=createHist(relR,nR);
+    // sHist=createHist(relS,nS);
+
+    rHist=histArrayToHist(histResultR,numOfThreads);
+    sHist=histArrayToHist(histResultS,numOfThreads);
+
 
 
     rPsum=createPsum(relR,nR,rHist);          
