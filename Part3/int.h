@@ -34,12 +34,7 @@ typedef struct relation {
     tuple *tuples;
     uint32_t num_tuples;
 }relation;
-typedef struct columnStatistics{
-    uint64_t min_value;
-    uint64_t max_value;
-    uint64_t value_count;
-    uint64_t discrete_values;
-}columnStatistics; 
+
 typedef struct histThreadArgs{
 
     relation* relR;
