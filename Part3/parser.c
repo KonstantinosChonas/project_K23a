@@ -7,7 +7,6 @@
 //to do: Make it so files don't need to be in same directory as main
 
 relationInfo* parseRelations(char* workPath, int* numRel){
-    //printf("entered parser\n");
     FILE* fp;
     char* line = NULL;
     size_t len = 0;
@@ -16,7 +15,6 @@ relationInfo* parseRelations(char* workPath, int* numRel){
     char* file = NULL;
     char* lineStr = NULL;
     int numRelations = 0;
-    //printf("Start entering relation files one by one, and enter Done, to end\n");
 
     if(workPath == NULL){
         fp = stdin;
@@ -25,19 +23,18 @@ relationInfo* parseRelations(char* workPath, int* numRel){
 
     relationInfo* relInfo = NULL;
     char** fileLocations = NULL;
-
     while((read = getline(&line, &len, fp)) != -1){
-       lineStr = strtok(line, "\n");
-       if(strcmp(lineStr, "Done") == 0)
-           break;
+        lineStr = strtok(line, "\n");
+        if(strcmp(lineStr, "Done") == 0)
+            break;
+        fileLocations = realloc(fileLocations, (numRelations + 1) * sizeof (char**));
+        fileLocations[numRelations] = malloc(strlen(line) + 1);
 
-       fileLocations = realloc(fileLocations, (numRelations + 1) * sizeof (char**));
-       fileLocations[numRelations] = malloc(strlen(line) + 1);
+        strcpy(fileLocations[numRelations], line);
 
-       strcpy(fileLocations[numRelations], line);
-
-       numRelations++;
+        numRelations++;
     }
+
     fclose(fp);
     *numRel = numRelations;
     relInfo = malloc(numRelations * sizeof(struct relationInfo));

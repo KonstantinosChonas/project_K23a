@@ -8,7 +8,7 @@
 
 int main (int argc, char* argv[]){
 
-    //printf("starting main\n");
+    printf("starting main\n");
 
     relationInfo* relInfo = NULL;
     int relationNum;
@@ -32,6 +32,7 @@ int main (int argc, char* argv[]){
     if(queries == NULL){
         queries = "workloads/small/small.work";
     }
+
 
     int i = parseQueries(queries, relInfo, relationNum);
     //int i = parseQueries("workloads/small/small.work", relInfo, relationNum);

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include<unistd.h>
 #include <time.h>
 #include <pthread.h>
 #include "statistics.h"
@@ -43,6 +44,7 @@ typedef struct histThreadArgs{
     int nS;
     relation* histR;
     relation *histS;
+    // pthread_t id;
 
 }histThreadArgs;
 
