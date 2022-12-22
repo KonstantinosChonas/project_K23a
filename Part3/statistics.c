@@ -37,6 +37,27 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
         printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
     }
+
+    if(filter == '>'){
+        if(relInfo[relName].colStats[column].min_value > filterValue){
+            filterValue = relInfo[relName].colStats[column].min_value;
+        }
+        newStatistics->min_value = filterValue;
+        newStatistics->max_value = relInfo[relName].colStats[column].max_value;
+        newStatistics->discrete_values = (uint64_t)((float)((float) (filterValue - relInfo[relName].colStats[column].min_value) / (float) ( relInfo[relName].colStats[column].max_value - relInfo[relName].colStats[column].min_value) ) * (float)relInfo[relName].colStats[column].discrete_values);
+        newStatistics->value_count =  (uint64_t)((float) ((float)(filterValue - relInfo[relName].colStats[column].min_value) / (float) ( relInfo[relName].colStats[column].max_value - relInfo[relName].colStats[column].min_value) ) * (float)relInfo[relName].colStats[column].value_count);
+        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
+        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+    }
+
+    for(int i = 0; i < relInfo[relName].num_cols; i++){
+        if(i != column){
+            relInfo[relName].colStats[i].discrete_values = (uint64_t)((float)(relInfo[relName].colStats[i].discrete_values) * (1.0 - pow((float)(1.0 - (float)(newStatistics->value_count/relInfo[relName].colStats[column].value_count)), ((float)(relInfo[relName].colStats[column].value_count)/(float)(relInfo[relName].colStats[column].discrete_values)))));
+            relInfo[relName].colStats[i].value_count = newStatistics->value_count;
+        }
+    }
+
+    return 1;
 }
 
 int valueExists(relationInfo* relInfo, int column, int relName, int value){
