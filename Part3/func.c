@@ -158,7 +158,6 @@ relation* createHist(relation* r,int n)
 
     }
 
-
     return hist;
 
 }
@@ -312,18 +311,14 @@ hashMap** createHashForBuckets(relation* r, relation* pSum, int hashmap_size, in
         hashMapArray[0] = hashCreate(hashmap_size,0);
 
         for(int i = 0; i < r->num_tuples; i++){
-            //printf("%d\n", hashmap_size);
             rehash_check = hashInsert(hashMapArray[0], r->tuples[i].key, r->tuples[i].payloadList->data, neighborhood_size);
             if(rehash_check == -1 && neighborhood_size < 640){
                 hashDelete(hashMapArray);
-                //printf("rehashing hash table...\n");
                 hashMapArray = NULL;
-                //printf("size %d  neigh %d\n",hashmap_size, neighborhood_size);
                 hashMapArray = createHashForBuckets(r, pSum, hashmap_size * 2, neighborhood_size * 2);
                 return hashMapArray;
             }
         }
-        //printf("created hash map for bucket:%d\n", hashMapArray[0]->bucket);
         return hashMapArray;
     }
 }
@@ -350,9 +345,7 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
             if(i+1 >= pSum->num_tuples){
                 for(int j = pSum->tuples[i].payloadList->data; j < r->num_tuples; j++){
                     if(hashMapArray[i]){
-                        //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        //if(exists){
-                        //printf("looking for %d in bucket %d\n", r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
+
                         int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
                             int counter = 0;
                             if(rowIdList != NULL){
@@ -367,32 +360,28 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
                                 free(rowIdList);
 
                             }
-                            //newTuple = createTupleFromNode(r->tuples[j].key, r->tuples[j].payloadList->data, newPayload);
 
-                        //}
                     }
                 }
             }else
                 for(int j = pSum->tuples[i].payloadList->data; j < pSum->tuples[i+1].payloadList->data; j++){
                     if(hashMapArray[i]) {
-                        //exists = hashSearch(hashMapArray[i], r->tuples[j].key, r->tuples[j].payloadList->data, 0);
-                        //if (exists) {
-                            //printf("%d looking for %d in bucket %d\n", j, r->tuples[j].payloadList->data, hashMapArray[i]->bucket);
-                            int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
-                            int counter = 0;
-                            if(rowIdList != NULL){
-                                while(rowIdList[counter] > -1){
-                                    newTuple = createTupleFromNode(r->tuples[j].payloadList->data, r->tuples[j].key, rowIdList[counter]);
-                                    result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
-                                    result->tuples[nodeCounter] = *newTuple;
-                                    nodeCounter++;
-                                    counter++;
-                                    free(newTuple);
-                                }
-                                free(rowIdList);
-                            }
 
-                        //}
+                        int* rowIdList = getKey(hashMapArray[i], r->tuples[j].payloadList->data, 0);
+                        int counter = 0;
+                        if(rowIdList != NULL){
+                            while(rowIdList[counter] > -1){
+                                newTuple = createTupleFromNode(r->tuples[j].payloadList->data, r->tuples[j].key, rowIdList[counter]);
+                                result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
+                                result->tuples[nodeCounter] = *newTuple;
+                                nodeCounter++;
+                                counter++;
+                                free(newTuple);
+                            }
+                            free(rowIdList);
+                        }
+
+
                     }
                 }
         }
@@ -403,30 +392,82 @@ relation* joinRelation(struct hashMap** hashMapArray, relation *r, relation *sma
         for(int i = 0; i < r->num_tuples; i++){
             int j = 0;
             while(hashMapArray[j]){
-               // exists = hashSearch(hashMapArray[j], r->tuples[i].key, r->tuples[i].payloadList->data, 0);
-               // if(exists){
-                    int* rowIdList = getKey(hashMapArray[j], r->tuples[i].payloadList->data, 0);
-                    int counter = 0;
-                    if(rowIdList != NULL){
-                        while(rowIdList[counter] > -1){
-                            newTuple = createTupleFromNode(r->tuples[i].payloadList->data, r->tuples[i].key, rowIdList[counter]);
-                            result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
-                            result->tuples[nodeCounter] = *newTuple;
-                            nodeCounter++;
-                            counter++;
-                            free(newTuple);
-                        }
-                        free(rowIdList);
-                    }
 
-              //  }
+                int* rowIdList = getKey(hashMapArray[j], r->tuples[i].payloadList->data, 0);
+                int counter = 0;
+                if(rowIdList != NULL){
+                    while(rowIdList[counter] > -1){
+                        newTuple = createTupleFromNode(r->tuples[i].payloadList->data, r->tuples[i].key, rowIdList[counter]);
+                        result->tuples = realloc(result->tuples, sizeof(struct tuple) * (nodeCounter + 1));
+                        result->tuples[nodeCounter] = *newTuple;
+                        nodeCounter++;
+                        counter++;
+                        free(newTuple);
+                    }
+                    free(rowIdList);
+                }
+
                 j++;
             }
         }
     }
     result->num_tuples = nodeCounter;
-    //printRelation(result);
     return result;
+}
+
+relation* histArrayToHist(relation **hArray,int size)
+{
+
+    int count_size=0;
+
+    for (int i=0 ; i<size ; i++)
+    {
+
+        if (hArray[i]->num_tuples>count_size) count_size=hArray[i]->num_tuples;
+
+    }
+
+    relation* hist=createEmptyRelation(count_size);
+    for( int i=0 ; i<count_size ; i++)
+    {
+        hist->tuples[i].key=i;
+
+    }
+
+    for( int i=0 ; i<size ; i++)
+    {
+        for(int j=0 ; j<hArray[i]->num_tuples ; j++)
+        {
+            if (hist->tuples[hArray[i]->tuples[j].key].payloadList==NULL){
+                relationPayloadList *p=malloc(sizeof(relationPayloadList));
+
+                p->next=NULL;
+                p->data=hArray[i]->tuples[j].payloadList->data;
+                hist->tuples[hArray[i]->tuples[j].key].payloadList=p;
+                continue;
+            }
+            else
+                hist->tuples[hArray[i]->tuples[j].key].payloadList->data+=hArray[i]->tuples[j].payloadList->data;
+
+        }
+
+    }
+
+    return hist;
+
+
+}
+
+
+void * histWithThread(void *args)
+{
+    histThreadArgs* h= (histThreadArgs*) args;
+
+    h->histR=createHist(h->relR,h->nR);
+
+    h->histS=createHist(h->relS,h->nS);
+
+    pthread_exit(NULL);
 }
 
 
@@ -436,18 +477,121 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
         return NULL;
     }
     /**     Step 1. Partitioning        **/
+
+
     int nR,nS;
 
 
     nR=findNumOfBuckets(relR);
     nS=findNumOfBuckets(relS);
 
+/*      threading       */
+    int numOfThreads=3;
+
+    threadArray *tarray=malloc(sizeof(threadArray));
+
+    tarray->noThreads=numOfThreads;
+
+    tarray->threads=malloc(numOfThreads*sizeof(pthread_t));
+
+    int indexR=0;
+    int indexS=0;
+
+    int Rcounter=relR->num_tuples/numOfThreads;
+    int Scounter=relS->num_tuples/numOfThreads;
+
+    relation **threadRelationsR=malloc(numOfThreads*sizeof(relation*));
+    relation **threadRelationsS=malloc(numOfThreads*sizeof(relation*));
+
+
+
+    for (int i=0 ; i< numOfThreads ; i++)       // just to get everything ready, no thread creation yet
+    {
+
+
+        if (indexR>relR->num_tuples)
+            threadRelationsR[i]=createEmptyRelation(Rcounter-(indexR-relR->num_tuples));
+        else
+            threadRelationsR[i]=createEmptyRelation(Rcounter);
+
+
+        if (indexS>relS->num_tuples)
+            threadRelationsS[i]=createEmptyRelation(Scounter-(indexS-relS->num_tuples));
+        else
+            threadRelationsS[i]=createEmptyRelation(Scounter);    
+
+
+        
+        for (int j=0 ; j<Rcounter ; j++)
+        {
+            threadRelationsR[i]->tuples[j].key=relR->tuples[indexR+j].key;
+            relationPayloadList *p=malloc(sizeof(relationPayloadList));
+            p->data=relR->tuples[indexR+j].payloadList->data;
+
+            p->next=NULL;
+            threadRelationsR[i]->tuples[j].payloadList=p;
+            if (relR->num_tuples==indexR+j) break;
+
+        }
+        for (int j=0 ; j<Scounter ; j++)
+        {
+
+            threadRelationsS[i]->tuples[j].key=relS->tuples[indexS+j].key;
+            relationPayloadList *p=malloc(sizeof(relationPayloadList));
+            p->data=relS->tuples[indexS+j].payloadList->data;
+            p->next=NULL;
+            threadRelationsS[i]->tuples[j].payloadList=p;
+            if (relS->num_tuples==indexS+j) break;
+        }
+        indexR+=Rcounter;
+        indexS+=Scounter;
+
+    }
+
+    relation **histResultR;
+    relation **histResultS;
+
+
+    histResultR=malloc(numOfThreads*sizeof(relation*));
+    histResultS=malloc(numOfThreads*sizeof(relation*));
+
+    histThreadArgs *h=malloc(numOfThreads*sizeof(histThreadArgs));
+    for (int i=0 ; i<numOfThreads ; i++)
+    {
+        h[i].relR=threadRelationsR[i];
+
+        h[i].relS=threadRelationsS[i];
+
+        h[i].nR=nR;
+        h[i].nS=nS;
+
+        h[i].histR=NULL;
+        h[i].histS=NULL;
+
+        pthread_create(&tarray->threads[i] , NULL, histWithThread, (void *)&h[i]);
+    }
+
+    for (int i=0 ; i<numOfThreads ; i++)
+    pthread_join(tarray->threads[i],NULL);
+
+
+
+    /*      end of threading       */
+
 
     relation *newR,*newS,*rPsum,*sPsum,*rHist,*sHist;
+    for (int i=0 ; i<numOfThreads ; i++){
+
+        histResultR[i]=h[i].histR;
+        histResultS[i]=h[i].histS;
 
 
-    rHist=createHist(relR,nR);
-    sHist=createHist(relS,nS);
+    }
+
+
+
+    rHist=histArrayToHist(histResultR,numOfThreads);
+    sHist=histArrayToHist(histResultS,numOfThreads);
 
 
     rPsum=createPsum(relR,nR,rHist);          
@@ -501,7 +645,6 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
 
     /* use the hash table(s) to create the final result (from join) */
     relation* result = joinRelation(hashMapArray, largerR, smallerR, largerPSum);
-    // printRelation(result);
 
     /* freeing the memory from everything */
 
@@ -514,7 +657,6 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
         relationDelete(newS);
     }
 
-    // relationDelete(result);          //TODO free this
     hashDelete(hashMapArray);
 
     return result;

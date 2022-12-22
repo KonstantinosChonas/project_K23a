@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include<unistd.h>
 #include <time.h>
 #include <pthread.h>
 #include "statistics.h"
@@ -35,6 +36,17 @@ typedef struct relation {
     uint32_t num_tuples;
 }relation;
 
+typedef struct histThreadArgs{
+
+    relation* relR;
+    relation* relS;
+    int nR;
+    int nS;
+    relation* histR;
+    relation *histS;
+    // pthread_t id;
+
+}histThreadArgs;
 
 typedef struct threadArray{
     int noThreads;                        //number of threads
