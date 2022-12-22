@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "int.h"
 #include "statistics.h"
 #include "queries.h"
@@ -13,7 +14,7 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
     if(filter == '='){
         newStatistics->min_value = filterValue;
         newStatistics->max_value = filterValue;
-        if(valueExists(relInfo, column, relName, filterValue)){
+        if(valueExistsInColumn(relInfo, column, relName, filterValue)){
             newStatistics->discrete_values = 1;
             newStatistics->value_count = relInfo[relName].colStats[column].value_count / relInfo[relName].colStats[column].discrete_values;
             printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
@@ -57,10 +58,11 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         }
     }
 
+    //could be used for error handling
     return 1;
 }
 
-int valueExists(relationInfo* relInfo, int column, int relName, int value){
+int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int value){
     int curValue = 0;
     int foundValue = 0;
 
