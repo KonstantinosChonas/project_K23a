@@ -6,9 +6,11 @@
 #include "statistics.h"
 #include "queries.h"
 
-int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, int relName,columnStatistics* newStatistics){
+int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, int relName){
     char filter = curPred->operation;
     int filterValue = curPred->value;
+
+    columnStatistics* newStatistics = malloc(sizeof(struct columnStatistics));
 
     if(filter == '='){
         newStatistics->min_value = filterValue;
@@ -57,17 +59,22 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         }
     }
 
+    relInfo[relName].colStats[column] = *newStatistics;
+    free(newStatistics);
     //could be used for error handling
     return 1;
 }
 
-int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, columnStatistics* newStatistics){
+int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2){
     int column1 = curPred->leftRelation->payloadList->data;
     int column2 = curPred->rightRelation->payloadList->data;
     uint64_t combinedMin = 0;
     uint64_t combinedMax = 0;
     uint64_t combinedCount = 0;
     uint64_t combinedDiscrete = 0;
+
+    columnStatistics* newStatistics = malloc(sizeof(struct columnStatistics));
+
 
     if(relInfo[relName1].colStats[column1].min_value < relInfo[relName2].colStats[column2].min_value){
         combinedMin = relInfo[relName2].colStats[column2].min_value;
@@ -110,6 +117,10 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
 //    printf("NEW MAX: %ld\n", newStatistics->max_value);
 //    printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
 //    printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+
+    relInfo[relName1].colStats[column1] = *newStatistics;
+    relInfo[relName2].colStats[column2] = *newStatistics;
+    free(newStatistics);
 
     //could be used for error handling
     return 1;

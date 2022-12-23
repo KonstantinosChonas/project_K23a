@@ -154,12 +154,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         for(i = 0; i < predicateCounter; i++){
             predicateStructArray[i] = createPredicate(predicatesArray[i], i);
             if(predicateStructArray[i]->operation == '>'){
-                columnStatistics* newStats = malloc(sizeof(struct columnStatistics));
-                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key], newStats);
+                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key]);
             }else{
                 if(predicateStructArray[i]->isFilter != 1){
-                    columnStatistics* newStats = malloc(sizeof(struct columnStatistics));
-                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key], newStats);
+                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key]);
 
                 }
             }
