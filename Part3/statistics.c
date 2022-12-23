@@ -10,7 +10,6 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
     char filter = curPred->operation;
     int filterValue = curPred->value;
 
-    printf("relname %d max %ld  count %ld discrete %ld\n", relName, relInfo[relName].colStats[column].max_value, relInfo[relName].colStats[column].value_count, relInfo[relName].colStats[column].discrete_values);
     if(filter == '='){
         newStatistics->min_value = filterValue;
         newStatistics->max_value = filterValue;
@@ -47,16 +46,70 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         newStatistics->max_value = relInfo[relName].colStats[column].max_value;
         newStatistics->discrete_values = (uint64_t)((float)((float) (filterValue - relInfo[relName].colStats[column].min_value) / (float) ( relInfo[relName].colStats[column].max_value - relInfo[relName].colStats[column].min_value) ) * (float)relInfo[relName].colStats[column].discrete_values);
         newStatistics->value_count =  (uint64_t)((float) ((float)(filterValue - relInfo[relName].colStats[column].min_value) / (float) ( relInfo[relName].colStats[column].max_value - relInfo[relName].colStats[column].min_value) ) * (float)relInfo[relName].colStats[column].value_count);
-        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
-        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+//        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
+//        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
     }
 
     for(int i = 0; i < relInfo[relName].num_cols; i++){
         if(i != column){
-            relInfo[relName].colStats[i].discrete_values = (uint64_t)((float)(relInfo[relName].colStats[i].discrete_values) * (1.0 - pow((float)(1.0 - (float)(newStatistics->value_count/relInfo[relName].colStats[column].value_count)), ((float)(relInfo[relName].colStats[column].value_count)/(float)(relInfo[relName].colStats[column].discrete_values)))));
+            relInfo[relName].colStats[i].discrete_values = (uint64_t)((float)(relInfo[relName].colStats[i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->value_count/(float)relInfo[relName].colStats[column].value_count)), ((float)(relInfo[relName].colStats[i].value_count)/(float)(relInfo[relName].colStats[i].discrete_values)))));
             relInfo[relName].colStats[i].value_count = newStatistics->value_count;
         }
     }
+
+    //could be used for error handling
+    return 1;
+}
+
+int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, columnStatistics* newStatistics){
+    int column1 = curPred->leftRelation->payloadList->data;
+    int column2 = curPred->rightRelation->payloadList->data;
+    uint64_t combinedMin = 0;
+    uint64_t combinedMax = 0;
+    uint64_t combinedCount = 0;
+    uint64_t combinedDiscrete = 0;
+
+    if(relInfo[relName1].colStats[column1].min_value < relInfo[relName2].colStats[column2].min_value){
+        combinedMin = relInfo[relName2].colStats[column2].min_value;
+    }else combinedMin = relInfo[relName1].colStats[column1].min_value;
+
+    newStatistics->min_value = combinedMin;
+
+    if(relInfo[relName1].colStats[column1].max_value < relInfo[relName2].colStats[column2].max_value){
+        combinedMax = relInfo[relName1].colStats[column1].max_value;
+    }else combinedMax = relInfo[relName2].colStats[column2].max_value;
+
+    newStatistics->max_value = combinedMax;
+
+    int n = combinedMax - combinedMin + 1;
+    combinedCount = (uint64_t)((float)(relInfo[relName1].colStats[column1].value_count * relInfo[relName2].colStats[column2].value_count) / (float) n);
+
+    newStatistics->value_count = combinedCount;
+
+    combinedDiscrete = (uint64_t)((float)(relInfo[relName1].colStats[column1].discrete_values * relInfo[relName2].colStats[column2].discrete_values) / (float) n);
+
+    newStatistics->discrete_values = combinedDiscrete;
+
+    /* updating rest of columns for each relation */
+
+    for(int i = 0; i < relInfo[relName1].num_cols; i++){
+        if(i != column1){
+            relInfo[relName1].colStats[i].discrete_values = (uint64_t)((float)(relInfo[relName1].colStats[i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->discrete_values/(float)relInfo[relName1].colStats[column1].discrete_values)), (float)((float)(relInfo[relName1].colStats[i].value_count)/(float)(relInfo[relName1].colStats[i].discrete_values)))));
+            relInfo[relName1].colStats[i].value_count = newStatistics->value_count;
+        }
+    }
+
+    for(int i = 0; i < relInfo[relName2].num_cols; i++){
+        if(i != column2){
+            relInfo[relName2].colStats[i].discrete_values = (uint64_t)((float)(relInfo[relName2].colStats[i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->discrete_values/(float)relInfo[relName2].colStats[column2].discrete_values)), (float)((float)(relInfo[relName2].colStats[i].value_count)/(float)(relInfo[relName2].colStats[i].discrete_values)))));
+            relInfo[relName2].colStats[i].value_count = newStatistics->value_count;
+        }
+    }
+
+//    printf("NEW MIN: %ld\n", newStatistics->min_value);
+//    printf("NEW MAX: %ld\n", newStatistics->max_value);
+//    printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
+//    printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
 
     //could be used for error handling
     return 1;

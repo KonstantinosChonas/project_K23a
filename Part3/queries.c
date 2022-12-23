@@ -156,7 +156,14 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
             if(predicateStructArray[i]->operation == '>'){
                 columnStatistics* newStats = malloc(sizeof(struct columnStatistics));
                 getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key], newStats);
+            }else{
+                if(predicateStructArray[i]->isFilter != 1){
+                    columnStatistics* newStats = malloc(sizeof(struct columnStatistics));
+                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key], newStats);
+
+                }
             }
+
             // printf("predicate: %s, isFilter: %d\n",predicateStructArray[i]->predicate,predicateStructArray[i]->isFilter);
         }
 
