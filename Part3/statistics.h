@@ -12,6 +12,7 @@ typedef struct columnStatistics{
 }columnStatistics;
 
 int getFilterStatistics(struct relationInfo* relInfo,struct predicate* curPred, int column, int relName, columnStatistics* newStatistics);
-int valueExists(struct relationInfo* relInfo, int column, int relName, int value);
+int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, columnStatistics* newStatistics);
+int valueExistsInColumn(struct relationInfo* relInfo, int column, int relName, int value);
 
 #endif //SIG18_STATISTICS_H
