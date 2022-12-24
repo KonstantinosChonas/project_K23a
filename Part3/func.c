@@ -461,12 +461,13 @@ relation* histArrayToHist(relation **hArray,int size)
 
 void * histWithThread(void *args)
 {
+    // printf("entering thread\n");
     histThreadArgs* h= (histThreadArgs*) args;
 
     h->histR=createHist(h->relR,h->nR);
 
     h->histS=createHist(h->relS,h->nS);
-
+    // printf("exiting thread\n");
     pthread_exit(NULL);
 }
 
@@ -486,7 +487,7 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
     nS=findNumOfBuckets(relS);
 
 /*      threading       */
-    int numOfThreads=3;
+    int numOfThreads=4;
 
     threadArray *tarray=malloc(sizeof(threadArray));
 
