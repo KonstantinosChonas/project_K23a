@@ -406,7 +406,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
         intermediateDelete(rowidarray);
-        return 1;
+        // return 1;
 /*----------------------------------------------------------------*/
         /*            end of  intermediate          */
         //freeing memory used in query
