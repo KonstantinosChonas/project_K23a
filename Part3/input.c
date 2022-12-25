@@ -102,6 +102,9 @@ void printPayload(relationPayloadList* payloadList){
 void relationDelete(relation* myRelation){
     //printf("deleting relation with %d tuples\n", myRelation->num_tuples);
 
+
+    if(myRelation==NULL) return;
+
     struct relationPayloadList* tempPayloadList = NULL;
     struct relationPayloadList* tempPayloadListNext = NULL;
 
