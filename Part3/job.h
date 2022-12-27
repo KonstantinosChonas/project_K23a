@@ -1,7 +1,8 @@
 #include "int.h"
 
 typedef struct Job{
-
+    void (*function)(void* arg);
+	void* arguments;
     Job* next;
 }Job;
 
@@ -16,7 +17,7 @@ int execution_threads; // number of execution threads
 Queue* q; // a queue that holds submitted jobs / tasks
 // p_thread_t* tids; // execution threads
 pthread_mutex_t lock;
-pthread_cond_t notEmpty;    
+pthread_cond_t notEmpty;    //TODO na to ftiaksoume ligo auto
 
 }JobScheduler;
 
