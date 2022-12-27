@@ -610,12 +610,7 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
     for (int i=0 ; i<numOfThreads ; i++){
         relationDelete(threadRelationsR[i]);
         relationDelete(threadRelationsS[i]);
-        relationDelete(h[i].relR);
-        relationDelete(h[i].relS);
-        relationDelete(h[i].histR);
-        relationDelete(h[i].histS);
     }
-
 
     free(h);
 
