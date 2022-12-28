@@ -19,9 +19,10 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
             newStatistics->discrete_values = 1;
 
             //compromise in case discrete values of a column is 0
-            if(relInfo[relName].colStats[column].discrete_values == 0){
-                newStatistics->value_count = relInfo[relName].colStats[column].value_count / 1;
-            }else newStatistics->value_count = relInfo[relName].colStats[column].value_count / relInfo[relName].colStats[column].discrete_values;
+//            if(relInfo[relName].colStats[column].discrete_values == 0){
+//                newStatistics->value_count = relInfo[relName].colStats[column].value_count / 1;
+//            }else
+            newStatistics->value_count = relInfo[relName].colStats[column].value_count / relInfo[relName].colStats[column].discrete_values;
 //            printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
 //            printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
 
@@ -63,7 +64,11 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         }
     }
 
-    relInfo[relName].colStats[column] = *newStatistics;
+    relInfo[relName].colStats[column].min_value = newStatistics->min_value;
+    relInfo[relName].colStats[column].max_value = newStatistics->max_value;
+    relInfo[relName].colStats[column].value_count = newStatistics->value_count;
+    relInfo[relName].colStats[column].discrete_values = newStatistics->discrete_values;
+
     free(newStatistics);
 
     //cost is measured by number of elements
@@ -124,8 +129,16 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
 //    printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
 //    printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
 
-    relInfo[relName1].colStats[column1] = *newStatistics;
-    relInfo[relName2].colStats[column2] = *newStatistics;
+    relInfo[relName1].colStats[column1].min_value = newStatistics->min_value;
+    relInfo[relName1].colStats[column1].max_value = newStatistics->max_value;
+    relInfo[relName1].colStats[column1].value_count = newStatistics->value_count;
+    relInfo[relName1].colStats[column1].discrete_values = newStatistics->discrete_values;
+
+    relInfo[relName2].colStats[column2].min_value = newStatistics->min_value;
+    relInfo[relName2].colStats[column2].max_value = newStatistics->max_value;
+    relInfo[relName2].colStats[column2].value_count = newStatistics->value_count;
+    relInfo[relName2].colStats[column2].discrete_values = newStatistics->discrete_values;
+
     free(newStatistics);
 
     //could be used for error handling
@@ -146,7 +159,7 @@ int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int valu
     return foundValue;
 }
 
-int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray){
+int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray, int relationNumber){
     int numOfFilters = 0;
 
     //to begin with, put all filter predicates in a list, and get their cost
@@ -172,5 +185,20 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
         relName = filterPredicates[i]->leftRelation->key;
         filterCost += getFilterStatistics(relInfo, filterPredicates[i], column, relationsArray[relName]);
         //printf("FILTER COST:%d\n", filterCost);
+    }
+
+    getOriginalStatistics(relInfo, relationsArray, relationNumber);
+}
+
+void getOriginalStatistics(struct relationInfo* relInfo, int* relationsArray, int relationNumber){
+    for(int i = 0; i < relationNumber; i++){
+        int relName = relationsArray[i];
+
+        for(int j = 0; j < relInfo[relName].num_cols; j++){
+            relInfo[relName].colStats[j].min_value = relInfo[relName].colStats[j].original_min_value;
+            relInfo[relName].colStats[j].max_value = relInfo[relName].colStats[j].original_max_value;
+            relInfo[relName].colStats[j].value_count = relInfo[relName].colStats[j].original_value_count;
+            relInfo[relName].colStats[j].discrete_values = relInfo[relName].colStats[j].original_discrete_values;
+        }
     }
 }
