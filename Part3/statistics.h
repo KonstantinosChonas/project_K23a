@@ -11,8 +11,8 @@ typedef struct columnStatistics{
     uint64_t discrete_values;
 }columnStatistics;
 
-int getFilterStatistics(struct relationInfo* relInfo,struct predicate* curPred, int column, int relName, columnStatistics* newStatistics);
-int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, columnStatistics* newStatistics);
+int getFilterStatistics(struct relationInfo* relInfo,struct predicate* curPred, int column, int relName);
+int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2);
 int valueExistsInColumn(struct relationInfo* relInfo, int column, int relName, int value);
 
 #endif //SIG18_STATISTICS_H

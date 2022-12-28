@@ -400,11 +400,11 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 relationDelete(result);
                 continue;
             }
-            printf("%d ", checksum);
-            // numBuffer[0] = '\0';
-            // sprintf(numBuffer, "%d ", checksum);
-            // strcat(resultBuffer, numBuffer);
-            relationDelete(result);
+            //printf("%d ", checksum);
+             numBuffer[0] = '\0';
+             sprintf(numBuffer, "%d ", checksum);
+             strcat(resultBuffer, numBuffer);
+             relationDelete(result);
         }
         strcat(resultBuffer, "\n");
         //printf("\n");

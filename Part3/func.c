@@ -605,29 +605,29 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
 
     //printRelation(newR);
 /*              freeing memory for histograms               */
-    relationDelete(sHist);
-    relationDelete(rHist);
-    for (int i=0 ; i<numOfThreads ; i++){
-        relationDelete(threadRelationsR[i]);
-        relationDelete(threadRelationsS[i]);
-        relationDelete(h[i].relR);
-        relationDelete(h[i].relS);
-        relationDelete(h[i].histR);
-        relationDelete(h[i].histS);
-    }
-
-
-    free(h);
-
-    free(threadRelationsR);
-    free(threadRelationsS);
-
-    free(tarray->threads);
-    free(tarray);
-
-
-    free(histResultR);
-    free(histResultS);
+//    relationDelete(sHist);
+//    relationDelete(rHist);
+//    for (int i=0 ; i<numOfThreads ; i++){
+//        relationDelete(threadRelationsR[i]);
+//        relationDelete(threadRelationsS[i]);
+//        relationDelete(h[i].relR);
+//        relationDelete(h[i].relS);
+//        relationDelete(h[i].histR);
+//        relationDelete(h[i].histS);
+//    }
+//
+//
+//    free(h);
+//
+//    free(threadRelationsR);
+//    free(threadRelationsS);
+//
+//    free(tarray->threads);
+//    free(tarray);
+//
+//
+//    free(histResultR);
+//    free(histResultS);
 
 /*                          done                           */
     relation* largerR = NULL;
