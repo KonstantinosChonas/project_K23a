@@ -18,8 +18,8 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         if(valueExistsInColumn(relInfo, column, relName, filterValue)){
             newStatistics->discrete_values = 1;
             newStatistics->value_count = relInfo[relName].colStats[column].value_count / relInfo[relName].colStats[column].discrete_values;
-            printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
-            printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+//            printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
+//            printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
 
         }else {
             newStatistics->discrete_values = 0;
@@ -36,8 +36,8 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         newStatistics->max_value = filterValue;
         newStatistics->discrete_values = (uint64_t)((float)((float) (relInfo[relName].colStats[column].max_value - filterValue) / (float) ( relInfo[relName].colStats[column].max_value - relInfo[relName].colStats[column].min_value) ) * (float)relInfo[relName].colStats[column].discrete_values);
         newStatistics->value_count =  (uint64_t)((float) ((float)(relInfo[relName].colStats[column].max_value - filterValue) / (float) ( relInfo[relName].colStats[column].max_value - relInfo[relName].colStats[column].min_value) ) * (float)relInfo[relName].colStats[column].value_count);
-        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
-        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+//        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
+//        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
     }
 
     if(filter == '>'){
@@ -61,8 +61,10 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
 
     relInfo[relName].colStats[column] = *newStatistics;
     free(newStatistics);
-    //could be used for error handling
-    return 1;
+
+    //cost is measured by number of elements
+    //printf("returned cost: %ld\n", relInfo[relName].colStats[column].value_count);
+    return relInfo[relName].colStats[column].value_count;
 }
 
 int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2){
@@ -138,4 +140,33 @@ int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int valu
         }
     }
     return foundValue;
+}
+
+int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray){
+    int numOfFilters = 0;
+
+    //to begin with, put all filter predicates in a list, and get their cost
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateList[i]->isFilter == 1){
+            numOfFilters++;
+        }
+    }
+    predicate* filterPredicates[numOfFilters];
+    int counter = 0;
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateList[i]->isFilter == 1){
+            filterPredicates[counter++] = predicateList[i];
+        }
+    }
+
+    int column = 0;
+    int relName = 0;
+    int filterCost = 0;
+
+    for(int i = 0; i < numOfFilters; i++){
+        column = filterPredicates[i]->leftRelation->payloadList->data;
+        relName = filterPredicates[i]->leftRelation->key;
+        filterCost += getFilterStatistics(relInfo, filterPredicates[i], column, relationsArray[relName]);
+        //printf("FILTER COST:%d\n", filterCost);
+    }
 }

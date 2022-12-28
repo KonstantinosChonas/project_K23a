@@ -153,17 +153,21 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
 
         for(i = 0; i < predicateCounter; i++){
             predicateStructArray[i] = createPredicate(predicatesArray[i], i);
-            if(predicateStructArray[i]->operation == '>'){
-                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key]);
-            }else{
-                if(predicateStructArray[i]->isFilter != 1){
-                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key]);
 
-                }
-            }
+            //            if(predicateStructArray[i]->operation == '>'){
+//                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key]);
+//            }else{
+//                if(predicateStructArray[i]->isFilter != 1){
+//                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key]);
+//
+//                }
+//            }
 
             // printf("predicate: %s, isFilter: %d\n",predicateStructArray[i]->predicate,predicateStructArray[i]->isFilter);
         }
+
+        //calling joinEnumeration to find optimal order for predicates
+        int error = joinEnumeration(predicateStructArray, relInfo, predicateCounter, relationsArray);
 
         // for(i = 0; i < predicateCounter; i++){               //TODO edo prokalei thema na to eleutheroso argotera
         //     free(predicatesArray[i]);
