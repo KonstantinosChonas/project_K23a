@@ -1,3 +1,4 @@
+#include "int.h"
 #ifndef SIG18_STATISTICS_H
 #define SIG18_STATISTICS_H
 

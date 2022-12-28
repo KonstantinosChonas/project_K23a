@@ -391,20 +391,18 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         for(int i = 0; i < projectionCounter; i++){
             projRel = atoi(strtok(projectionsArray[i], "."));
             projCol = atoi(strtok(NULL, "\0"));
-            //printf("GET SUM OF COLUMN %d FROM RELATION %d OF FILE r%d\n", projCol, projRel, relationsArray[projRel]);
             relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
             checksum = getSumRelation(result);
             if(checksum <= 0){
-                //printf("NULL ");
                 strcat(resultBuffer, "NULL ");
                 relationDelete(result);
                 continue;
             }
             //printf("%d ", checksum);
-             numBuffer[0] = '\0';
-             sprintf(numBuffer, "%d ", checksum);
-             strcat(resultBuffer, numBuffer);
-             relationDelete(result);
+            numBuffer[0] = '\0';
+            sprintf(numBuffer, "%d ", checksum);
+            strcat(resultBuffer, numBuffer);
+            relationDelete(result);
         }
         strcat(resultBuffer, "\n");
         //printf("\n");
