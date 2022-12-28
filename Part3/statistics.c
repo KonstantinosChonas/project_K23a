@@ -17,7 +17,11 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         newStatistics->max_value = filterValue;
         if(valueExistsInColumn(relInfo, column, relName, filterValue)){
             newStatistics->discrete_values = 1;
-            newStatistics->value_count = relInfo[relName].colStats[column].value_count / relInfo[relName].colStats[column].discrete_values;
+
+            //compromise in case discrete values of a column is 0
+            if(relInfo[relName].colStats[column].discrete_values == 0){
+                newStatistics->value_count = relInfo[relName].colStats[column].value_count / 1;
+            }else newStatistics->value_count = relInfo[relName].colStats[column].value_count / relInfo[relName].colStats[column].discrete_values;
 //            printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
 //            printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
 
