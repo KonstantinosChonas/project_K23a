@@ -5,7 +5,7 @@
 #include "statistics.h"
 
 typedef struct predicate{
-    /* for predicate tuples, data contains column, and payload contains relation */
+    /* for predicate tuples, data contains column, and key contains relation */
     tuple* leftRelation;
     tuple* rightRelation;
     int leftRel;        //if predicate is 0.1=3.2 then leftRel=0

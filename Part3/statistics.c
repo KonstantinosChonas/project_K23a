@@ -142,7 +142,7 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
     free(newStatistics);
 
     //could be used for error handling
-    return 1;
+    return relInfo[relName1].colStats[column1].value_count;
 }
 
 int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int value){
@@ -161,19 +161,28 @@ int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int valu
 
 int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray, int relationNumber){
     int numOfFilters = 0;
+    int numOfJoins = 0;
+    int predicateOrder[predicateNumber];
+
+    for(int i = 0; i < predicateNumber; i++){
+        predicateOrder[i] = i;
+    }
 
     //to begin with, put all filter predicates in a list, and get their cost
     for(int i = 0; i < predicateNumber; i++){
         if(predicateList[i]->isFilter == 1){
             numOfFilters++;
-        }
+        }else numOfJoins++;
     }
     predicate* filterPredicates[numOfFilters];
-    int counter = 0;
+    predicate* joinPredicates[numOfJoins];
+    int filterCounter = 0;
+    int joinCounter = 0;
+
     for(int i = 0; i < predicateNumber; i++){
         if(predicateList[i]->isFilter == 1){
-            filterPredicates[counter++] = predicateList[i];
-        }
+            filterPredicates[filterCounter++] = predicateList[i];
+        }else joinPredicates[joinCounter++] = predicateList[i];
     }
 
     int column = 0;
@@ -187,8 +196,27 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
         //printf("FILTER COST:%d\n", filterCost);
     }
 
+    getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder);
+
     getOriginalStatistics(relInfo, relationsArray, relationNumber);
 }
+
+int getOptimalPredicateOrder(struct predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray, int relationNumber, int* optimalOrder){
+    int predicateCost[predicateNumber];
+
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateList[i]->isFilter == 0){
+//            printf("rel1: %d\n", predicateList[i]->leftRelation->key);
+//            printf("rel2: %d\n", predicateList[i]->rightRelation->key);
+
+            predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], predicateList[i]->leftRelation->key, predicateList[i]->rightRelation->key);
+//            printf("predicate cost: %d\n", predicateCost[i]);
+        }
+        getOriginalStatistics(relInfo, relationsArray, relationNumber);
+
+    }
+}
+
 
 void getOriginalStatistics(struct relationInfo* relInfo, int* relationsArray, int relationNumber){
     for(int i = 0; i < relationNumber; i++){
@@ -202,3 +230,4 @@ void getOriginalStatistics(struct relationInfo* relInfo, int* relationsArray, in
         }
     }
 }
+
