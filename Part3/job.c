@@ -17,7 +17,15 @@ JobScheduler* initialize_scheduler(int execution_threads){
 	return sch;
 }
 
+Job* createJob(void *(*function)(void* arg),void* arguments){
 
+	Job *j=malloc(sizeof(Job));
+
+	j->function=function;
+	j->arguments=arguments;
+	j->next=NULL;
+	return j;
+}
 
 int destroy_scheduler(JobScheduler* sch){
 	Job* currentJob = sch->q->front;
@@ -52,14 +60,32 @@ int wait_all_tasks_finish(JobScheduler* sch){
     while(sch->q!=NULL)
         execute_all_jobs(sch);
 
-    return 0;
+
+	// for(int i=0 ; i<sch->execution_threads ; i++){
+	// 	if(!pthread_join())
+
+	// }
+
+
+    return EXIT_SUCCESS;
 
 }
 
 int execute_all_jobs(JobScheduler* sch){
-    
-}
 
+	Job *j;
+
+	while(1){
+		pthread_mutex_lock(&sch->lock);
+		j=dequeue(sch->q);
+		pthread_mutex_unlock(&sch->lock);
+
+		if (j){		//returned non-NULL
+			j->function(j->arguments);
+		}
+		else return EXIT_SUCCESS;	//nothing to execute
+	}
+}
 
 
 Queue* createQueue() {
@@ -68,7 +94,7 @@ Queue* createQueue() {
     return q;
 }
 
-enqueue(struct Queue* q, Job* job) {
+void enqueue(struct Queue* q, Job* job) {
     Job* temp = job;
     // temp->data = data;
     temp->next = NULL;
@@ -88,4 +114,44 @@ Job* dequeue(Queue* q) {
     if (q->front == NULL)
         q->rear = NULL;
     return temp;
+}
+
+
+
+
+threadPool* initialize_threadPool(int numOfThreads){
+	
+
+	if(numOfThreads==0)
+		return NULL;
+
+
+	threadPool* pool = malloc(sizeof(threadPool));
+
+	pool->numOfThreads=numOfThreads;
+	pool->numOfFree=0;
+	pool->numOfWorkingThreads=0;
+
+
+	pool->threads=malloc(numOfThreads*sizeof(pthread_t));
+
+	if(pthread_mutex_init(&pool->lock, NULL) != 0){
+		deleteThreadPool(&pool);
+		return NULL;
+	}
+
+	for(int i=0; i < numOfThreads; i++){
+		pthread_create(&pool->threads[i], NULL, (void *) execute_all_jobs, &pool->threads[i]);
+		pthread_detach(pool->threads[i]);
+	}
+
+	return pool;
+
+}
+
+void deleteThreadPool(threadPool* pool){
+
+	pthread_mutex_destroy(&pool->lock);
+	free(pool);
+
 }

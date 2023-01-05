@@ -1,5 +1,16 @@
 #include "int.h"
 
+typedef struct threadPool{
+
+    int numOfThreads;
+    pthread_t* threads;
+    int numOfFree; //number of free threads
+    int numOfWorkingThreads;
+    pthread_mutex_t lock;
+
+}threadPool;
+
+
 typedef struct Job{
     void (*function)(void* arg);
 	void* arguments;
@@ -26,6 +37,13 @@ int submit_job(JobScheduler* sch, Job* j);
 int execute_all_jobs(JobScheduler* sch);
 int wait_all_tasks_finish(JobScheduler* sch);
 int destroy_scheduler(JobScheduler* sch);
+
+
+threadPool* initialize_threadPool(int numOfThreads)
+
+
+
+
 
 Queue* createQueue();
 
