@@ -202,11 +202,11 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder);
 
-//    printf("OPTIMAL PREDICATE ORDER: ");
-//    for(int i = 0; i < predicateNumber; i++){
-//        printf("%d ", predicateOrder[i]);
-//    }
-//    printf(" (-1 means that precicate is filter and should be done first)\n");
+    printf("OPTIMAL PREDICATE ORDER: ");
+    for(int i = 0; i < predicateNumber; i++){
+        printf("%d ", predicateOrder[i]);
+    }
+    printf(" (-1 means that precicate is filter and should be done first)\n");
     getOriginalStatistics(relInfo, relationsArray, relationNumber);
 }
 
@@ -226,7 +226,7 @@ int getOptimalPredicateOrder(struct predicate** predicateList, struct relationIn
                 doneFlag = 0;
                 predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], predicateList[i]->leftRelation->key, predicateList[i]->rightRelation->key);
 //            printf("predicate cost: %d\n", predicateCost[i]);
-                getOriginalStatistics(relInfo, relationsArray, relationNumber);
+                //getOriginalStatistics(relInfo, relationsArray, relationNumber);
             }
         }
     }
