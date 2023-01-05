@@ -102,6 +102,7 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
     int n = combinedMax - combinedMin + 1;
     combinedCount = (uint64_t)((float)(relInfo[relName1].colStats[column1].value_count * relInfo[relName2].colStats[column2].value_count) / (float) n);
 
+    //printf("COMBINED:%ld\n", relInfo[relName1].colStats[column1].value_count);
     newStatistics->value_count = combinedCount;
 
     combinedDiscrete = (uint64_t)((float)(relInfo[relName1].colStats[column1].discrete_values * relInfo[relName2].colStats[column2].discrete_values) / (float) n);
@@ -165,7 +166,7 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
     int predicateOrder[predicateNumber];
 
     for(int i = 0; i < predicateNumber; i++){
-        predicateOrder[i] = i;
+        predicateOrder[i] = -1;
     }
 
     //to begin with, put all filter predicates in a list, and get their cost
@@ -196,25 +197,71 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
         //printf("FILTER COST:%d\n", filterCost);
     }
 
+    //temp fix because sometimes getFilterStatistics gives 0
+    getOriginalStatistics(relInfo, relationsArray, relationNumber);
+
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder);
 
+//    printf("OPTIMAL PREDICATE ORDER: ");
+//    for(int i = 0; i < predicateNumber; i++){
+//        printf("%d ", predicateOrder[i]);
+//    }
+//    printf(" (-1 means that precicate is filter and should be done first)\n");
     getOriginalStatistics(relInfo, relationsArray, relationNumber);
 }
 
 int getOptimalPredicateOrder(struct predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray, int relationNumber, int* optimalOrder){
     int predicateCost[predicateNumber];
+    int doneFlag = 1;
+    for(int i = 0; i < predicateNumber; i++){
+        predicateCost[i] = -1;
+    }
 
     for(int i = 0; i < predicateNumber; i++){
         if(predicateList[i]->isFilter == 0){
 //            printf("rel1: %d\n", predicateList[i]->leftRelation->key);
 //            printf("rel2: %d\n", predicateList[i]->rightRelation->key);
 
-            predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], predicateList[i]->leftRelation->key, predicateList[i]->rightRelation->key);
+            if(optimalOrder[i] == - 1){
+                doneFlag = 0;
+                predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], predicateList[i]->leftRelation->key, predicateList[i]->rightRelation->key);
 //            printf("predicate cost: %d\n", predicateCost[i]);
+                getOriginalStatistics(relInfo, relationsArray, relationNumber);
+            }
         }
-        getOriginalStatistics(relInfo, relationsArray, relationNumber);
-
     }
+
+    int minPredicateCost = -1;
+    int index = -1;
+
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateCost[i] != -1){
+            if(minPredicateCost == -1){
+                minPredicateCost = predicateCost[i];
+                index = i;
+            }else{
+                if(minPredicateCost > predicateCost[i]){
+                    minPredicateCost = predicateCost[i];
+                    index = i;
+                }
+            }
+        }
+    }
+
+    //if doneFlag = 1, it means that all join predicates have been ordered and the function just returns 0
+    if(!doneFlag){
+        int counter = 0;
+        for(int i = 0; i < predicateNumber; i++){
+            if(optimalOrder[i] != -1){
+                counter++;
+            }
+        }
+        optimalOrder[index] = counter;
+
+        minPredicateCost += getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, optimalOrder);
+    }else minPredicateCost = 0;
+
+    return minPredicateCost;
 }
 
 
