@@ -167,7 +167,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
         }
 
         //calling joinEnumeration to find optimal order for predicates
+//        printf("%s\n", predicateStructArray[0]->predicate);
         int error = joinEnumeration(predicateStructArray, relInfo, predicateCounter, relationsArray, relationCounter);
+//        printf("%s\n\n", predicateStructArray[0]->predicate);
 
         // for(i = 0; i < predicateCounter; i++){               //TODO edo prokalei thema na to eleutheroso argotera
         //     free(predicatesArray[i]);

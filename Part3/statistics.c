@@ -202,11 +202,25 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder);
 
-    printf("OPTIMAL PREDICATE ORDER: ");
+//    printf("OPTIMAL PREDICATE ORDER: ");
+//    for(int i = 0; i < predicateNumber; i++){
+//        printf("%d ", predicateOrder[i]);
+//    }
+//    printf(" (-1 means that precicate is filter and should be done first)\n");
+
+    int newIndex = -1;
+    predicate* tempPredList[predicateNumber];
     for(int i = 0; i < predicateNumber; i++){
-        printf("%d ", predicateOrder[i]);
+        tempPredList[i] = predicateList[i];
     }
-    printf(" (-1 means that precicate is filter and should be done first)\n");
+
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateOrder[i] != -1){
+            newIndex = predicateOrder[i];
+            //tempPred = predicateList[i];
+            predicateList[i] = tempPredList[newIndex];
+        }
+    }
     getOriginalStatistics(relInfo, relationsArray, relationNumber);
 }
 
