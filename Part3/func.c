@@ -467,12 +467,14 @@ void * histWithThread(void *args)
     h->histR=createHist(h->relR,h->nR);
 
     h->histS=createHist(h->relS,h->nS);
+    sem_post(&h->lock);
     // printf("exiting thread\n");
-    pthread_exit(NULL);
+    // pthread_exit(NULL);
+    return NULL;
 }
 
 
-relation* PartitionedHashJoin(relation *relR, relation *relS){
+relation* PartitionedHashJoin(relation *relR, relation *relS, JobScheduler* sch){
 
     if(relR->num_tuples <= 0 || relS->num_tuples <= 0){
         return NULL;
@@ -568,12 +570,14 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
 
         h[i].histR=NULL;
         h[i].histS=NULL;
-
-        pthread_create(&tarray->threads[i] , NULL, histWithThread, (void *)&h[i]);
+        sem_init(&h[i].lock, 0, 1);
+        Job* j=createJob(histWithThread,&h[i]);
+        submit_job(sch->q,j);   
+        // pthread_create(&tarray->threads[i] , NULL, histWithThread, (void *)&h[i]);
     }
 
     for (int i=0 ; i<numOfThreads ; i++)
-    pthread_join(tarray->threads[i],NULL);
+        sem_wait(&h[i].lock);   //wait untill every part of the histogram is ready
 
 
 
@@ -610,6 +614,7 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
     for (int i=0 ; i<numOfThreads ; i++){
         relationDelete(threadRelationsR[i]);
         relationDelete(threadRelationsS[i]);
+        sem_destroy(&h[i].lock);
     }
 
     free(h);
@@ -676,6 +681,12 @@ relation* PartitionedHashJoin(relation *relR, relation *relS){
     }
 
     hashDelete(hashMapArray);
+
+    sch->isFinished=1;
+
+    for (int i=0 ; i<sch->numOfThreads ; i++)
+        pthread_join(sch->thread_ids[i],NULL);
+
 
     return result;
 

@@ -3,17 +3,18 @@
 
 JobScheduler* initialize_scheduler(int execution_threads){
 	JobScheduler* sch = malloc(sizeof(JobScheduler));
-	sch->q->front = NULL;
-	sch->q->rear = NULL;
-	sch->execution_threads = 0;
-	if(pthread_mutex_init(&(sch->lock),NULL)!=0){   //if error destroy
-		destroyJobPool(&sch);
-		return NULL;
+	sch->q=createQueue();
+
+	sch->numOfThreads = execution_threads;
+	sch->thread_ids=malloc(execution_threads*sizeof(pthread_t));
+	sch->isFinished=0;
+	for(int i=0 ; i<execution_threads ; i++){
+
+		pthread_create(&sch->thread_ids[i], NULL, threadFun, sch);
+
 	}
-	if(pthread_cond_init(&(sch->notEmpty),NULL)!=0){    //if error destroy
-		destroy_scheduler(&sch);
-		return NULL;
-	}
+
+
 	return sch;
 }
 
@@ -37,9 +38,6 @@ int destroy_scheduler(JobScheduler* sch){
 		free(tempJob);
 	}
 	sch->q->front = NULL;
-	sch->execution_threads = 0;
-	pthread_mutex_destroy(&(sch->lock));
-    pthread_cond_destroy(&(sch->notEmpty));
 	free(sch);
 	sch = NULL;
     return 1;
@@ -47,11 +45,14 @@ int destroy_scheduler(JobScheduler* sch){
 
 
 int submit_job(JobScheduler* sch, Job* j){
-	pthread_mutex_lock(&(sch->lock));
+	// pthread_mutex_lock(&(sch->lock));
+	sem_wait(&queue_lock);
 	enqueue(sch->q,j);
-	sch->execution_threads++;
-	pthread_cond_signal(&sch->notEmpty);
-	pthread_mutex_unlock(&(sch->lock));
+	sem_post(&queue_full);
+	sem_post(&queue_lock);
+	// pthread_cond_signal(&sch->notEmpty);
+	// pthread_mutex_unlock(&(sch->lock));
+	return EXIT_SUCCESS;
 }
 
 
@@ -71,19 +72,40 @@ int wait_all_tasks_finish(JobScheduler* sch){
 
 }
 
-int execute_all_jobs(JobScheduler* sch){
+int execute_all_jobs(JobScheduler* sch){		//agnoise 
 
 	Job *j;
 
 	while(1){
-		pthread_mutex_lock(&sch->lock);
 		j=dequeue(sch->q);
-		pthread_mutex_unlock(&sch->lock);
 
 		if (j){		//returned non-NULL
 			j->function(j->arguments);
 		}
 		else return EXIT_SUCCESS;	//nothing to execute
+	}
+}
+
+
+void threadFun(JobScheduler* sch){
+	while (1) {
+		// Wait until there is a job in the queue
+		sem_wait(&queue_full);
+
+		// Acquire lock on the queue
+		sem_wait(&queue_lock);
+
+		// Remove a job from the queue
+		Job *j = dequeue(sch->q);
+
+		// Release lock on the queue
+		sem_post(&queue_lock);
+
+
+		//Execute job
+		j->function(j->arguments);
+
+		if (sch->isFinished && sch->q==NULL) pthread_exit(NULL);
 	}
 }
 
@@ -119,39 +141,39 @@ Job* dequeue(Queue* q) {
 
 
 
-threadPool* initialize_threadPool(int numOfThreads){
+// threadPool* initialize_threadPool(int numOfThreads){
 	
 
-	if(numOfThreads==0)
-		return NULL;
+// 	if(numOfThreads==0)
+// 		return NULL;
 
 
-	threadPool* pool = malloc(sizeof(threadPool));
+// 	threadPool* pool = malloc(sizeof(threadPool));
 
-	pool->numOfThreads=numOfThreads;
-	pool->numOfFree=0;
-	pool->numOfWorkingThreads=0;
+// 	pool->numOfThreads=numOfThreads;
+// 	pool->numOfFree=0;
+// 	pool->numOfWorkingThreads=0;
 
 
-	pool->threads=malloc(numOfThreads*sizeof(pthread_t));
+// 	pool->threads=malloc(numOfThreads*sizeof(pthread_t));
 
-	if(pthread_mutex_init(&pool->lock, NULL) != 0){
-		deleteThreadPool(&pool);
-		return NULL;
-	}
+// 	if(pthread_mutex_init(&pool->lock, NULL) != 0){
+// 		deleteThreadPool(&pool);
+// 		return NULL;
+// 	}
 
-	for(int i=0; i < numOfThreads; i++){
-		pthread_create(&pool->threads[i], NULL, (void *) execute_all_jobs, &pool->threads[i]);
-		pthread_detach(pool->threads[i]);
-	}
+// 	for(int i=0; i < numOfThreads; i++){
+// 		pthread_create(&pool->threads[i], NULL, (void *) execute_all_jobs, &pool->threads[i]);
+// 		pthread_detach(pool->threads[i]);
+// 	}
 
-	return pool;
+// 	return pool;
 
-}
+// }
 
-void deleteThreadPool(threadPool* pool){
+// void deleteThreadPool(threadPool* pool){
 
-	pthread_mutex_destroy(&pool->lock);
-	free(pool);
+// 	pthread_mutex_destroy(&pool->lock);
+// 	free(pool);
 
-}
+// }

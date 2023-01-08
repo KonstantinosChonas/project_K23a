@@ -8,8 +8,20 @@
 #include<unistd.h>
 #include <time.h>
 #include <pthread.h>
+#include <semaphore.h>
+#include "job.h"
 #include "statistics.h"
 
+
+
+
+/*  Semaphores  */
+ 
+sem_t queue_lock;   //lock the queue before accessing 
+sem_t queue_full;   //used for threads to wait until there is a job to be done
+
+
+/*--------------*/
 
 #define L2 256000      /* bits of information stored in L2 cache memory */
 #define N_DISCRETE 50000000   /* maximum value of discrete values (50.000.000) apo ekfwnish */
@@ -44,6 +56,7 @@ typedef struct histThreadArgs{
     int nS;
     relation* histR;
     relation *histS;
+    sem_t   lock;
     // pthread_t id;
 
 }histThreadArgs;
@@ -70,7 +83,7 @@ relation* inputFromFile(char* s);
 
 
 /** Partitioned Hash Join**/
-relation* PartitionedHashJoin(relation *relR, relation *relS);
+relation* PartitionedHashJoin(relation *relR, relation *relS,JobScheduler* sch);
 
 
 /**Our Hash Function**/

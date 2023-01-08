@@ -18,7 +18,7 @@ typedef struct predicate{
     int done;
 } predicate;
 
-int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum);
+int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum,JobScheduler* sch);
 int isFilter(char* str);
 int sameRel(char* predicate);
 relation* relationInfoToRelation(relationInfo* relin,int column);

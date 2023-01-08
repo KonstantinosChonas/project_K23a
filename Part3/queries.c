@@ -5,7 +5,7 @@
 #include "queries.h"
 #include "intermediate.h"
 
-int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
+int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, JobScheduler* sch){
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
@@ -257,7 +257,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
                         *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
                         
-                        relation *res=PartitionedHashJoin(rel1,rel2);
+                        relation *res=PartitionedHashJoin(rel1,rel2,sch);
                         if(res == NULL){
                             break;
                         }
@@ -285,7 +285,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                         //printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
                         // printRelation(rel2);
 
-                        relation *res=PartitionedHashJoin(rel1,rel2);
+                        relation *res=PartitionedHashJoin(rel1,rel2,sch);
                         if(res == NULL){
                             // printf("its null\n");
                             relationDelete(rel1);
@@ -361,7 +361,7 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum){
                 }
                 else{
                     relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-                    relation *res=PartitionedHashJoin(rel1,rel2);
+                    relation *res=PartitionedHashJoin(rel1,rel2,sch);
                     if(res == NULL){
                         break;
                     }

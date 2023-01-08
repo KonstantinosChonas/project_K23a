@@ -9,6 +9,16 @@
 int main (int argc, char* argv[]){
 
     printf("starting main\n");
+    int numOfthreads=4;
+
+    sem_init(&queue_lock, 0, 1);
+    sem_init(&queue_full, 0, 0);
+
+
+
+
+    JobScheduler* JS=initialize_scheduler(numOfthreads);
+
 
     relationInfo* relInfo = NULL;
     int relationNum;
@@ -34,13 +44,16 @@ int main (int argc, char* argv[]){
     }
 
 
-    int i = parseQueries(queries, relInfo, relationNum);
+    int i = parseQueries(queries, relInfo, relationNum,JS);
     //int i = parseQueries("workloads/small/small.work", relInfo, relationNum);
-
-
     //these should be a function
     // free(rowids->relArray);
     // free(rowids);
+
+
+    sem_destroy(&queue_lock);
+    sem_destroy(&queue_full);
+
 
     relationInfoDelete(relInfo, relationNum);
 
