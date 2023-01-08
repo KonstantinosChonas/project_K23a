@@ -1,5 +1,5 @@
-main: main.c input.c func.c hash.c queries.c intermediate.c parser.c statistics.c
-	gcc  -o main main.c input.c func.c hash.c queries.c intermediate.c parser.c statistics.c  -I. -pthread -g -lm 
+main: main.c input.c func.c hash.c queries.c intermediate.c parser.c statistics.c job.c
+	gcc  -o main main.c input.c func.c hash.c queries.c intermediate.c parser.c statistics.c job.c -I. -pthread -g -lm 
 
 all: run
 

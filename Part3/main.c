@@ -2,9 +2,15 @@
 #include "intermediate.h"
 #include "int.h"
 #include "statistics.h"
+// #include "job.h"
 #include <time.h>
 #include <stdio.h>
 #include <unistd.h>
+
+// sem_t queue_lock;   //lock the queue before accessing 
+// sem_t queue_full;   //used for threads to wait until there is a job to be done
+
+
 
 int main (int argc, char* argv[]){
 

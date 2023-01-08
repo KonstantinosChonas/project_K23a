@@ -1,5 +1,6 @@
 #include "int.h"
 #include "hash.h"
+// #include "job.h"
 #include <math.h>
 
 
@@ -571,8 +572,8 @@ relation* PartitionedHashJoin(relation *relR, relation *relS, JobScheduler* sch)
         h[i].histR=NULL;
         h[i].histS=NULL;
         sem_init(&h[i].lock, 0, 1);
-        Job* j=createJob(histWithThread,&h[i]);
-        submit_job(sch->q,j);   
+        Job* j=createJob((void*)histWithThread,&h[i]);
+        submit_job(sch,j);   
         // pthread_create(&tarray->threads[i] , NULL, histWithThread, (void *)&h[i]);
     }
 

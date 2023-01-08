@@ -9,16 +9,14 @@
 #include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "job.h"
 #include "statistics.h"
-
-
+#include "job.h"
 
 
 /*  Semaphores  */
  
-sem_t queue_lock;   //lock the queue before accessing 
-sem_t queue_full;   //used for threads to wait until there is a job to be done
+// sem_t queue_lock;   //lock the queue before accessing 
+// sem_t queue_full;   //used for threads to wait until there is a job to be done
 
 
 /*--------------*/

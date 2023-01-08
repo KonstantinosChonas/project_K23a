@@ -1,6 +1,9 @@
 #include "job.h"
 
 
+sem_t queue_lock;   //lock the queue before accessing 
+sem_t queue_full;   //used for threads to wait until there is a job to be done
+
 JobScheduler* initialize_scheduler(int execution_threads){
 	JobScheduler* sch = malloc(sizeof(JobScheduler));
 	sch->q=createQueue();
@@ -18,7 +21,7 @@ JobScheduler* initialize_scheduler(int execution_threads){
 	return sch;
 }
 
-Job* createJob(void *(*function)(void* arg),void* arguments){
+Job* createJob(void (*function)(void* arg),void* arguments){
 
 	Job *j=malloc(sizeof(Job));
 
@@ -87,7 +90,8 @@ int execute_all_jobs(JobScheduler* sch){		//agnoise
 }
 
 
-void threadFun(JobScheduler* sch){
+void* threadFun(void* arg){
+	JobScheduler* sch=(JobScheduler*)arg;
 	while (1) {
 		// Wait until there is a job in the queue
 		sem_wait(&queue_full);
@@ -177,3 +181,4 @@ Job* dequeue(Queue* q) {
 // 	free(pool);
 
 // }
+
