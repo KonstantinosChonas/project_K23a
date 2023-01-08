@@ -153,17 +153,32 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
 
         for(i = 0; i < predicateCounter; i++){
             predicateStructArray[i] = createPredicate(predicatesArray[i], i);
-            if(predicateStructArray[i]->operation == '>'){
-                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key]);
-            }else{
-                if(predicateStructArray[i]->isFilter != 1){
-                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key]);
 
-                }
-            }
+            //            if(predicateStructArray[i]->operation == '>'){
+//                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key]);
+//            }else{
+//                if(predicateStructArray[i]->isFilter != 1){
+//                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key]);
+//
+//                }
+//            }
 
             // printf("predicate: %s, isFilter: %d\n",predicateStructArray[i]->predicate,predicateStructArray[i]->isFilter);
         }
+
+//        for(int i = 0; i < predicateCounter; i++){
+//            printf("%s&", predicateStructArray[i]->predicate);
+//        }
+//        printf("\n");
+
+
+        //calling joinEnumeration to find optimal order for predicates
+        int error = joinEnumeration(predicateStructArray, relInfo, predicateCounter, relationsArray, relationCounter);
+
+        //        for(int i = 0; i < predicateCounter; i++){
+//            printf("%s&", predicateStructArray[i]->predicate);
+//        }
+//        printf("\n\n");
 
         // for(i = 0; i < predicateCounter; i++){               //TODO edo prokalei thema na to eleutheroso argotera
         //     free(predicatesArray[i]);
@@ -398,14 +413,14 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
                 relationDelete(result);
                 continue;
             }
-            printf("%d ", checksum);
+            //printf("%d ", checksum);
             numBuffer[0] = '\0';
             sprintf(numBuffer, "%d ", checksum);
             strcat(resultBuffer, numBuffer);
             relationDelete(result);
         }
         strcat(resultBuffer, "\n");
-        printf("\n");
+        //printf("\n");
         //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 
         intermediateDelete(rowidarray);

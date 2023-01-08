@@ -60,6 +60,8 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         for(int j = 0;  j < relInfo[i].num_cols; j++){
             relInfo[i].columns[j] = malloc(relInfo[i].num_tuples * sizeof(uint64_t));
             relInfo[i].colStats[j].value_count = relInfo[i].num_tuples;
+            relInfo[i].colStats[j].original_value_count = relInfo[i].num_tuples;
+
 
             for(int k = 0; k < relInfo[i].num_tuples; k++){
                 fread(&relInfo[i].columns[j][k], sizeof(uint64_t), 1, relationFile);
@@ -74,7 +76,10 @@ relationInfo* parseRelations(char* workPath, int* numRel){
                 }
             }
             relInfo[i].colStats[j].min_value = min;
+            relInfo[i].colStats[j].original_min_value = min;
+
             relInfo[i].colStats[j].max_value = max;
+            relInfo[i].colStats[j].original_max_value = max;
 
             /* using min and max values to get discrete values */
             uint64_t discreteValues = 0;
@@ -96,6 +101,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
                 }
             }
             relInfo[i].colStats[j].discrete_values = discreteValues;
+            relInfo[i].colStats[j].original_discrete_values = discreteValues;
         }
 
         fclose(relationFile);
