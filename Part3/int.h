@@ -9,6 +9,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
+// #include "queries.h"
 #include "statistics.h"
 #include "job.h"
 

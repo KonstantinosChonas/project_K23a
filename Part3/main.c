@@ -15,7 +15,7 @@
 int main (int argc, char* argv[]){
 
     printf("starting main\n");
-    int numOfthreads=4;
+    int numOfthreads=1;
 
     sem_init(&queue_lock, 0, 1);
     sem_init(&queue_full, 0, 0);
@@ -49,7 +49,7 @@ int main (int argc, char* argv[]){
         queries = "workloads/small/small.work";
     }
 
-
+    printf("before parse Queries\n");
     int i = parseQueries(queries, relInfo, relationNum,JS);
     //int i = parseQueries("workloads/small/small.work", relInfo, relationNum);
     //these should be a function
@@ -59,6 +59,7 @@ int main (int argc, char* argv[]){
 
     sem_destroy(&queue_lock);
     sem_destroy(&queue_full);
+
 
 
     relationInfoDelete(relInfo, relationNum);

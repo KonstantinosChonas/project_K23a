@@ -7,10 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include<unistd.h>
+#include <unistd.h>
 #include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include "int.h"
+#include "queries.h"
 
 
 extern sem_t queue_lock;   //lock the queue before accessing 
@@ -39,6 +41,22 @@ typedef struct Queue{
     Job* rear;
 }Queue;
 
+typedef struct str{
+    char data[100];
+    struct str* next;
+
+}str;
+
+typedef struct resultQ{
+    str* front;
+    str* rear;
+    sem_t lock;
+
+}resultQ;
+
+
+
+
 
 typedef struct JobScheduler{
     int numOfThreads;
@@ -46,6 +64,14 @@ typedef struct JobScheduler{
     pthread_t* thread_ids; // thread pool
     int isFinished;
 }JobScheduler;
+
+
+typedef struct queryThreadArgs{
+    char* line;
+    resultQ* q;
+    struct relationInfo* relInfo; 
+    JobScheduler* sch;
+}queryThreadArgs;
 
 JobScheduler* initialize_scheduler(int execution_threads);
 int submit_job(JobScheduler* sch, Job* j);
@@ -57,15 +83,16 @@ Job* createJob(void (*function)(void* arg),void* arguments);
 threadPool* initialize_threadPool(int numOfThreads);
 
 void* threadFun(void* arg);
+void* queryFun(void* args);
 
 
-
-Queue* createQueue();
-
-void enqueue(Queue* q, Job*);
-
-Job* dequeue(Queue* q);
-
-
+Queue* createQueue();           //for job queue
+void enqueue(Queue* q, Job*);   //for job queue
+Job* dequeue(Queue* q);         //for job queue
+resultQ* initializeQ();          //for resultQ
+void push(resultQ *q,str* new); //for resultQ
+str* pop(resultQ *q);           //for resultQ
+void deleteQ(Queue *q);
+void deleteresultQ(resultQ *q);
 
 #endif

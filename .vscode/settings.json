@@ -3,6 +3,8 @@
         "stdlib.h": "c",
         "job.h": "c",
         "statistics.h": "c",
-        "int.h": "c"
+        "int.h": "c",
+        "stdio.h": "c",
+        "string.h": "c"
     }
 }

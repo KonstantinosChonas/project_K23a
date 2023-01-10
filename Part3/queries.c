@@ -27,6 +27,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
         exit(EXIT_FAILURE);
     }
 
+    int query_counter=0;
+    resultQ *q=initializeQ();
+
     while((read = getline(&line, &len, fp)) != -1){
         int isValid = 1;        //used to determine if the query contains formatting errors
 
@@ -34,418 +37,49 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
 
         if(strcmp(endCheck,"F") == 0){
         //    printf("continuing to next query set...\n");
-            printf("%s", resultBuffer);
-            resultBuffer[0] = '\0';
+            // printf("%s", resultBuffer);
+            // resultBuffer[0] = '\0';
             continue;
         }
+        query_counter++;
 
-        token = strtok(line, "|");
-        relations = token;
-        // printf("relations: %s\n", relations);
+        queryThreadArgs* args=malloc(sizeof(queryThreadArgs));
 
-        token = strtok(NULL, "|");
-        predicates = token;
-        // printf("predicates: %s\n", predicates);
+        args->sch=sch;
+        args->q=q;
+        // strcpy(args->line,line);
+        args->line=line;
+        args->relInfo=relInfo;
 
-        token = strtok(NULL, "\n");
-        projections = token;
-        // printf("projections: %s\n", projections);
 
+        Job* j=createJob((void*)queryFun,args);
 
-        /* code for relation handling */
 
-        // printf("Start of relation handling\n");
 
 
-        int relationCounter = 0;
-        char tempRelations[20];
-        strcpy(tempRelations, relations);
-        // printf("%s\n", tempRelations);
-        token = strtok(tempRelations, " \t");
-        relationCounter++;
-        while(token != NULL){
-            token = strtok(NULL, " \t");
-            if(token == NULL){
-                break;
-            }
-            relationCounter++;
-        }
-        int relationsArray[relationCounter];
-
-        token = strtok(relations, " \t");
-        relationsArray[0] = atoi(token);
-
-        int i = 1;
-        while(token != NULL){
-            token = strtok(NULL, " \t");
-            if(token == NULL){
-                break;
-            }
-            relationsArray[i] = atoi(token);
-            i++;
-        }
-
-        relationInfo usedRelations[relationCounter];
-
-        //get appropriate relations from relInfo and put them in usedRelations in correct order
-        for(i = 0; i < relationCounter; i++){
-            usedRelations[i] = relInfo[relationsArray[i]];
-//            printf("PRINTING VALUE %d FROM RELATION: %d\n", usedRelations[i].columns[0][100], relationsArray[i]);
-        }
-
-        /* code for predicates handling */
-
-        // printf("Start of predicate handling\n");
-
-        int predicateCounter = 0;
-        char tempPredicates[50];
-        strcpy(tempPredicates, predicates);
-        //printf("TEMPPEICAT$ES:%s\n", tempPredicates);
-
-        token = strtok(tempPredicates, "&");
-        predicateCounter++;
-        while(token != NULL){
-            
-            token = strtok(NULL, "&");
-
-            if(token == NULL){
-                break;
-            }
-            predicateCounter++;
-        }
-
-        char* predicatesArray[predicateCounter+1];
-        for(int j = 0; j < predicateCounter; j++){
-            predicatesArray[j] = malloc(50 * sizeof(char));
-        }
-
-        i = 0;
-
-        token = strtok(predicates, "&");
-        strcpy(predicatesArray[0], token);
-        //printf("PREDICATESARRAY[%d]= %s \n",i,token);
-//        if(isFilter(predicatesArray[i])){
-//                    printf("predicate: %s, is filter\n", predicatesArray[i]);
-//                }else
-//                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
-            
-        
-        while(token != NULL){
-            
-            token = strtok(NULL, "&");
-
-            if(token == NULL){
-                break;
-            }
-            else{
-                i++;
-                strcpy(predicatesArray[i], token);
-//                printf("PREDICATESARRAY[%d]= %s \n",i,token);
-//                if(isFilter(predicatesArray[i])){
-//                    printf("predicate: %s, is filter\n", predicatesArray[i]);
-//                }else
-//                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
-            }
-        }
-        
-
-        predicate* predicateStructArray[predicateCounter];
-
-        for(i = 0; i < predicateCounter; i++){
-            predicateStructArray[i] = createPredicate(predicatesArray[i], i);
-
-            //            if(predicateStructArray[i]->operation == '>'){
-//                getFilterStatistics(relInfo, predicateStructArray[i], predicateStructArray[i]->leftRelation->payloadList->data, relationsArray[predicateStructArray[i]->leftRelation->key]);
-//            }else{
-//                if(predicateStructArray[i]->isFilter != 1){
-//                    getJoinStatistics(relInfo, predicateStructArray[i], relationsArray[predicateStructArray[i]->leftRelation->key], relationsArray[predicateStructArray[i]->rightRelation->key]);
-//
-//                }
-//            }
-
-            // printf("predicate: %s, isFilter: %d\n",predicateStructArray[i]->predicate,predicateStructArray[i]->isFilter);
-        }
-
-//        for(int i = 0; i < predicateCounter; i++){
-//            printf("%s&", predicateStructArray[i]->predicate);
-//        }
-//        printf("\n");
-
-
-        //calling joinEnumeration to find optimal order for predicates
-        int error = joinEnumeration(predicateStructArray, relInfo, predicateCounter, relationsArray, relationCounter);
-
-        //        for(int i = 0; i < predicateCounter; i++){
-//            printf("%s&", predicateStructArray[i]->predicate);
-//        }
-//        printf("\n\n");
-
-        // for(i = 0; i < predicateCounter; i++){               //TODO edo prokalei thema na to eleutheroso argotera
-        //     free(predicatesArray[i]);
-        // }
-
-        /* code for projection handling */
-
-        // printf("Start of projection handling\n");
-
-        int projectionCounter = 0;
-        char tempProjections[50];
-        strcpy(tempProjections, projections);
-        token = strtok(tempProjections, " \t");
-        projectionCounter++;
-        while(token != NULL){
-            token = strtok(NULL, " \t");
-            if(token == NULL){
-                break;
-            }
-            projectionCounter++;
-        }
-        char* projectionsArray[projectionCounter];
-
-        token = strtok(projections, " \t");
-        projectionsArray[0] = malloc(50 * sizeof(char));
-        strcpy(projectionsArray[0], token);
-
-        // printf("%s\n", projectionsArray[0]);
-
-
-        i = 1;
-        while(token != NULL){
-            token = strtok(NULL, " \t");
-            if(token == NULL){
-                break;
-            }
-            projectionsArray[i] = malloc(50 * sizeof(char));
-            strcpy(projectionsArray[i], token);
-            // printf("%s\n", projectionsArray[i]);
-            i++;
-        }
-        /*          adding to inermediate           */
-/*----------------------------------------------------------------*/
-        intermediate *rowidarray=intermediateCreate(relationCounter);
-
-        //printf("NUM OF RELATIONS=%d\n",relationCounter);
-        int empty=1;
-
-        int done_counter=0;
-
-
-        for(int i=0 ; i<predicateCounter ; i++)                 // apply filter first
-        {
-            if ( predicateStructArray[i]->isFilter==1)
-            {
-                empty=0;
-                applyFilter(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],rowidarray,predicateStructArray[i]->predicate);
-                predicateStructArray[i]->done=1;
-                done_counter++;
-            }
-        }
-
-        //printf("key %d, payload %d\n",predicateStructArray[0]->leftRelation->key,predicateStructArray[0]->leftRelation->payloadList->data);
-
-        while(done_counter!=predicateCounter){
-
-
-            for(int i=0 ; i<predicateCounter ; i++){
-                // printf("CURRENT PREDICATE %s predicate counter %d, done counter %d \n", predicateStructArray[i]->predicate, predicateCounter,done_counter);
-                if (predicateStructArray[i]->done==1) continue;
-                //printf("first\n");
-                if (empty==0){
-//                    if(sameRel(predicatesArray[i])){
-//                        selfJoin(relInfo, rowidarray, predicateStructArray[i]);
-//                        predicateStructArray[i]->done=1;
-//                        done_counter++;
-//                        continue;
-//                    }
-                    // printf("2\n");
-                    // if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL)
-                    // printf("blabla\n");
-                    if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL && (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL)){
-                    //    printf("3\n");
-                        if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
-                            continue;
-                        }
-                        //only left is null
-                        // printf(" done %s\n",predicatesArray[i]);
-                        predicateStructArray[i]->done=1;
-                        done_counter++;
-                        relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),
-                        *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
-                        
-                        relation *res=PartitionedHashJoin(rel1,rel2,sch);
-                        if(res == NULL){
-                            break;
-                        }
-                        if(biggerRel(rel1,rel2)){
-                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
-                        }
-                        else
-                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
-
-                        relationDelete(rel1);
-                        relationDelete(rel2);
-                        relationDelete(res);
-                    }
-                    else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
-                        // printf("4\n");
-                        //only right is null
-                        // printf("4\n");
-                        // printf(" 2done %s\n",predicatesArray[i]);
-                        // printIntermediate(rowidarray);
-                        predicateStructArray[i]->done=1;
-                        done_counter++;
-                        // printf("predicate done %s\n",predicatesArray[i]);
-                        relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
-                        *rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-                        //printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
-                        // printRelation(rel2);
-
-                        relation *res=PartitionedHashJoin(rel1,rel2,sch);
-                        if(res == NULL){
-                            // printf("its null\n");
-                            relationDelete(rel1);
-                            relationDelete(rel2);
-                            done_counter=predicateCounter;
-                            break;
-                        }
-                        // printRelation(res);
-                        //printf("hello2\n");
-                        //printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-                        if(biggerRel(rel1,rel2)){
-                            //printf("hello3\n");
-                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
-                        }
-                        else    
-                            rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
-                        //printf("done with everything\n");
-                        //printf("rowidarray num relations : %d\n",rowidarray->num_relations);
-
-                        //printIntermediate(rowidarray);
-                        relationDelete(rel1);
-                        relationDelete(rel2);
-                        relationDelete(res);
-                    }
-                    else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
-                        // printf("5\n");
-                        //none of them is null both of them are in the rowidarray
-                        // printf(" done %s\n",predicatesArray[i]);
-                        predicateStructArray[i]->done=1;
-                        done_counter++;
-                        relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel),
-                        *rel2=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data,predicateStructArray[i]->rightRel);
-
-
-                        // relation *res=PartitionedHashJoin(rel1,rel2);
-                        int count=0;
-                        for (int i=0; i<rel1->num_tuples ; i++){
-
-                            if (rel1->tuples[i].payloadList->data==rel2->tuples[i].payloadList->data)
-                            count++;
-                        }
-                        intermediate *newidarray=intermediateCreate(rowidarray->num_relations);
-
-                        newidarray->num_rows=count;
-                        for (int i=0 ; i<rowidarray->num_relations ; i++){
-
-                            if (rowidarray->row_ids[i]!=NULL)
-                                newidarray->row_ids[i]=malloc(count*sizeof(int));
-
-                        }
-
-                        int insert=0;
-                        for( int i=0 ; i<rowidarray->num_rows ; i++){
-                            if (rel1->tuples[i].payloadList->data==rel2->tuples[i].payloadList->data){
-
-                                for(int j=0 ; j<newidarray->num_relations ; j++){
-                                    if (newidarray->row_ids[j]!=NULL){
-                                            newidarray->row_ids[j][insert]=rowidarray->row_ids[j][i];
-                                            // printf("%d\n",newidarray->row_ids[j][insert]);
-                                    }
-    
-                                }
-                                insert++;
-                            }
-
-                        }
-                        intermediateDelete(rowidarray);
-                        rowidarray=newidarray;
-
-                        relationDelete(rel1);
-                        relationDelete(rel2);
-                    }
-                }
-                else{
-                    relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-                    relation *res=PartitionedHashJoin(rel1,rel2,sch);
-                    if(res == NULL){
-                        break;
-                    }
-                    if (biggerRel(rel1,rel2)){
-                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
-
-                    }
-                    else{
-                        rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
-                    }
-                    // printf("predicate done %s\n",predicatesArray[i]);
-                    predicateStructArray[i]->done=1;
-                    done_counter++;
-                    empty=0;
-                    relationDelete(rel1);
-                    relationDelete(rel2);
-                    relationDelete(res);
-                }
-
-            }
-        }
-
-        int projRel = 0;
-        int projCol = 0;
-        int checksum = 0;
-        //printIntermediate(rowidarray);
-        for(int i = 0; i < projectionCounter; i++){
-            projRel = atoi(strtok(projectionsArray[i], "."));
-            projCol = atoi(strtok(NULL, "\0"));
-            relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
-            checksum = getSumRelation(result);
-            if(checksum <= 0){
-                strcat(resultBuffer, "NULL ");
-                relationDelete(result);
-                continue;
-            }
-            //printf("%d ", checksum);
-            numBuffer[0] = '\0';
-            sprintf(numBuffer, "%d ", checksum);
-            strcat(resultBuffer, numBuffer);
-            relationDelete(result);
-        }
-        strcat(resultBuffer, "\n");
-        //printf("\n");
-        //TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
-
-        intermediateDelete(rowidarray);
-        // return 1;
-/*----------------------------------------------------------------*/
-        /*            end of  intermediate          */
-        //freeing memory used in query
-        if(projectionsArray != NULL){
-            for(int j = 0; j < i; j++){
-                free(projectionsArray[j]);
-            }
-        }
-
-        for(i = 0; i < predicateCounter; i++){
-            if(predicateStructArray[i]->rightRelation != NULL){
-                tupleDelete(predicateStructArray[i]->rightRelation);
-            }
-
-            if(predicateStructArray[i]->leftRelation != NULL){
-                tupleDelete(predicateStructArray[i]->leftRelation);
-            }
-            free(predicateStructArray[i]);
-            free(predicatesArray[i]);
-        }
     }
+
+
+
+    while(query_counter){
+
+        sem_wait(&q->lock);
+
+        str* s=pop(q);
+
+        sem_post(&q->lock);
+
+        printf("%s\n",s->data);
+
+        free(s);
+
+        query_counter--;
+    }
+
+
+
+
+/*          here            */
 
     printf("all done with query handling\n");
 
