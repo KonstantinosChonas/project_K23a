@@ -6,7 +6,7 @@
 #include "intermediate.h"
 
 int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, JobScheduler* sch){
-    char *line = NULL;
+    char* line;
     size_t len = 0;
     ssize_t read;
     char *token;
@@ -47,30 +47,34 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
 
         args->sch=sch;
         args->q=q;
-        // strcpy(args->line,line);
-        args->line=line;
+        strcpy(args->line,line);
+        // args->line=line;
         args->relInfo=relInfo;
+
+
+        // printf("before creating job %s\n",args->line);
 
 
         Job* j=createJob((void*)queryFun,args);
 
+        
+        submit_job(sch,j);
 
-
-
+        // if(query_counter==1) break;
     }
-
 
 
     while(query_counter){
 
-        sem_wait(&q->lock);
+        sem_wait(&q->full);     //wait until there is something in the queue
 
+
+
+        sem_wait(&q->lock);
         str* s=pop(q);
 
         sem_post(&q->lock);
-
         printf("%s\n",s->data);
-
         free(s);
 
         query_counter--;
@@ -87,6 +91,8 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
     if (line){
         free(line);
     }
+
+    printf("helloooo\n");
 }
 
 

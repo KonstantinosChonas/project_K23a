@@ -55,13 +55,13 @@ int main (int argc, char* argv[]){
     //these should be a function
     // free(rowids->relArray);
     // free(rowids);
-
-
+    JS->isFinished=1;
+    printf("after parseq\n");
     sem_destroy(&queue_lock);
     sem_destroy(&queue_full);
 
+    printf("after parseq1\n");
 
-
-    relationInfoDelete(relInfo, relationNum);
-
+    // relationInfoDelete(relInfo, relationNum);        //error: command terminated by signal 6 corrupted size vs. prev_size
+    printf("after parseq2\n");
 }

@@ -259,7 +259,7 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
 
 relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
 
-    printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN FOR SUM: %d RELNAME :%d\n",column,relname);
+    // printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN FOR SUM: %d RELNAME :%d\n",column,relname);
     relation *rel=createEmptyRelation(rowidarray->num_rows);
 
     int keyCheck[rowidarray->num_rows];
@@ -301,13 +301,13 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
 
 relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
-    //printf("THIS IS RELATIONINFOTOREALTION\n");
+    printf("THIS IS RELATIONINFOTOREALTION\n");
     //printf("relin->numtuples: %d\n",relin->num_tuples);
 
     relation* rel=createEmptyRelation(relin->num_tuples);
 
 
-    //printf("rel->numtuples: %d\n",rel->num_tuples);
+    printf("rel->numtuples: %d\n",rel->num_tuples);
     for (int i=0 ; i<relin->num_tuples ; i++){
         rel->tuples[i].key=i;
         // printf("relin->columns[column][i] : %d, i:%d, column:%d\n",relin->columns[column][i],i,column);

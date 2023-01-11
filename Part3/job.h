@@ -11,8 +11,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include "int.h"
-#include "queries.h"
+
 
 
 extern sem_t queue_lock;   //lock the queue before accessing 
@@ -51,7 +50,7 @@ typedef struct resultQ{
     str* front;
     str* rear;
     sem_t lock;
-
+    sem_t full;
 }resultQ;
 
 
@@ -67,7 +66,7 @@ typedef struct JobScheduler{
 
 
 typedef struct queryThreadArgs{
-    char* line;
+    char line[100];
     resultQ* q;
     struct relationInfo* relInfo; 
     JobScheduler* sch;
