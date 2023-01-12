@@ -147,35 +147,116 @@ Job* dequeue(Queue* q) {
 }
 
 
-resultQ* initializeQ() {
-    resultQ* q = (resultQ*)malloc(sizeof(Queue));
-    q->front = q->rear = NULL;
+resultQ* initializeQ()  {
+	resultQ* q = (resultQ*)malloc(sizeof(resultQ));
+    q->size = 0;
+	q->capacity=10;
+	q->heap = (Element *)malloc(q->capacity * sizeof(Element));
 	sem_init(&q->lock, 0, 1);
 	sem_init(&q->full,0,0);
-    return q;
+	return q;
 }
 
-void push(resultQ* q,str* new){
-    str* temp=new;
-	
-    temp->next = NULL;
-    if (q->rear == NULL) {
-        q->front = q->rear = temp;
-        return;
+
+// {
+//     resultQ* q = (resultQ*)malloc(sizeof(resultQ));
+//     q->front = q->rear = NULL;
+// 	sem_init(&q->lock, 0, 1);
+// 	sem_init(&q->full,0,0);
+//     return q;
+// }
+
+void push(resultQ* q,Element e){
+    if (q->size == q->capacity) {
+        increaseCapacity(q);
     }
-    q->rear->next = temp;
-    q->rear = temp;
+    q->heap[q->size] = e;
+    moveUp(q, q->size);
+    q->size++;
 }
 
-str* pop(resultQ* q) {
-    if (q->front == NULL)
-        return NULL;
-    str* temp = q->front;
-    q->front = q->front->next;
-    if (q->front == NULL)
-        q->rear = NULL;
-    return temp;
+
+
+// {
+//     str* temp=new;
+	
+//     temp->next = NULL;
+//     if (q->rear == NULL) {
+//         q->front = q->rear = temp;
+//         return;
+//     }
+//     q->rear->next = temp;
+//     q->rear = temp;
+// }
+
+Element pop(resultQ* q) {
+    Element top = q->heap[0];
+    q->size--;
+    q->heap[0] = q->heap[q->size];
+    moveDown(q, 0);
+    if((q->capacity > 1) && (q->size <= q->capacity/4)) {
+        q->capacity /= 2;
+        Element *new_heap = (Element *)realloc(q->heap, q->capacity * sizeof(Element));
+        q->heap = new_heap;
+    }
+    return top;
 }
+int compare(Element a, Element b) {
+    return a.priority < b.priority;
+}
+
+// Swap elements at index i and j in the heap array
+void swap(Element *heap, int i, int j) {
+    Element temp = heap[i];
+    heap[i] = heap[j];
+    heap[j] = temp;
+}
+
+// Increase the capacity of the heap array
+void increaseCapacity(resultQ *q) {
+    q->capacity *= 2;
+    Element *new_heap = (Element *)realloc(q->heap, q->capacity * sizeof(Element));
+    q->heap = new_heap;
+}
+
+// Move element at index i in the heap array up the heap until it is in the correct position
+void moveUp(resultQ *q, int i) {
+    int parent = (i - 1) / 2;
+    if (parent >= 0 && compare(q->heap[i], q->heap[parent])) {
+        swap(q->heap, i, parent);
+        moveUp(q, parent);
+    }
+}
+
+// Move element at index i in the heap array down the heap until it is in the correct position
+void moveDown(resultQ *q, int i) {
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    int smallest = i;
+
+    if (left < q->size && compare(q->heap[left], q->heap[i])) {
+        smallest = left;
+    }
+    if (right < q->size && compare(q->heap[right], q->heap[smallest])) {
+        smallest = right;
+    }
+    if (smallest != i) {
+        swap(q->heap, i, smallest);
+        moveDown(q, smallest);
+    }
+}
+
+
+
+// {
+//     if (q->front == NULL)
+//         return NULL;
+//     str* temp = q->front;
+//     q->front = q->front->next;
+//     if (q->front == NULL)
+//         q->rear = NULL;
+//     return temp;
+// }
 
 
 void* queryFun(void* args){
@@ -185,54 +266,70 @@ void* queryFun(void* args){
 	char* line;
 
 
-	printf("start of query fun \n");
 
 
 	// strcpy(line,temp->line);
 	line=temp->line;
 
-	if(strcmp(line,"F")==0){printf("returned because of F\n");return NULL;}
-	printf("line: %s\n",line);
+	if(strcmp(line,"F")==0){return NULL;}
 
 	resultQ *q=temp->q;
 
 	relationInfo* relInfo=temp->relInfo;
 	JobScheduler* sch=temp->sch;
+	int priority=temp->priority;
 
 	char *token;
-    char *endCheck;
-    FILE *fp;
-    char resultBuffer[1000] = "";
-    char numBuffer[50] = "";
+	char *endCheck;
+	FILE *fp;
+	char resultBuffer[200] = "";
+	char numBuffer[50] = "";
 
-    char* relations;
-    char* predicates;
-    char* projections;
-	
-	
-	token = strtok(line, "|");
+	char* relations;
+	char* predicates;
+	char* projections;
+	char *saveptr;
+
+	token = strtok_r(line, "|", &saveptr);
 	relations = token;
 
-	token = strtok(NULL, "|");
+	token = strtok_r(NULL, "|", &saveptr);
 	predicates = token;
 
-	token = strtok(NULL, "\n");
+	token = strtok_r(NULL, "\n", &saveptr);
 	projections = token;
+	// char *token;
+    // char *endCheck;
+    // FILE *fp;
+    // char resultBuffer[200] = "";
+    // char numBuffer[50] = "";
+
+    // char* relations;
+    // char* predicates;
+    // char* projections;
+	
+	
+	// token = strtok(line, "|");
+	// relations = token;
+
+	// token = strtok(NULL, "|");
+	// predicates = token;
+
+	// token = strtok(NULL, "\n");
+	// projections = token;
 
 
 	/* code for relation handling */
 
 	// printf("Start of relation handling\n");
 
-
 	int relationCounter = 0;
 	char tempRelations[20];
 	strcpy(tempRelations, relations);
-	// printf("%s\n", tempRelations);
-	token = strtok(tempRelations, " \t");
+	token = strtok_r(tempRelations, " \t", &saveptr);
 	relationCounter++;
 	while(token != NULL){
-		token = strtok(NULL, " \t");
+		token = strtok_r(NULL, " \t", &saveptr);
 		if(token == NULL){
 			break;
 		}
@@ -240,21 +337,46 @@ void* queryFun(void* args){
 	}
 	int relationsArray[relationCounter];
 
-	token = strtok(relations, " \t");
+	token = strtok_r(relations, " \t", &saveptr);
 	relationsArray[0] = atoi(token);
 
 	int i = 1;
 	while(token != NULL){
-		token = strtok(NULL, " \t");
+		token = strtok_r(NULL, " \t", &saveptr);
 		if(token == NULL){
 			break;
 		}
 		relationsArray[i] = atoi(token);
 		i++;
 	}
+	// int relationCounter = 0;
+	// char tempRelations[20];
+	// strcpy(tempRelations, relations);
+	// token = strtok(tempRelations, " \t");
+	// relationCounter++;
+	// while(token != NULL){
+	// 	token = strtok(NULL, " \t");
+	// 	if(token == NULL){
+	// 		break;
+	// 	}
+	// 	relationCounter++;
+	// }
+	// int relationsArray[relationCounter];
+
+	// token = strtok(relations, " \t");
+	// relationsArray[0] = atoi(token);
+
+	// int i = 1;
+	// while(token != NULL){
+	// 	token = strtok(NULL, " \t");
+	// 	if(token == NULL){
+	// 		break;
+	// 	}
+	// 	relationsArray[i] = atoi(token);
+	// 	i++;
+	// }
 
 
-	printf("hello1 relation counter: %d\n",relationCounter);
 
 
 	// relationInfo usedRelations[relationCounter];
@@ -263,44 +385,38 @@ void* queryFun(void* args){
 	// for(i = 0; i < relationCounter; i++){
 	// 	usedRelations[i] = relInfo[relationsArray[i]];
 	// }
-		printf("hello2\n");
 
 	/* code for predicates handling */
 
 	// printf("Start of predicate handling\n");
-
 	int predicateCounter = 0;
 	char tempPredicates[50];
 	strcpy(tempPredicates, predicates);
-	printf("hello3\n");
 
-
-	token = strtok(tempPredicates, "&");
+	token = strtok_r(tempPredicates, "&", &saveptr);
 	predicateCounter++;
 	while(token != NULL){
-		
-		token = strtok(NULL, "&");
+
+		token = strtok_r(NULL, "&", &saveptr);
 
 		if(token == NULL){
 			break;
 		}
 		predicateCounter++;
 	}
-	printf("hello4\n");
 
 	char* predicatesArray[predicateCounter+1];
 	for(int j = 0; j < predicateCounter; j++){
-		predicatesArray[j] = malloc(50 * sizeof(char));
+		predicatesArray[j] = malloc(100 * sizeof(char));
 	}
 
 	i = 0;
 
-	token = strtok(predicates, "&");
+	token = strtok_r(predicates, "&", &saveptr);
 	strcpy(predicatesArray[0], token);
-	printf("hello5\n");
 	while(token != NULL){
-		
-		token = strtok(NULL, "&");
+
+		token = strtok_r(NULL, "&", &saveptr);
 
 		if(token == NULL){
 			break;
@@ -308,52 +424,86 @@ void* queryFun(void* args){
 		else{
 			i++;
 			strcpy(predicatesArray[i], token);
-//                printf("PREDICATESARRAY[%d]= %s \n",i,token);
-//                if(isFilter(predicatesArray[i])){
-//                    printf("predicate: %s, is filter\n", predicatesArray[i]);
-//                }else
-//                    printf("predicate: %s, is not filter\n", predicatesArray[i]);
 		}
 	}
-	printf("hello5.5\n");
 
 	predicate* predicateStructArray[predicateCounter];
-
 	for(i = 0; i < predicateCounter; i++){
 		predicateStructArray[i] = createPredicate(predicatesArray[i], i);
 
 	}
 
-	printf("hello5.6\n");
+	// int predicateCounter = 0;
+	// char tempPredicates[50];
+	// strcpy(tempPredicates, predicates);
+
+
+	// token = strtok(tempPredicates, "&");
+	// predicateCounter++;
+	// while(token != NULL){
+		
+	// 	token = strtok(NULL, "&");
+
+	// 	if(token == NULL){
+	// 		break;
+	// 	}
+	// 	predicateCounter++;
+	// }
+
+	// char* predicatesArray[predicateCounter+1];
+	// for(int j = 0; j < predicateCounter; j++){
+	// 	predicatesArray[j] = malloc(100 * sizeof(char));
+	// }
+
+	// i = 0;
+
+	// token = strtok(predicates, "&");
+	// strcpy(predicatesArray[0], token);
+	// while(token != NULL){
+		
+	// 	token = strtok(NULL, "&");
+
+	// 	if(token == NULL){
+	// 		break;
+	// 	}
+	// 	else{
+	// 		i++;
+	// 		strcpy(predicatesArray[i], token);
+	// 	}
+	// }
+
+	// predicate* predicateStructArray[predicateCounter];
+	// for(i = 0; i < predicateCounter; i++){
+	// 	predicateStructArray[i] = createPredicate(predicatesArray[i], i);
+
+	// }
+
 
 	/* code for projection handling */
 
 	// printf("Start of projection handling\n");
-
 	int projectionCounter = 0;
 	char tempProjections[50];
 	strcpy(tempProjections, projections);
-	token = strtok(tempProjections, " \t");
+	token = strtok_r(tempProjections, " \t", &saveptr);
 	projectionCounter++;
 	while(token != NULL){
-		token = strtok(NULL, " \t");
+		token = strtok_r(NULL, " \t", &saveptr);
 		if(token == NULL){
 			break;
 		}
 		projectionCounter++;
 	}
 	char* projectionsArray[projectionCounter];
-	printf("hello5.7\n");
-	token = strtok(projections, " \t");
+	token = strtok_r(projections, " \t", &saveptr);
 	projectionsArray[0] = malloc(50 * sizeof(char));
 	strcpy(projectionsArray[0], token);
 
 	// printf("%s\n", projectionsArray[0]);
 
-	printf("hello5.8\n");
 	i = 1;
 	while(token != NULL){
-		token = strtok(NULL, " \t");
+		token = strtok_r(NULL, " \t", &saveptr);
 		if(token == NULL){
 			break;
 		}
@@ -362,6 +512,36 @@ void* queryFun(void* args){
 		// printf("%s\n", projectionsArray[i]);
 		i++;
 	}
+	// int projectionCounter = 0;
+	// char tempProjections[50];
+	// strcpy(tempProjections, projections);
+	// token = strtok(tempProjections, " \t");
+	// projectionCounter++;
+	// while(token != NULL){
+	// 	token = strtok(NULL, " \t");
+	// 	if(token == NULL){
+	// 		break;
+	// 	}
+	// 	projectionCounter++;
+	// }
+	// char* projectionsArray[projectionCounter];
+	// token = strtok(projections, " \t");
+	// projectionsArray[0] = malloc(50 * sizeof(char));
+	// strcpy(projectionsArray[0], token);
+
+	// // printf("%s\n", projectionsArray[0]);
+
+	// i = 1;
+	// while(token != NULL){
+	// 	token = strtok(NULL, " \t");
+	// 	if(token == NULL){
+	// 		break;
+	// 	}
+	// 	projectionsArray[i] = malloc(50 * sizeof(char));
+	// 	strcpy(projectionsArray[i], token);
+	// 	// printf("%s\n", projectionsArray[i]);
+	// 	i++;
+	// }
 	/*          adding to intermediate           */
 /*----------------------------------------------------------------*/
 	intermediate *rowidarray=intermediateCreate(relationCounter);
@@ -370,7 +550,6 @@ void* queryFun(void* args){
 	int empty=1;
 
 	int done_counter=0;
-
 
 	for(int i=0 ; i<predicateCounter ; i++)                 // apply filter first
 	{
@@ -383,19 +562,13 @@ void* queryFun(void* args){
 		}
 	}
 
-	//printf("key %d, payload %d\n",predicateStructArray[0]->leftRelation->key,predicateStructArray[0]->leftRelation->payloadList->data);
-
 	while(done_counter!=predicateCounter){
 
-		// printf("hello\n");
 		for(int i=0 ; i<predicateCounter ; i++){
-			// printf("CURRENT PREDICATE %s predicate counter %d, done counter %d \n", predicateStructArray[i]->predicate, predicateCounter,done_counter);
 			if (predicateStructArray[i]->done==1) continue;
-			//printf("first\n");
 			if (empty==0){
 
 				if(rowidarray->row_ids[predicateStructArray[i]->leftRel]==NULL && (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL)){
-				   printf("3\n");
 					if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL){
 						continue;
 					}
@@ -421,42 +594,33 @@ void* queryFun(void* args){
 					relationDelete(res);
 				}
 				else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]==NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
-					printf("4\n");
 					//only right is null
 
 					predicateStructArray[i]->done=1;
-					printf("4.01\n");
 					done_counter++;
-					printf("4.02\n");
 					// printf("predicate done %s\n",predicatesArray[i]);
 					relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel);
-					printf("4.021\n");
 					relation* rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
 					//printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
 					// printRelation(rel2);
-					printf("4.1\n");
 					relation *res=PartitionedHashJoin(rel1,rel2,sch);
-					printf("4.2\n");
 					if(res == NULL){
 						relationDelete(rel1);
 						relationDelete(rel2);
 						done_counter=predicateCounter;
 						break;
 					}
-					printf("4.3\n");
 					if(biggerRel(rel1,rel2)){
 						// printf("hello3\n");
 						rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
 					}
 					else    
 						rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->leftRel,predicateStructArray[i]->rightRel);
-					printf("4.4\n");
 					relationDelete(rel1);
 					relationDelete(rel2);
 					relationDelete(res);
 				}
 				else if (rowidarray->row_ids[predicateStructArray[i]->rightRel]!=NULL && rowidarray->row_ids[predicateStructArray[i]->leftRel]!=NULL){
-					printf("5\n");
 					//none of them is null both of them are in the rowidarray
 
 					predicateStructArray[i]->done=1;
@@ -505,7 +669,6 @@ void* queryFun(void* args){
 				}
 			}
 			else{
-				printf("6\n");
 				relation *rel1=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data),*rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
 				relation *res=PartitionedHashJoin(rel1,rel2,sch);
 				if(res == NULL){
@@ -529,13 +692,13 @@ void* queryFun(void* args){
 
 		}
 	}
-	printf("hello6\n");
+
+
 	int projRel = 0;
 	int projCol = 0;
 	int checksum = 0;
 	for(int i = 0; i < projectionCounter; i++){
-		projRel = atoi(strtok(projectionsArray[i], "."));
-		projCol = atoi(strtok(NULL, "\0"));
+		sscanf(projectionsArray[i], "%d.%d", &projRel, &projCol);
 		relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
 		checksum = getSumRelation(result);
 		if(checksum <= 0){
@@ -548,17 +711,34 @@ void* queryFun(void* args){
 		strcat(resultBuffer, numBuffer);
 		relationDelete(result);
 	}
-	printf("hello7\n");
-	str *s=malloc(sizeof(str));
-	strcpy(s->data,resultBuffer);
-	s->next=NULL;
+	// int projRel = 0;
+	// int projCol = 0;
+	// int checksum = 0;
+	// for(int i = 0; i < projectionCounter; i++){
+	// 	projRel = atoi(strtok(projectionsArray[i], "."));
+	// 	projCol = atoi(strtok(NULL, "\0"));
+	// 	relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
+	// 	checksum = getSumRelation(result);
+	// 	if(checksum <= 0){
+	// 		strcat(resultBuffer, "NULL ");
+	// 		relationDelete(result);
+	// 		continue;
+	// 	}
+	// 	numBuffer[0] = '\0';
+	// 	sprintf(numBuffer, "%d ", checksum);
+	// 	strcat(resultBuffer, numBuffer);
+	// 	relationDelete(result);
+	// }
+	// str *s=malloc(sizeof(str));
+	Element e;
+	strcpy(e.data,resultBuffer);
+	e.priority=priority;
+	// s->next=NULL;
 	sem_wait(&q->lock);
-	push(q,s);
+	push(q,e);
 	sem_post(&q->full);
 	sem_post(&q->lock);
-	//printf("\n");
 	//TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
-	printf("hello8\n");
 	intermediateDelete(rowidarray);
 	// return 1;
 /*----------------------------------------------------------------*/
@@ -603,21 +783,21 @@ void deleteQ(Queue *q){
 }
 
 
-void deleteresultQ(resultQ* q){
+// void deleteresultQ(resultQ* q){
 
-	str* temp;
+// 	str* temp;
 
-	while(q->front!=NULL)
-	{
-		temp=q->front;
-		q->front=temp->next;
-		free(temp);
-	}
+// 	while(q->front!=NULL)
+// 	{
+// 		temp=q->front;
+// 		q->front=temp->next;
+// 		free(temp);
+// 	}
 
-	return;
+// 	return;
 
 
-}
+// }
 
 
 // threadPool* initialize_threadPool(int numOfThreads){

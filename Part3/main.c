@@ -29,7 +29,8 @@ int main (int argc, char* argv[]){
     relationInfo* relInfo = NULL;
     int relationNum;
 
-    char* relations = argv[1];
+    // char* relations = argv[1];
+    char* relations = "workloads/small/small.init";
     if(relations == NULL){
         relations = "workloads/small/small.init";
     }
@@ -44,7 +45,8 @@ int main (int argc, char* argv[]){
 //    printf("%d\n", relInfo[2].columns[5][3]);
     sleep(1);
     /* start of query reading */
-    char* queries = argv[2];
+    // char* queries = argv[2];
+    char* queries = "workloads/small/small.work";
     if(queries == NULL){
         queries = "workloads/small/small.work";
     }

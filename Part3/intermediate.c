@@ -302,7 +302,6 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
 relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
     //printf("THIS IS RELATIONINFOTOREALTION\n");
-    //printf("relin->numtuples: %d\n",relin->num_tuples);
 
     relation* rel=createEmptyRelation(relin->num_tuples);
 
@@ -310,17 +309,14 @@ relation* relationInfoToRelation(relationInfo* relin,int column){           // m
     //printf("rel->numtuples: %d\n",rel->num_tuples);
     for (int i=0 ; i<relin->num_tuples ; i++){
         rel->tuples[i].key=i;
-        // printf("relin->columns[column][i] : %d, i:%d, column:%d\n",relin->columns[column][i],i,column);
         relationPayloadList *new=malloc(sizeof(relationPayloadList));
         new->data=relin->columns[column][i];
 
         new->next=NULL;
         rel->tuples[i].payloadList=new;
-        // printf("payload is :%d\n",rel->tuples[i].payloadList->data);
     
     }
 
-    //printf("exiting relation info to relation\n");
 
     return rel;
 

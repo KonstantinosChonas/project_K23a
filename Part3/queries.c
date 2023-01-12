@@ -6,14 +6,13 @@
 #include "intermediate.h"
 
 int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, JobScheduler* sch){
-    char* line;
+    char* line=NULL;
     size_t len = 0;
     ssize_t read;
     char *token;
     char *endCheck;
     FILE *fp;
-    char resultBuffer[1000] = "";
-    char numBuffer[20] = "";
+
 
     char* relations;
     char* predicates;
@@ -29,13 +28,14 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
 
     int query_counter=0;
     resultQ *q=initializeQ();
-
+    queryThreadArgs* args[50];
     while((read = getline(&line, &len, fp)) != -1){
         int isValid = 1;        //used to determine if the query contains formatting errors
 
-        endCheck = strtok(line, "\n");
+        char* newline = strchr(line, '\n');
+        if (newline) *newline = '\0';
 
-        if(strcmp(endCheck,"F") == 0){
+        if(strcmp(line,"F") == 0){
         //    printf("continuing to next query set...\n");
             // printf("%s", resultBuffer);
             // resultBuffer[0] = '\0';
@@ -43,44 +43,77 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
         }
         query_counter++;
 
-        queryThreadArgs* args=malloc(sizeof(queryThreadArgs));
+        args[query_counter]=malloc(sizeof(queryThreadArgs));
 
-        args->sch=sch;
-        args->q=q;
-        strcpy(args->line,line);
+        args[query_counter]->sch=sch;
+        args[query_counter]->q=q;
+        strcpy(args[query_counter]->line,line);
         // args->line=line;
-        args->relInfo=relInfo;
+        args[query_counter]->relInfo=relInfo;
+        args[query_counter]->priority=query_counter;
 
+        // printf("before creating job %s
+        Job* j=createJob((void*)queryFun,args[query_counter]);
 
-        // printf("before creating job %s\n",args->line);
-
-
-        Job* j=createJob((void*)queryFun,args);
-
-        
+        // sleep(1);
         submit_job(sch,j);
-
-        // if(query_counter==1) break;
     }
+    // while((read = getline(&line, &len, fp)) != -1){
+    //     int isValid = 1;        //used to determine if the query contains formatting errors
+
+    //     endCheck = strtok(line, "\n");
+
+    //     if(strcmp(endCheck,"F") == 0){
+    //     //    printf("continuing to next query set...\n");
+    //         // printf("%s", resultBuffer);
+    //         // resultBuffer[0] = '\0';
+    //         continue;
+    //     }
+    //     query_counter++;
+
+    //     args[query_counter]=malloc(sizeof(queryThreadArgs));
+
+    //     args[query_counter]->sch=sch;
+    //     args[query_counter]->q=q;
+    //     strcpy(args[query_counter]->line,line);
+    //     // args->line=line;
+    //     args[query_counter]->relInfo=relInfo;
+    //     args[query_counter]->priority=query_counter;
+
+    //     // printf("before creating job %s\n",args->line);
+
+
+    //     Job* j=createJob((void*)queryFun,args[query_counter]);
+
+    //     // sleep(1);
+    //     submit_job(sch,j);
+
+    //     // if(query_counter==1) break;
+    // }
+
+        int value=0;
+        while(1){
+            sem_getvalue(&q->full,&value);
+            if(value==query_counter)
+                break;
+        }
 
 
     while(query_counter){
-
         sem_wait(&q->full);     //wait until there is something in the queue
 
 
 
         sem_wait(&q->lock);
-        str* s=pop(q);
+        Element e=pop(q);
 
         sem_post(&q->lock);
-        printf("%s\n",s->data);
-        free(s);
+        printf("%s\n",e.data);
 
         query_counter--;
     }
 
-
+    free(q);
 
 
 /*          here            */
@@ -216,20 +249,22 @@ predicate* createPredicate(char* predicateStr, int order){
 
     char* leftToken;
     char* rightToken;
-    leftToken = strtok(tempPredicates, "><=");
+
+    char *saveptr;
+    leftToken = strtok_r(tempPredicates, "><=", &saveptr);
     newPredicate->leftRel=returnRelation(leftToken);
-    rightToken = strtok(NULL, "\0");
+    rightToken = strtok_r(NULL, "\0", &saveptr);
     newPredicate->rightRel=returnRelation(rightToken);
-    char* leftRelationStr = strtok(leftToken, ".");
+    char* leftRelationStr = strtok_r(leftToken, ".", &saveptr);
     tuple* leftRelation = createTuple(atoi(leftRelationStr));
-    char* leftRelationColumnStr = strtok(NULL, "\0");
+    char* leftRelationColumnStr = strtok_r(NULL, "\0", &saveptr);
     leftRelation->payloadList->data = atoi(leftRelationColumnStr);
     newPredicate->leftRelation = leftRelation;
 
     if(isFilter != 1){
-        char* rightRelationStr = strtok(rightToken, ".");
+        char* rightRelationStr = strtok_r(rightToken, ".", &saveptr);
         tuple* rightRelation = createTuple(atoi(rightRelationStr));
-        char* rightRelationColumnStr = strtok(NULL, "\0");
+        char* rightRelationColumnStr = strtok_r(NULL, "\0", &saveptr);
         rightRelation->payloadList->data = atoi(rightRelationColumnStr);
         newPredicate->rightRelation = rightRelation;
     }else{
@@ -237,6 +272,30 @@ predicate* createPredicate(char* predicateStr, int order){
         newPredicate->value = atoi(rightToken);
     }
     newPredicate->order = order;
+    // printf("WHOLE TOKEN %s\n",tempPredicates);
+    // leftToken = strtok(tempPredicates, "><=");
+    // printf("LEFT TOKEN %s\n",leftToken);
+    // newPredicate->leftRel=returnRelation(leftToken);
+    // rightToken = strtok(NULL, "\0");
+    // printf("RIGHT TOKEN %s\n",rightToken);
+    // newPredicate->rightRel=returnRelation(rightToken);
+    // char* leftRelationStr = strtok(leftToken, ".");
+    // tuple* leftRelation = createTuple(atoi(leftRelationStr));
+    // char* leftRelationColumnStr = strtok(NULL, "\0");
+    // leftRelation->payloadList->data = atoi(leftRelationColumnStr);
+    // newPredicate->leftRelation = leftRelation;
+
+    // if(isFilter != 1){
+    //     char* rightRelationStr = strtok(rightToken, ".");
+    //     tuple* rightRelation = createTuple(atoi(rightRelationStr));
+    //     char* rightRelationColumnStr = strtok(NULL, "\0");
+    //     rightRelation->payloadList->data = atoi(rightRelationColumnStr);
+    //     newPredicate->rightRelation = rightRelation;
+    // }else{
+    //     newPredicate->rightRelation = NULL;
+    //     newPredicate->value = atoi(rightToken);
+    // }
+    // newPredicate->order = order;
 
 //    printf("now printing predicate struct %s:\nleft relation: %d, left column %d\n",predicateStr, newPredicate->leftRelation->key, newPredicate->leftRelation->payloadList->data);
 //    printf("isFilter: %d\n", newPredicate->isFilter);
@@ -248,7 +307,6 @@ predicate* createPredicate(char* predicateStr, int order){
 //    }else{
 //        printf("value: %d\n", newPredicate->value);
 //    }
-
     return newPredicate;
 }
 
@@ -267,14 +325,13 @@ int biggerRel(relation* rel1,relation* rel2){               /* rel1>rel2 return 
 
 int returnRelation(char *str){      // str is of type 0.1
     int rel=0;
-
     for (int i=0 ; str[i] ; i++){
         if (str[i]=='.')
             return rel;
-    rel=10*rel + str[i]-'0';
+        rel=10*rel + str[i]-'0';
     }
 
-
+    // return rel;
 }
 
 

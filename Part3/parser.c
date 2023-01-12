@@ -24,8 +24,9 @@ relationInfo* parseRelations(char* workPath, int* numRel){
     relationInfo* relInfo = NULL;
     char** fileLocations = NULL;
     while((read = getline(&line, &len, fp)) != -1){
-        lineStr = strtok(line, "\n");
-        if(strcmp(lineStr, "Done") == 0)
+        char* newline = strchr(line, '\n');
+        if (newline) *newline = '\0';
+        if(strcmp(line, "Done") == 0)
             break;
         fileLocations = realloc(fileLocations, (numRelations + 1) * sizeof (char**));
         fileLocations[numRelations] = malloc(strlen(line) + 1);
@@ -34,6 +35,17 @@ relationInfo* parseRelations(char* workPath, int* numRel){
 
         numRelations++;
     }
+    // while((read = getline(&line, &len, fp)) != -1){
+    //     lineStr = strtok(line, "\n");
+    //     if(strcmp(lineStr, "Done") == 0)
+    //         break;
+    //     fileLocations = realloc(fileLocations, (numRelations + 1) * sizeof (char**));
+    //     fileLocations[numRelations] = malloc(strlen(line) + 1);
+
+    //     strcpy(fileLocations[numRelations], line);
+
+    //     numRelations++;
+    // }
 
     fclose(fp);
     *numRel = numRelations;

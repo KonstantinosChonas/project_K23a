@@ -40,18 +40,29 @@ typedef struct Queue{
     Job* rear;
 }Queue;
 
-typedef struct str{
+// typedef struct str{
+//     char data[100];
+//     struct str* next;
+
+// }str;
+typedef struct {
+    int priority;
     char data[100];
-    struct str* next;
+} Element;
 
-}str;
-
-typedef struct resultQ{
-    str* front;
-    str* rear;
+typedef struct {
+    Element *heap;
+    int size;
+    int capacity;
     sem_t lock;
     sem_t full;
-}resultQ;
+} resultQ;
+// typedef struct resultQ{
+//     str* front;
+//     str* rear;
+//     sem_t lock;
+//     sem_t full;
+// }resultQ;
 
 
 
@@ -70,6 +81,7 @@ typedef struct queryThreadArgs{
     resultQ* q;
     struct relationInfo* relInfo; 
     JobScheduler* sch;
+    int priority;
 }queryThreadArgs;
 
 JobScheduler* initialize_scheduler(int execution_threads);
@@ -88,9 +100,16 @@ void* queryFun(void* args);
 Queue* createQueue();           //for job queue
 void enqueue(Queue* q, Job*);   //for job queue
 Job* dequeue(Queue* q);         //for job queue
+
+
 resultQ* initializeQ();          //for resultQ
-void push(resultQ *q,str* new); //for resultQ
-str* pop(resultQ *q);           //for resultQ
+void push(resultQ *q,Element e); //for resultQ
+void increaseCapacity(resultQ *q);//for resultQ
+Element pop(resultQ *q);           //for resultQ
+void moveUp(resultQ *q, int i);
+void moveDown(resultQ *q, int i);
+void swap(Element *heap, int i, int j);
+int compare(Element a, Element b);
 void deleteQ(Queue *q);
 void deleteresultQ(resultQ *q);
 
