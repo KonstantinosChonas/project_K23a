@@ -46,7 +46,7 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
     }
 
     if(filter == '>'){
-        if(relInfo[relName].colStats[column].min_value > filterValue){
+        if(statistics[relName][column].min_value > filterValue){
             filterValue = statistics[relName][column].min_value;
         }
         newStatistics->min_value = filterValue;
@@ -87,7 +87,7 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
     columnStatistics* newStatistics = malloc(sizeof(struct columnStatistics));
 
 
-    if(relInfo[relName1].colStats[column1].min_value < relInfo[relName2].colStats[column2].min_value){
+    if(statistics[relName1][column1].min_value < statistics[relName2][column2].min_value){
         combinedMin = statistics[relName2][column2].min_value;
     }else combinedMin = statistics[relName1][column1].min_value;
 
@@ -143,6 +143,7 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
     free(newStatistics);
 
     //could be used for error handling
+    //printf("RETURNING %d FOR REL %d COL %d\n", statistics[relName1][column1].value_count, relName1, column1);
     return statistics[relName1][column1].value_count;
 }
 
@@ -201,7 +202,7 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
 
 
     //temp fix because sometimes getFilterStatistics gives 0
-    getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
+    //getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder, statistics);
 
@@ -245,9 +246,9 @@ int getOptimalPredicateOrder(struct predicate** predicateList, struct relationIn
 
             if(optimalOrder[i] == - 1){
                 doneFlag = 0;
-                predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], predicateList[i]->leftRelation->key, predicateList[i]->rightRelation->key, statistics);
-//            printf("predicate cost: %d\n", predicateCost[i]);
-                //getOriginalStatistics(relInfo, relationsArray, relationNumber);
+                predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], relationsArray[predicateList[i]->leftRelation->key], relationsArray[predicateList[i]->rightRelation->key], statistics);
+                //printf("predicate cost: %d\n", predicateCost[i]);
+                //getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
             }
         }
     }
