@@ -76,13 +76,31 @@ typedef struct JobScheduler{
 }JobScheduler;
 
 
-typedef struct queryThreadArgs{
-    char line[100];
-    resultQ* q;
-    struct relationInfo* relInfo; 
+typedef struct queryThreadArgs queryThreadArgs;
+struct queryThreadArgs {
     JobScheduler* sch;
+    resultQ* q;
+    char line[100];
+    struct relationInfo* relInfo;
     int priority;
-}queryThreadArgs;
+    queryThreadArgs* next;
+};
+
+typedef struct argsList {
+    queryThreadArgs* head;
+    int size;
+} argsList;
+
+
+
+
+// typedef struct queryThreadArgs{
+//     char line[100];
+//     resultQ* q;
+//     struct relationInfo* relInfo; 
+//     JobScheduler* sch;
+//     int priority;
+// }queryThreadArgs;
 
 JobScheduler* initialize_scheduler(int execution_threads);
 int submit_job(JobScheduler* sch, Job* j);
@@ -112,5 +130,9 @@ void swap(Element *heap, int i, int j);
 int compare(Element a, Element b);
 void deleteQ(Queue *q);
 void deleteresultQ(resultQ *q);
+
+argsList* initializeArgsList();
+void addToArgsList(argsList* list, JobScheduler* sch, resultQ* q, char* line, struct relationInfo* relInfo, int priority);
+void freeArgsList(argsList* list);
 
 #endif

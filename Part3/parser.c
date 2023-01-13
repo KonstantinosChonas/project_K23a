@@ -140,6 +140,7 @@ void relationInfoDelete(relationInfo* relInfo, int relationNum){
             free(relInfo[i].columns[j]);
         }
         free(relInfo[i].columns);
+        free(relInfo[i].colStats);
     }
     free(relInfo);
     return;
