@@ -68,6 +68,7 @@ typedef struct threadArray{
 
 
 typedef struct relationInfo{
+    int relation_num_total;
     int num_tuples;
     int num_cols;
     int **columns;

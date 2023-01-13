@@ -433,6 +433,18 @@ void* queryFun(void* args){
 
 	}
 
+//	for(int i = 0; i < predicateCounter; i++){
+//	    printf("%s&", predicateStructArray[i]->predicate);
+//	}
+//	printf("\n");
+
+	int error = joinEnumeration(predicateStructArray, relInfo, predicateCounter, relationsArray, relationCounter);
+
+//    for(int i = 0; i < predicateCounter; i++){
+//        printf("%s&", predicateStructArray[i]->predicate);
+//    }
+//    printf("\n\n");
+
 	// int predicateCounter = 0;
 	// char tempPredicates[50];
 	// strcpy(tempPredicates, predicates);
