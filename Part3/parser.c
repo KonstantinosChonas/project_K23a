@@ -58,6 +58,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         //printf("parsing file: %s\n", fileLocations[i]);
         FILE* relationFile = NULL;
         relationFile = fopen(currFile, "rb");
+        relInfo[i].relation_num_total = numRelations;
         fread(&relInfo[i].num_tuples, sizeof(uint64_t), 1, relationFile);
         fread(&relInfo[i].num_cols, sizeof(uint64_t), 1, relationFile);
         relInfo[i].columns = malloc(relInfo[i].num_cols * sizeof(uint64_t));
