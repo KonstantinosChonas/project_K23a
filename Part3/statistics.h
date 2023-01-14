@@ -18,7 +18,7 @@ typedef struct columnStatistics{
 }columnStatistics;
 
 int getFilterStatistics(struct relationInfo* relInfo,struct predicate* curPred, int column, int relName, columnStatistics** statistics);
-int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, columnStatistics** statistics);
+int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, columnStatistics** statistics, int updateStatistics);
 int valueExistsInColumn(struct relationInfo* relInfo, int column, int relName, int value);
 int joinEnumeration(struct predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray, int relationNumber);
 int getOptimalPredicateOrder(struct predicate** predicateList, struct relationInfo* relInfo, int predicateNumber, int* relationsArray, int relationNumber, int* optimalOrder, columnStatistics** statistics);

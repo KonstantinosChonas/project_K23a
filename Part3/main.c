@@ -15,7 +15,7 @@
 int main (int argc, char* argv[]){
 
     printf("starting main\n");
-    int numOfthreads=4;
+    int numOfthreads=1;
 
     sem_init(&queue_lock, 0, 1);
     sem_init(&queue_full, 0, 0);
