@@ -15,7 +15,8 @@
 int main (int argc, char* argv[]){
 
     printf("starting main\n");
-    int numOfthreads=1;
+
+    int numOfthreads=2;
 
     sem_init(&queue_lock, 0, 1);
     sem_init(&queue_full, 0, 0);
@@ -51,19 +52,14 @@ int main (int argc, char* argv[]){
         queries = "workloads/small/small.work";
     }
 
-    printf("before parse Queries\n");
     int i = parseQueries(queries, relInfo, relationNum,JS);
     //int i = parseQueries("workloads/small/small.work", relInfo, relationNum);
     //these should be a function
     // free(rowids->relArray);
     // free(rowids);
-    JS->isFinished=1;
-    printf("after parseq\n");
     sem_destroy(&queue_lock);
     sem_destroy(&queue_full);
 
-    printf("after parseq1\n");
-
-    // relationInfoDelete(relInfo, relationNum);        //error: command terminated by signal 6 corrupted size vs. prev_size
-    printf("after parseq2\n");
+    destroy_scheduler(JS);
+    relationInfoDelete(relInfo, relationNum);        //error: command terminated by signal 6 corrupted size vs. prev_size
 }

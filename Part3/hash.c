@@ -148,7 +148,6 @@ int hashInsert(hashMap* hashTable, int key, int payload, int neighborhood_size){
 
     //if neighborhood is full
     if(checkNeighborhood(hashTable,keyHash) == 1){
-        /* needs rehashing here */
         return -1;
     }
     int nodecheck = 0;

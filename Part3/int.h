@@ -108,7 +108,7 @@ relation* createRelation(int hop);
 void printRelation(relation* myRelation);
 void printPayload(relationPayloadList* payloadList);
 int* pruneRelation(relation* myRelation, char operand, int value);
-int getSumRelation(relation* myRelation);
+unsigned long long int getSumRelation(relation* myRelation);
 
 void relationDelete(relation* myRelation);
 void deleteTuples(relation* myRelation);

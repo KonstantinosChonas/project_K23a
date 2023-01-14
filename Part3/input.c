@@ -197,7 +197,7 @@ int* pruneRelation(relation* myRelation, char operand, int value){
     return keyList;
 }
 
-int getSumRelation(relation* myRelation){
+unsigned long long int getSumRelation(relation* myRelation){
     uint64_t sum = 0;
 
     for(int i = 0; i < myRelation->num_tuples; i++){

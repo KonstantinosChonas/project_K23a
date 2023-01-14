@@ -28,7 +28,9 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
 
     int query_counter=0;
     resultQ *q=initializeQ();
-    queryThreadArgs* args[50];
+    int capacity=20;
+    // queryThreadArgs** args = (queryThreadArgs**)malloc(capacity * sizeof(queryThreadArgs*));
+    argsList* list = initializeArgsList();
     while((read = getline(&line, &len, fp)) != -1){
         int isValid = 1;        //used to determine if the query contains formatting errors
 
@@ -36,67 +38,64 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
         if (newline) *newline = '\0';
 
         if(strcmp(line,"F") == 0){
-        //    printf("continuing to next query set...\n");
-            // printf("%s", resultBuffer);
-            // resultBuffer[0] = '\0';
             continue;
         }
         query_counter++;
+        // if (query_counter == capacity) {
+        //     capacity *= 2;
+        //     args = (queryThreadArgs**)realloc(args, capacity * sizeof(queryThreadArgs*));
+        // }
 
-        args[query_counter]=malloc(sizeof(queryThreadArgs));
 
-        args[query_counter]->sch=sch;
-        args[query_counter]->q=q;
-        strcpy(args[query_counter]->line,line);
-        // args->line=line;
-        args[query_counter]->relInfo=relInfo;
-        args[query_counter]->priority=query_counter;
+        addToArgsList(list, sch, q, line, relInfo, query_counter);
+        // args[query_counter] = (queryThreadArgs*)malloc(sizeof(queryThreadArgs));
+        // // args[query_counter]=malloc(sizeof(queryThreadArgs));
+
+        // args[query_counter]->sch=sch;
+        // args[query_counter]->q=q;
+        // memset(args[query_counter]->line, 0, sizeof(args[query_counter]->line));
+        // strcpy(args[query_counter]->line,line);
+        // // args->line=line;
+        // args[query_counter]->relInfo=relInfo;
+        // args[query_counter]->priority=query_counter;
 
         // printf("before creating job %s
-        Job* j=createJob((void*)queryFun,args[query_counter]);
+        queryThreadArgs* current = list->head;
+        Job* j=createJob((void*)queryFun,current);
 
         // sleep(1);
         submit_job(sch,j);
+        // if(query_counter==1) break;
     }
-    // while((read = getline(&line, &len, fp)) != -1){
-    //     int isValid = 1;        //used to determine if the query contains formatting errors
 
-    //     endCheck = strtok(line, "\n");
-
-    //     if(strcmp(endCheck,"F") == 0){
-    //     //    printf("continuing to next query set...\n");
-    //         // printf("%s", resultBuffer);
-    //         // resultBuffer[0] = '\0';
-    //         continue;
-    //     }
-    //     query_counter++;
-
-    //     args[query_counter]=malloc(sizeof(queryThreadArgs));
-
-    //     args[query_counter]->sch=sch;
-    //     args[query_counter]->q=q;
-    //     strcpy(args[query_counter]->line,line);
-    //     // args->line=line;
-    //     args[query_counter]->relInfo=relInfo;
-    //     args[query_counter]->priority=query_counter;
-
-    //     // printf("before creating job %s\n",args->line);
+    // freein memory from args
 
 
-    //     Job* j=createJob((void*)queryFun,args[query_counter]);
+    sch->isFinished=1;
+    int value=0; 
+    while(1){
+        sem_getvalue(&q->full,&value);
+        if(value==query_counter)
+            break;
+    }
 
-    //     // sleep(1);
-    //     submit_job(sch,j);
+    for(int i=0 ; i<sch->numOfThreads ; i++)
+        sem_post(&queue_full);
+    sem_getvalue(&queue_full,&value);
+    // printf("waiting here: %d\n",value);
+    for(int i=0 ; i<sch->numOfThreads ; i++){
 
-    //     // if(query_counter==1) break;
+        pthread_join(sch->thread_ids[i],NULL);
+    }
+
+
+
+    // for (int i = 0; i < query_counter; i++) {
+    //     free(args[i]);
     // }
+    // free(args);
 
-        int value=0;
-        while(1){
-            sem_getvalue(&q->full,&value);
-            if(value==query_counter)
-                break;
-        }
+    freeArgsList(list);
 
 
     while(query_counter){
@@ -113,10 +112,10 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
         query_counter--;
     }
 
+    sem_destroy(&q->lock);
+    sem_destroy(&q->full);
+    free(q->heap);
     free(q);
-
-
-/*          here            */
 
     printf("all done with query handling\n");
 
@@ -125,7 +124,6 @@ int parseQueries(char* queryFileName, relationInfo* relInfo, int relationNum, Jo
         free(line);
     }
 
-    printf("helloooo\n");
 }
 
 

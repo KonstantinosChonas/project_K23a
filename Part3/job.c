@@ -43,6 +43,8 @@ int destroy_scheduler(JobScheduler* sch){
 		free(tempJob);
 	}
 	sch->q->front = NULL;
+	free(sch->q);
+	free(sch->thread_ids);
 	free(sch);
 	sch = NULL;
     return 1;
@@ -50,13 +52,10 @@ int destroy_scheduler(JobScheduler* sch){
 
 
 int submit_job(JobScheduler* sch, Job* j){
-	// pthread_mutex_lock(&(sch->lock));
 	sem_wait(&queue_lock);
 	enqueue(sch->q,j);
 	sem_post(&queue_full);
 	sem_post(&queue_lock);
-	// pthread_cond_signal(&sch->notEmpty);
-	// pthread_mutex_unlock(&(sch->lock));
 	return EXIT_SUCCESS;
 }
 
@@ -96,8 +95,10 @@ void* threadFun(void* arg){
 	JobScheduler* sch=(JobScheduler*)arg;
 	while (1) {
 		// Wait until there is a job in the queue
+		// printf("before sem wait\n");
 		sem_wait(&queue_full);
-
+		// printf("finished: %d \n",sch->isFinished);
+		if (sch->isFinished==1 && sch->q->front==NULL) pthread_exit(NULL);
 		// Acquire lock on the queue
 		sem_wait(&queue_lock);
 
@@ -113,7 +114,6 @@ void* threadFun(void* arg){
 
 		free(j);
 
-		if (sch->isFinished && sch->q==NULL) pthread_exit(NULL);
 	}
 }
 
@@ -708,7 +708,7 @@ void* queryFun(void* args){
 
 	int projRel = 0;
 	int projCol = 0;
-	int checksum = 0;
+	unsigned long long int checksum = 0;
 	for(int i = 0; i < projectionCounter; i++){
 		sscanf(projectionsArray[i], "%d.%d", &projRel, &projCol);
 		relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
@@ -719,7 +719,7 @@ void* queryFun(void* args){
 			continue;
 		}
 		numBuffer[0] = '\0';
-		sprintf(numBuffer, "%d ", checksum);
+		sprintf(numBuffer, "%lld ", checksum);
 		strcat(resultBuffer, numBuffer);
 		relationDelete(result);
 	}
@@ -849,3 +849,46 @@ void deleteQ(Queue *q){
 
 // }
 
+
+
+argsList* initializeArgsList() {
+    argsList* list = (argsList*)malloc(sizeof(argsList));
+    list->head = NULL;
+    list->size = 0;
+    return list;
+}
+
+void addToArgsList(argsList* list, JobScheduler* sch, resultQ* q, char* line, relationInfo* relInfo, int priority) {
+    queryThreadArgs* newArgs = (queryThreadArgs*)malloc(sizeof(queryThreadArgs));
+    newArgs->sch = sch;
+    newArgs->q = q;
+    strcpy(newArgs->line, line);
+    newArgs->relInfo = relInfo;
+    newArgs->priority = priority;
+    newArgs->next = NULL;
+
+
+	newArgs->next=list->head;
+	list->head=newArgs;
+    // if (list->head == NULL) {
+    //     list->head = newArgs;
+    // } else {
+    //     queryThreadArgs* current = list->head;
+    //     while (current->next != NULL) {
+    //         current = current->next;
+    //     }
+    //     current->next = newArgs;
+    // }
+    list->size++;
+}
+
+void freeArgsList(argsList* list) {
+    queryThreadArgs* current = list->head;
+    queryThreadArgs* next;
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    free(list);
+}
