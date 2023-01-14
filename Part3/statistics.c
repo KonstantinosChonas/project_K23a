@@ -296,12 +296,6 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder, statistics);
 
-//    printf("OPTIMAL PREDICATE ORDER: ");
-//    for(int i = 0; i < predicateNumber; i++){
-//        printf("%d ", predicateOrder[i]);
-//    }
-//    printf(" (-1 means that precicate is filter and should be done first)\n");
-
     int newIndex = -1;
     predicate* tempPredList[predicateNumber];
     for(int i = 0; i < predicateNumber; i++){
@@ -309,10 +303,11 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
     }
 
     for(int i = 0; i < predicateNumber; i++){
+
+        //predicateOrder[i] == -1 means that predicate is a filter, so we ignore it
         if(predicateOrder[i] != -1){
             newIndex = predicateOrder[i];
-            //tempPred = predicateList[i];
-            predicateList[i] = tempPredList[newIndex];
+            predicateList[newIndex] = tempPredList[i];
         }
     }
     getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
@@ -331,52 +326,55 @@ int getOptimalPredicateOrder(struct predicate** predicateList, struct relationIn
 
     for(int i = 0; i < predicateNumber; i++){
         if(predicateList[i]->isFilter == 0){
-//            printf("rel1: %d\n", predicateList[i]->leftRelation->key);
-//            printf("rel2: %d\n", predicateList[i]->rightRelation->key);
-
-            if(optimalOrder[i] == - 1){
+            if(optimalOrder[i] == -1){
                 doneFlag = 0;
                 predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], relationsArray[predicateList[i]->leftRelation->key], relationsArray[predicateList[i]->rightRelation->key], statistics, 0);
                 //printf("predicate cost: %d\n", predicateCost[i]);
-                //getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
             }
         }
     }
 
-    int minPredicateCost = -1;
-    int index = -1;
-
+    //get first value for minimum cost of predicates
+    int minPredicateCost, index;
     for(int i = 0; i < predicateNumber; i++){
         if(predicateCost[i] != -1){
-            if(minPredicateCost == -1){
+            minPredicateCost = predicateCost[i];
+            index = i;
+            break;
+        }else{
+            minPredicateCost = -1;
+            index = -1;
+        }
+    }
+
+    //and check if there's a predicate that gives a smaller cost
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateCost[i] != -1){
+            if(minPredicateCost > predicateCost[i]){
                 minPredicateCost = predicateCost[i];
                 index = i;
-            }else{
-                if(minPredicateCost > predicateCost[i]){
-                    minPredicateCost = predicateCost[i];
-                    index = i;
-                }
             }
         }
     }
 
     /*update the statistics */
     if(index != -1){
-        int newCost = getJoinStatistics(relInfo, predicateList[index], relationsArray[predicateList[index]->leftRelation->key], relationsArray[predicateList[index]->rightRelation->key], statistics, 1);
+        getJoinStatistics(relInfo, predicateList[index], relationsArray[predicateList[index]->leftRelation->key], relationsArray[predicateList[index]->rightRelation->key], statistics, 1);
     }
 
-    //if doneFlag = 1, it means that all join predicates have been ordered and the function just returns 0
+    /* if doneFlag = 1, it means that all join predicates have been ordered and so the recursive calls end and final cost is returned */
     if(!doneFlag){
         int counter = 0;
+
+        /* with this loop, we place the cheapest predicate to the left-most free space in the optimalOrder array */
         for(int i = 0; i < predicateNumber; i++){
-            if(optimalOrder[i] != -1){
-                counter++;
-            }
+            if(optimalOrder[i] == -1){
+                continue;
+            }else counter++;
         }
         optimalOrder[index] = counter;
-
         minPredicateCost += getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, optimalOrder, statistics);
-    }else minPredicateCost = 0;
+    }
 
     return minPredicateCost;
 }
