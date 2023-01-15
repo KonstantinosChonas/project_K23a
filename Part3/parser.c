@@ -35,17 +35,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
 
         numRelations++;
     }
-    // while((read = getline(&line, &len, fp)) != -1){
-    //     lineStr = strtok(line, "\n");
-    //     if(strcmp(lineStr, "Done") == 0)
-    //         break;
-    //     fileLocations = realloc(fileLocations, (numRelations + 1) * sizeof (char**));
-    //     fileLocations[numRelations] = malloc(strlen(line) + 1);
 
-    //     strcpy(fileLocations[numRelations], line);
-
-    //     numRelations++;
-    // }
 
     fclose(fp);
     *numRel = numRelations;
@@ -55,7 +45,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         char* currFile = fileLocations[i];
 
         //start reading the binary file
-        //printf("parsing file: %s\n", fileLocations[i]);
+
         FILE* relationFile = NULL;
         relationFile = fopen(currFile, "rb");
         relInfo[i].relation_num_total = numRelations;
@@ -67,8 +57,6 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         uint64_t max = 0;
 
 
-//        printf("tuples: %d\n", relInfo[i].num_tuples);
-//        printf("columns: %d\n", relInfo[i].num_cols);
 
         for(int j = 0;  j < relInfo[i].num_cols; j++){
             relInfo[i].columns[j] = malloc(relInfo[i].num_tuples * sizeof(uint64_t));
@@ -120,9 +108,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         fclose(relationFile);
     }
 
-//    for(int i = 0; i < numRelations; i++){
-//        printf("relation %s loaded\n", fileLocations[i]);
-//    }
+
 
     for(int i = 0; i < numRelations; i++){
         free(fileLocations[i]);

@@ -30,24 +30,17 @@ int main (int argc, char* argv[]){
     relationInfo* relInfo = NULL;
     int relationNum;
 
-    // char* relations = argv[1];
-    char* relations = "workloads/small/small.init";
+    char* relations = argv[1];
+    // char* relations = "workloads/small/small.init";
     if(relations == NULL){
         relations = "workloads/small/small.init";
     }
     relInfo = parseRelations(relations, &relationNum);
-    //relInfo = parseRelations("workloads/small/small.init", &relationNum);
 
-//    relationInfo* relInfo = NULL;
-//    relInfo = (relationInfo*) malloc(15*sizeof(relationInfo));
-//    FILE *f = fopen("relation.data", "rb");
-//    fread(relInfo, sizeof(char), sizeof(relationInfo), f);
-//
-//    printf("%d\n", relInfo[2].columns[5][3]);
     sleep(1);
     /* start of query reading */
-    // char* queries = argv[2];
-    char* queries = "workloads/small/small.work";
+    char* queries = argv[2];
+    // char* queries = "workloads/small/small.work";
     if(queries == NULL){
         queries = "workloads/small/small.work";
     }

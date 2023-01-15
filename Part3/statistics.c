@@ -41,8 +41,7 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         newStatistics->max_value = filterValue;
         newStatistics->discrete_values = (uint64_t)((float)((float) (statistics[relName][column].max_value - filterValue) / (float) ( statistics[relName][column].max_value - statistics[relName][column].min_value) ) * (float)statistics[relName][column].discrete_values);
         newStatistics->value_count =  (uint64_t)((float) ((float)(statistics[relName][column].max_value - filterValue) / (float) ( statistics[relName][column].max_value - statistics[relName][column].min_value) ) * (float)statistics[relName][column].value_count);
-//        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
-//        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+
     }
 
     if(filter == '>'){
@@ -53,8 +52,7 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
         newStatistics->max_value = statistics[relName][column].max_value;
         newStatistics->discrete_values = (uint64_t)((float)((float) (filterValue - statistics[relName][column].min_value) / (float) ( statistics[relName][column].max_value - statistics[relName][column].min_value) ) * (float)statistics[relName][column].discrete_values);
         newStatistics->value_count =  (uint64_t)((float) ((float)(filterValue - statistics[relName][column].min_value) / (float) ( statistics[relName][column].max_value - statistics[relName][column].min_value) ) * (float)statistics[relName][column].value_count);
-//        printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
-//        printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+
     }
 
     for(int i = 0; i < relInfo[relName].num_cols; i++){
@@ -71,8 +69,7 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
 
     free(newStatistics);
 
-    //cost is measured by number of elements
-    //printf("returned cost: %ld\n", relInfo[relName].colStats[column].value_count);
+
     return statistics[relName][column].value_count;
 }
 
@@ -102,7 +99,6 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
     int n = combinedMax - combinedMin + 1;
     combinedCount = (uint64_t)((float)(statistics[relName1][column1].value_count * statistics[relName2][column2].value_count) / (float) n);
 
-    //printf("COMBINED:%ld\n", relInfo[relName1].colStats[column1].value_count);
     newStatistics->value_count = combinedCount;
 
     combinedDiscrete = (uint64_t)((float)(statistics[relName1][column1].discrete_values * statistics[relName2][column2].discrete_values) / (float) n);
@@ -125,10 +121,7 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
         }
     }
 
-//    printf("NEW MIN: %ld\n", newStatistics->min_value);
-//    printf("NEW MAX: %ld\n", newStatistics->max_value);
-//    printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
-//    printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+
 
     statistics[relName1][column1].min_value = newStatistics->min_value;
     statistics[relName1][column1].max_value = newStatistics->max_value;
@@ -142,8 +135,7 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
 
     free(newStatistics);
 
-    //could be used for error handling
-    //printf("RETURNING %d FOR REL %d COL %d\n", statistics[relName1][column1].value_count, relName1, column1);
+
     return statistics[relName1][column1].value_count;
 }
 
@@ -197,20 +189,15 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
         column = filterPredicates[i]->leftRelation->payloadList->data;
         relName = filterPredicates[i]->leftRelation->key;
         filterCost += getFilterStatistics(relInfo, filterPredicates[i], column, relationsArray[relName], statistics);
-        //printf("FILTER COST:%d\n", filterCost);
     }
 
 
     //temp fix because sometimes getFilterStatistics gives 0
-    //getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
+
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder, statistics);
 
-//    printf("OPTIMAL PREDICATE ORDER: ");
-//    for(int i = 0; i < predicateNumber; i++){
-//        printf("%d ", predicateOrder[i]);
-//    }
-//    printf(" (-1 means that precicate is filter and should be done first)\n");
+
 
     int newIndex = -1;
     predicate* tempPredList[predicateNumber];
@@ -221,7 +208,6 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
     for(int i = 0; i < predicateNumber; i++){
         if(predicateOrder[i] != -1){
             newIndex = predicateOrder[i];
-            //tempPred = predicateList[i];
             predicateList[i] = tempPredList[newIndex];
         }
     }
@@ -241,14 +227,12 @@ int getOptimalPredicateOrder(struct predicate** predicateList, struct relationIn
 
     for(int i = 0; i < predicateNumber; i++){
         if(predicateList[i]->isFilter == 0){
-//            printf("rel1: %d\n", predicateList[i]->leftRelation->key);
-//            printf("rel2: %d\n", predicateList[i]->rightRelation->key);
+
 
             if(optimalOrder[i] == - 1){
                 doneFlag = 0;
                 predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], relationsArray[predicateList[i]->leftRelation->key], relationsArray[predicateList[i]->rightRelation->key], statistics);
-                //printf("predicate cost: %d\n", predicateCost[i]);
-                //getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
+
             }
         }
     }
@@ -270,7 +254,6 @@ int getOptimalPredicateOrder(struct predicate** predicateList, struct relationIn
         }
     }
 
-    //if doneFlag = 1, it means that all join predicates have been ordered and the function just returns 0
     if(!doneFlag){
         int counter = 0;
         for(int i = 0; i < predicateNumber; i++){

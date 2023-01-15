@@ -59,7 +59,6 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
     }                                                   /*      if filter is 1.0>3000 then filter_num=3000 and operator = '>'       */
     int count=0;
     for (int i=0 ; i<r->num_tuples ; i++){
-        // printf("operator in switch : %d\n",r->columns[column][i]);
         switch (operator)
         {
         case '>':
@@ -85,7 +84,6 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 
 
     for (int i=0 ; i<r->num_tuples ; i++){
-        // printf("i:%d, value : %d, num tuples:%d, count:%d\n",i,r->columns[column][i],r->num_tuples,count);
 
 
         switch (operator)
@@ -101,7 +99,6 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
         case '<':
             if ( r->columns[column][i]<filter_num){
                 rowidarray->row_ids[rel][total-count]=i;
-                // printf("%d\n",i);
                 count--;
             }
             break;
@@ -121,8 +118,7 @@ void applyFilter(relationInfo *r, intermediate *rowidarray,char* filter){       
 
 intermediate* addToArray(intermediate *rowidarray, relation *phjRel,int relname1, int relname2){               /*      relname1 relname2 o arithmos tis kathe sxesis (0,1,2...)      */
 
-    //printf("just entered add to array\n");
-   // printIntermediate(rowidarray);
+
     if (rowidarray->row_ids[relname1]==NULL && rowidarray->row_ids[relname2]==NULL && rowidarray->num_rows==0){
         //int table1[phjRel->num_tuples],table2[phjRel->num_tuples];
         int* table1 = malloc(sizeof(int) * phjRel->num_tuples);
@@ -238,7 +234,6 @@ void printIntermediate(intermediate *rowidarray){
 
 relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo,int column,int relname){
 
-    //printf("THIS IS INTERMEDIATE TO ARRAY WITH COLUMN: %d RELNAME :%d\n",column,relname);
     relation *rel=createEmptyRelation(rowidarray->num_rows);
 
 
@@ -248,10 +243,8 @@ relation* intermediateToRelation(intermediate *rowidarray, relationInfo *relInfo
         new->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
         new->next=NULL;
         rel->tuples[i].payloadList=new;
-        // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
 
     }
-    //printf("exiting injtermediate to relation\n");
     return rel;
 
 
@@ -271,11 +264,9 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
     int keyCounter = 0;
 
     for( int i=0; i<rowidarray->num_rows ; i++){
-        //printf("NUMBER %d WITH VALUE %d\n", rowidarray->row_ids[relname][i], relInfo->columns[column][rowidarray->row_ids[relname][i]]);
         for(int j = 0; j< rowidarray->num_rows; j++){
             if(keyCheck[j] == rowidarray->row_ids[relname][i]){
                 exists = 1;
-                //printf("DOUBLE %d WITH VALUE %d\n", rowidarray->row_ids[relname][i], relInfo->columns[column][rowidarray->row_ids[relname][i]]);
                 break;
             }
         }
@@ -290,10 +281,8 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
         new->data=relInfo->columns[column][rowidarray->row_ids[relname][i]];
         new->next=NULL;
         rel->tuples[keyCounter++].payloadList=new;
-        // addToPayloadList(rel->tuples[i].payloadList,relInfo->columns[column][rowidarray->row_ids[relname][i]]);
 
     }
-    //printf("exiting intermediate to relation\n");
     return rel;
 
 
@@ -301,12 +290,10 @@ relation* intermediateToRelationSum(intermediate *rowidarray, relationInfo *relI
 
 relation* relationInfoToRelation(relationInfo* relin,int column){           // metatrepei ena relation info se relation (voithitiko gia phj)
 
-    //printf("THIS IS RELATIONINFOTOREALTION\n");
 
     relation* rel=createEmptyRelation(relin->num_tuples);
 
 
-    //printf("rel->numtuples: %d\n",rel->num_tuples);
     for (int i=0 ; i<relin->num_tuples ; i++){
         rel->tuples[i].key=i;
         relationPayloadList *new=malloc(sizeof(relationPayloadList));

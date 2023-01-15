@@ -60,35 +60,9 @@ int submit_job(JobScheduler* sch, Job* j){
 }
 
 
-int wait_all_tasks_finish(JobScheduler* sch){
-
-    while(sch->q!=NULL)
-        execute_all_jobs(sch);
 
 
-	// for(int i=0 ; i<sch->execution_threads ; i++){
-	// 	if(!pthread_join())
 
-	// }
-
-
-    return EXIT_SUCCESS;
-
-}
-
-int execute_all_jobs(JobScheduler* sch){		//agnoise 
-
-	Job *j;
-
-	while(1){
-		j=dequeue(sch->q);
-
-		if (j){		//returned non-NULL
-			j->function(j->arguments);
-		}
-		else return EXIT_SUCCESS;	//nothing to execute
-	}
-}
 
 
 void* threadFun(void* arg){
@@ -158,13 +132,7 @@ resultQ* initializeQ()  {
 }
 
 
-// {
-//     resultQ* q = (resultQ*)malloc(sizeof(resultQ));
-//     q->front = q->rear = NULL;
-// 	sem_init(&q->lock, 0, 1);
-// 	sem_init(&q->full,0,0);
-//     return q;
-// }
+
 
 void push(resultQ* q,Element e){
     if (q->size == q->capacity) {
@@ -177,17 +145,7 @@ void push(resultQ* q,Element e){
 
 
 
-// {
-//     str* temp=new;
-	
-//     temp->next = NULL;
-//     if (q->rear == NULL) {
-//         q->front = q->rear = temp;
-//         return;
-//     }
-//     q->rear->next = temp;
-//     q->rear = temp;
-// }
+
 
 Element pop(resultQ* q) {
     Element top = q->heap[0];
@@ -212,14 +170,12 @@ void swap(Element *heap, int i, int j) {
     heap[j] = temp;
 }
 
-// Increase the capacity of the heap array
 void increaseCapacity(resultQ *q) {
     q->capacity *= 2;
     Element *new_heap = (Element *)realloc(q->heap, q->capacity * sizeof(Element));
     q->heap = new_heap;
 }
 
-// Move element at index i in the heap array up the heap until it is in the correct position
 void moveUp(resultQ *q, int i) {
     int parent = (i - 1) / 2;
     if (parent >= 0 && compare(q->heap[i], q->heap[parent])) {
@@ -228,7 +184,6 @@ void moveUp(resultQ *q, int i) {
     }
 }
 
-// Move element at index i in the heap array down the heap until it is in the correct position
 void moveDown(resultQ *q, int i) {
     int left = 2 * i + 1;
     int right = 2 * i + 2;
@@ -248,15 +203,7 @@ void moveDown(resultQ *q, int i) {
 
 
 
-// {
-//     if (q->front == NULL)
-//         return NULL;
-//     str* temp = q->front;
-//     q->front = q->front->next;
-//     if (q->front == NULL)
-//         q->rear = NULL;
-//     return temp;
-// }
+
 
 
 void* queryFun(void* args){
@@ -268,7 +215,6 @@ void* queryFun(void* args){
 
 
 
-	// strcpy(line,temp->line);
 	line=temp->line;
 
 	if(strcmp(line,"F")==0){return NULL;}
@@ -298,30 +244,7 @@ void* queryFun(void* args){
 
 	token = strtok_r(NULL, "\n", &saveptr);
 	projections = token;
-	// char *token;
-    // char *endCheck;
-    // FILE *fp;
-    // char resultBuffer[200] = "";
-    // char numBuffer[50] = "";
-
-    // char* relations;
-    // char* predicates;
-    // char* projections;
 	
-	
-	// token = strtok(line, "|");
-	// relations = token;
-
-	// token = strtok(NULL, "|");
-	// predicates = token;
-
-	// token = strtok(NULL, "\n");
-	// projections = token;
-
-
-	/* code for relation handling */
-
-	// printf("Start of relation handling\n");
 
 	int relationCounter = 0;
 	char tempRelations[20];
@@ -349,42 +272,7 @@ void* queryFun(void* args){
 		relationsArray[i] = atoi(token);
 		i++;
 	}
-	// int relationCounter = 0;
-	// char tempRelations[20];
-	// strcpy(tempRelations, relations);
-	// token = strtok(tempRelations, " \t");
-	// relationCounter++;
-	// while(token != NULL){
-	// 	token = strtok(NULL, " \t");
-	// 	if(token == NULL){
-	// 		break;
-	// 	}
-	// 	relationCounter++;
-	// }
-	// int relationsArray[relationCounter];
-
-	// token = strtok(relations, " \t");
-	// relationsArray[0] = atoi(token);
-
-	// int i = 1;
-	// while(token != NULL){
-	// 	token = strtok(NULL, " \t");
-	// 	if(token == NULL){
-	// 		break;
-	// 	}
-	// 	relationsArray[i] = atoi(token);
-	// 	i++;
-	// }
-
-
-
-
-	// relationInfo usedRelations[relationCounter];
-
-	// //get appropriate relations from relInfo and put them in usedRelations in correct order
-	// for(i = 0; i < relationCounter; i++){
-	// 	usedRelations[i] = relInfo[relationsArray[i]];
-	// }
+	
 
 	/* code for predicates handling */
 
@@ -433,62 +321,11 @@ void* queryFun(void* args){
 
 	}
 
-//	for(int i = 0; i < predicateCounter; i++){
-//	    printf("%s&", predicateStructArray[i]->predicate);
-//	}
-//	printf("\n");
+
 
 	int error = joinEnumeration(predicateStructArray, relInfo, predicateCounter, relationsArray, relationCounter);
 
-//    for(int i = 0; i < predicateCounter; i++){
-//        printf("%s&", predicateStructArray[i]->predicate);
-//    }
-//    printf("\n\n");
 
-	// int predicateCounter = 0;
-	// char tempPredicates[50];
-	// strcpy(tempPredicates, predicates);
-
-
-	// token = strtok(tempPredicates, "&");
-	// predicateCounter++;
-	// while(token != NULL){
-		
-	// 	token = strtok(NULL, "&");
-
-	// 	if(token == NULL){
-	// 		break;
-	// 	}
-	// 	predicateCounter++;
-	// }
-
-	// char* predicatesArray[predicateCounter+1];
-	// for(int j = 0; j < predicateCounter; j++){
-	// 	predicatesArray[j] = malloc(100 * sizeof(char));
-	// }
-
-	// i = 0;
-
-	// token = strtok(predicates, "&");
-	// strcpy(predicatesArray[0], token);
-	// while(token != NULL){
-		
-	// 	token = strtok(NULL, "&");
-
-	// 	if(token == NULL){
-	// 		break;
-	// 	}
-	// 	else{
-	// 		i++;
-	// 		strcpy(predicatesArray[i], token);
-	// 	}
-	// }
-
-	// predicate* predicateStructArray[predicateCounter];
-	// for(i = 0; i < predicateCounter; i++){
-	// 	predicateStructArray[i] = createPredicate(predicatesArray[i], i);
-
-	// }
 
 
 	/* code for projection handling */
@@ -511,7 +348,6 @@ void* queryFun(void* args){
 	projectionsArray[0] = malloc(50 * sizeof(char));
 	strcpy(projectionsArray[0], token);
 
-	// printf("%s\n", projectionsArray[0]);
 
 	i = 1;
 	while(token != NULL){
@@ -521,39 +357,9 @@ void* queryFun(void* args){
 		}
 		projectionsArray[i] = malloc(50 * sizeof(char));
 		strcpy(projectionsArray[i], token);
-		// printf("%s\n", projectionsArray[i]);
 		i++;
 	}
-	// int projectionCounter = 0;
-	// char tempProjections[50];
-	// strcpy(tempProjections, projections);
-	// token = strtok(tempProjections, " \t");
-	// projectionCounter++;
-	// while(token != NULL){
-	// 	token = strtok(NULL, " \t");
-	// 	if(token == NULL){
-	// 		break;
-	// 	}
-	// 	projectionCounter++;
-	// }
-	// char* projectionsArray[projectionCounter];
-	// token = strtok(projections, " \t");
-	// projectionsArray[0] = malloc(50 * sizeof(char));
-	// strcpy(projectionsArray[0], token);
-
-	// // printf("%s\n", projectionsArray[0]);
-
-	// i = 1;
-	// while(token != NULL){
-	// 	token = strtok(NULL, " \t");
-	// 	if(token == NULL){
-	// 		break;
-	// 	}
-	// 	projectionsArray[i] = malloc(50 * sizeof(char));
-	// 	strcpy(projectionsArray[i], token);
-	// 	// printf("%s\n", projectionsArray[i]);
-	// 	i++;
-	// }
+	
 	/*          adding to intermediate           */
 /*----------------------------------------------------------------*/
 	intermediate *rowidarray=intermediateCreate(relationCounter);
@@ -610,11 +416,8 @@ void* queryFun(void* args){
 
 					predicateStructArray[i]->done=1;
 					done_counter++;
-					// printf("predicate done %s\n",predicatesArray[i]);
 					relation *rel1=intermediateToRelation(rowidarray,&relInfo[relationsArray[predicateStructArray[i]->leftRel]],predicateStructArray[i]->leftRelation->payloadList->data,predicateStructArray[i]->leftRel);
 					relation* rel2=relationInfoToRelation(&relInfo[relationsArray[predicateStructArray[i]->rightRel]],predicateStructArray[i]->rightRelation->payloadList->data);
-					//printf("hello1 rel2->tuples[0].payloadList->data: %d\n",rel2->tuples[0].payloadList->data);
-					// printRelation(rel2);
 					relation *res=PartitionedHashJoin(rel1,rel2,sch);
 					if(res == NULL){
 						relationDelete(rel1);
@@ -623,7 +426,6 @@ void* queryFun(void* args){
 						break;
 					}
 					if(biggerRel(rel1,rel2)){
-						// printf("hello3\n");
 						rowidarray=addToArray(rowidarray,res,predicateStructArray[i]->rightRel,predicateStructArray[i]->leftRel);
 					}
 					else    
@@ -665,7 +467,6 @@ void* queryFun(void* args){
 							for(int j=0 ; j<newidarray->num_relations ; j++){
 								if (newidarray->row_ids[j]!=NULL){
 										newidarray->row_ids[j][insert]=rowidarray->row_ids[j][i];
-										// printf("%d\n",newidarray->row_ids[j][insert]);
 								}
 
 							}
@@ -723,36 +524,15 @@ void* queryFun(void* args){
 		strcat(resultBuffer, numBuffer);
 		relationDelete(result);
 	}
-	// int projRel = 0;
-	// int projCol = 0;
-	// int checksum = 0;
-	// for(int i = 0; i < projectionCounter; i++){
-	// 	projRel = atoi(strtok(projectionsArray[i], "."));
-	// 	projCol = atoi(strtok(NULL, "\0"));
-	// 	relation* result = intermediateToRelation(rowidarray, &relInfo[relationsArray[projRel]], projCol, projRel);
-	// 	checksum = getSumRelation(result);
-	// 	if(checksum <= 0){
-	// 		strcat(resultBuffer, "NULL ");
-	// 		relationDelete(result);
-	// 		continue;
-	// 	}
-	// 	numBuffer[0] = '\0';
-	// 	sprintf(numBuffer, "%d ", checksum);
-	// 	strcat(resultBuffer, numBuffer);
-	// 	relationDelete(result);
-	// }
-	// str *s=malloc(sizeof(str));
+	
 	Element e;
 	strcpy(e.data,resultBuffer);
 	e.priority=priority;
-	// s->next=NULL;
 	sem_wait(&q->lock);
 	push(q,e);
 	sem_post(&q->full);
 	sem_post(&q->lock);
-	//TODO thelo na trexei gia ena pros to paron kai meta tha doume gia perissotera
 	intermediateDelete(rowidarray);
-	// return 1;
 /*----------------------------------------------------------------*/
 	/*            end of  intermediate          */
 	//freeing memory used in query
@@ -795,60 +575,6 @@ void deleteQ(Queue *q){
 }
 
 
-// void deleteresultQ(resultQ* q){
-
-// 	str* temp;
-
-// 	while(q->front!=NULL)
-// 	{
-// 		temp=q->front;
-// 		q->front=temp->next;
-// 		free(temp);
-// 	}
-
-// 	return;
-
-
-// }
-
-
-// threadPool* initialize_threadPool(int numOfThreads){
-	
-
-// 	if(numOfThreads==0)
-// 		return NULL;
-
-
-// 	threadPool* pool = malloc(sizeof(threadPool));
-
-// 	pool->numOfThreads=numOfThreads;
-// 	pool->numOfFree=0;
-// 	pool->numOfWorkingThreads=0;
-
-
-// 	pool->threads=malloc(numOfThreads*sizeof(pthread_t));
-
-// 	if(pthread_mutex_init(&pool->lock, NULL) != 0){
-// 		deleteThreadPool(&pool);
-// 		return NULL;
-// 	}
-
-// 	for(int i=0; i < numOfThreads; i++){
-// 		pthread_create(&pool->threads[i], NULL, (void *) execute_all_jobs, &pool->threads[i]);
-// 		pthread_detach(pool->threads[i]);
-// 	}
-
-// 	return pool;
-
-// }
-
-// void deleteThreadPool(threadPool* pool){
-
-// 	pthread_mutex_destroy(&pool->lock);
-// 	free(pool);
-
-// }
-
 
 
 argsList* initializeArgsList() {
@@ -870,15 +596,7 @@ void addToArgsList(argsList* list, JobScheduler* sch, resultQ* q, char* line, re
 
 	newArgs->next=list->head;
 	list->head=newArgs;
-    // if (list->head == NULL) {
-    //     list->head = newArgs;
-    // } else {
-    //     queryThreadArgs* current = list->head;
-    //     while (current->next != NULL) {
-    //         current = current->next;
-    //     }
-    //     current->next = newArgs;
-    // }
+
     list->size++;
 }
 

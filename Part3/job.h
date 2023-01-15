@@ -40,11 +40,7 @@ typedef struct Queue{
     Job* rear;
 }Queue;
 
-// typedef struct str{
-//     char data[100];
-//     struct str* next;
 
-// }str;
 typedef struct {
     int priority;
     char data[100];
@@ -57,12 +53,7 @@ typedef struct {
     sem_t lock;
     sem_t full;
 } resultQ;
-// typedef struct resultQ{
-//     str* front;
-//     str* rear;
-//     sem_t lock;
-//     sem_t full;
-// }resultQ;
+
 
 
 
@@ -94,13 +85,7 @@ typedef struct argsList {
 
 
 
-// typedef struct queryThreadArgs{
-//     char line[100];
-//     resultQ* q;
-//     struct relationInfo* relInfo; 
-//     JobScheduler* sch;
-//     int priority;
-// }queryThreadArgs;
+
 
 JobScheduler* initialize_scheduler(int execution_threads);
 int submit_job(JobScheduler* sch, Job* j);
