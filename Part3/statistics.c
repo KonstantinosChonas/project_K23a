@@ -219,20 +219,11 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
         statistics[relName2][column2].discrete_values = newStatistics->discrete_values;
     }
 
-
-
-
-
     free(newStatistics);
 
-<<<<<<< HEAD
-
-    return statistics[relName1][column1].value_count;
-=======
     if(updateStatistics){
         return statistics[relName1][column1].value_count;
     }else return newStatistics->value_count;
->>>>>>> edd910bd340a142fd5f0a7c40a80646ab4812767
 }
 
 int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int value){
@@ -286,10 +277,6 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
         relName = filterPredicates[i]->leftRelation->key;
         filterCost += getFilterStatistics(relInfo, filterPredicates[i], column, relationsArray[relName], statistics);
     }
-
-
-    //temp fix because sometimes getFilterStatistics gives 0
-
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder, statistics);
 
