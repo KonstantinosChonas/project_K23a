@@ -73,7 +73,7 @@ int getFilterStatistics(relationInfo* relInfo,predicate* curPred, int column, in
     return statistics[relName][column].value_count;
 }
 
-int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, struct columnStatistics** statistics){
+int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, int relName1, int relName2, struct columnStatistics** statistics, int updateStatistics){
     int column1 = curPred->leftRelation->payloadList->data;
     int column2 = curPred->rightRelation->payloadList->data;
     uint64_t combinedMin = 0;
@@ -83,6 +83,92 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
 
     columnStatistics* newStatistics = malloc(sizeof(struct columnStatistics));
 
+    if(relName1 == relName2){
+        if(column1 == column2){
+            newStatistics->min_value = statistics[relName1][column1].min_value;
+            newStatistics->max_value = statistics[relName1][column1].max_value;
+
+            int n = newStatistics->max_value - newStatistics->min_value + 1;
+
+            newStatistics->value_count = (uint64_t)((float)statistics[relName1][column1].value_count * (float)statistics[relName1][column1].value_count / (float)(n));
+            newStatistics->discrete_values = statistics[relName1][column1].discrete_values;
+
+            if(updateStatistics){
+
+                for(int i = 0; i < relInfo[relName1].num_cols; i++){
+                    if(i != column1){
+                        statistics[relName1][i].value_count = newStatistics->value_count;
+                    }
+                }
+
+                statistics[relName1][column1].min_value = newStatistics->min_value;
+                statistics[relName1][column1].max_value = newStatistics->max_value;
+                statistics[relName1][column1].value_count = newStatistics->value_count;
+                statistics[relName1][column1].discrete_values = newStatistics->discrete_values;
+            }
+
+            free(newStatistics);
+
+            if(updateStatistics){
+                return statistics[relName1][column1].value_count;
+            }else return newStatistics->value_count;
+        }
+        if(statistics[relName1][column1].min_value < statistics[relName2][column2].min_value){
+            combinedMin = statistics[relName2][column2].min_value;
+        }else combinedMin = statistics[relName1][column1].min_value;
+
+        newStatistics->min_value = combinedMin;
+
+        if(statistics[relName1][column1].max_value < statistics[relName2][column2].max_value){
+            combinedMax = statistics[relName1][column1].max_value;
+        }else combinedMax = statistics[relName2][column2].max_value;
+
+        newStatistics->max_value = combinedMax;
+
+        int n = combinedMax - combinedMin + 1;
+        combinedCount = (uint64_t)((float)(statistics[relName1][column1].value_count/ (float) n));
+
+        //printf("COMBINED:%ld\n", relInfo[relName1].colStats[column1].value_count);
+        newStatistics->value_count = combinedCount;
+
+        combinedDiscrete = (uint64_t)((float)(statistics[relName1][column1].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->value_count/(float)statistics[relName1][column1].value_count)), ((float)(statistics[relName1][column1].value_count)/(float)(statistics[relName1][column1].discrete_values)))));
+
+        newStatistics->discrete_values = combinedDiscrete;
+
+        /* updating rest of columns for the relation */
+
+        if(updateStatistics){
+            for(int i = 0; i < relInfo[relName1].num_cols; i++){
+                if(i != column1){
+                    statistics[relName1][i].discrete_values = (uint64_t)((float)(statistics[relName1][column1].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->value_count/(float)statistics[relName1][column1].value_count)), ((float)(statistics[relName1][column1].value_count)/(float)(statistics[relName1][column1].discrete_values)))));
+                    statistics[relName1][i].value_count = newStatistics->value_count;
+                }
+            }
+
+            statistics[relName1][column1].min_value = newStatistics->min_value;
+            statistics[relName1][column1].max_value = newStatistics->max_value;
+            statistics[relName1][column1].value_count = newStatistics->value_count;
+            statistics[relName1][column1].discrete_values = newStatistics->discrete_values;
+
+            statistics[relName2][column2].min_value = newStatistics->min_value;
+            statistics[relName2][column2].max_value = newStatistics->max_value;
+            statistics[relName2][column2].value_count = newStatistics->value_count;
+            statistics[relName2][column2].discrete_values = newStatistics->discrete_values;
+        }
+
+//    printf("NEW MIN: %ld\n", newStatistics->min_value);
+//    printf("NEW MAX: %ld\n", newStatistics->max_value);
+//    printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
+//    printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
+
+        free(newStatistics);
+
+        //could be used for error handling
+        //printf("RETURNING %d FOR REL %d COL %d\n", statistics[relName1][column1].value_count, relName1, column1);
+        if(updateStatistics){
+            return statistics[relName1][column1].value_count;
+        }else return newStatistics->value_count;
+    }
 
     if(statistics[relName1][column1].min_value < statistics[relName2][column2].min_value){
         combinedMin = statistics[relName2][column2].min_value;
@@ -107,36 +193,46 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
 
     /* updating rest of columns for each relation */
 
-    for(int i = 0; i < relInfo[relName1].num_cols; i++){
-        if(i != column1){
-            statistics[relName1][i].discrete_values = (uint64_t)((float)(statistics[relName1][i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->discrete_values/(float)statistics[relName1][column1].discrete_values)), (float)((float)(statistics[relName1][i].value_count)/(float)(statistics[relName1][i].discrete_values)))));
-            statistics[relName1][i].value_count = newStatistics->value_count;
+    if(updateStatistics){
+        for(int i = 0; i < relInfo[relName1].num_cols; i++){
+            if(i != column1){
+                statistics[relName1][i].discrete_values = (uint64_t)((float)(statistics[relName1][i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->discrete_values/(float)statistics[relName1][column1].discrete_values)), (float)((float)(statistics[relName1][i].value_count)/(float)(statistics[relName1][i].discrete_values)))));
+                statistics[relName1][i].value_count = newStatistics->value_count;
+            }
         }
+
+        for(int i = 0; i < relInfo[relName2].num_cols; i++){
+            if(i != column2){
+                statistics[relName2][i].discrete_values = (uint64_t)((float)(statistics[relName2][i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->discrete_values/(float)statistics[relName2][column2].discrete_values)), (float)((float)(statistics[relName2][i].value_count)/(float)(statistics[relName2][i].discrete_values)))));
+                statistics[relName2][i].value_count = newStatistics->value_count;
+            }
+        }
+
+        statistics[relName1][column1].min_value = newStatistics->min_value;
+        statistics[relName1][column1].max_value = newStatistics->max_value;
+        statistics[relName1][column1].value_count = newStatistics->value_count;
+        statistics[relName1][column1].discrete_values = newStatistics->discrete_values;
+
+        statistics[relName2][column2].min_value = newStatistics->min_value;
+        statistics[relName2][column2].max_value = newStatistics->max_value;
+        statistics[relName2][column2].value_count = newStatistics->value_count;
+        statistics[relName2][column2].discrete_values = newStatistics->discrete_values;
     }
 
-    for(int i = 0; i < relInfo[relName2].num_cols; i++){
-        if(i != column2){
-            statistics[relName2][i].discrete_values = (uint64_t)((float)(statistics[relName2][i].discrete_values) * (1.0 - (float)pow((float)(1.0 - (float)((float)newStatistics->discrete_values/(float)statistics[relName2][column2].discrete_values)), (float)((float)(statistics[relName2][i].value_count)/(float)(statistics[relName2][i].discrete_values)))));
-            statistics[relName2][i].value_count = newStatistics->value_count;
-        }
-    }
 
 
 
-    statistics[relName1][column1].min_value = newStatistics->min_value;
-    statistics[relName1][column1].max_value = newStatistics->max_value;
-    statistics[relName1][column1].value_count = newStatistics->value_count;
-    statistics[relName1][column1].discrete_values = newStatistics->discrete_values;
-
-    statistics[relName2][column2].min_value = newStatistics->min_value;
-    statistics[relName2][column2].max_value = newStatistics->max_value;
-    statistics[relName2][column2].value_count = newStatistics->value_count;
-    statistics[relName2][column2].discrete_values = newStatistics->discrete_values;
 
     free(newStatistics);
 
+<<<<<<< HEAD
 
     return statistics[relName1][column1].value_count;
+=======
+    if(updateStatistics){
+        return statistics[relName1][column1].value_count;
+    }else return newStatistics->value_count;
+>>>>>>> edd910bd340a142fd5f0a7c40a80646ab4812767
 }
 
 int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int value){
@@ -197,8 +293,6 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
 
     getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, predicateOrder, statistics);
 
-
-
     int newIndex = -1;
     predicate* tempPredList[predicateNumber];
     for(int i = 0; i < predicateNumber; i++){
@@ -206,9 +300,11 @@ int joinEnumeration(predicate** predicateList, struct relationInfo* relInfo, int
     }
 
     for(int i = 0; i < predicateNumber; i++){
+
+        //predicateOrder[i] == -1 means that predicate is a filter, so we ignore it
         if(predicateOrder[i] != -1){
             newIndex = predicateOrder[i];
-            predicateList[i] = tempPredList[newIndex];
+            predicateList[newIndex] = tempPredList[i];
         }
     }
     getOriginalStatistics(relInfo, relationsArray, relationNumber, statistics);
@@ -227,44 +323,55 @@ int getOptimalPredicateOrder(struct predicate** predicateList, struct relationIn
 
     for(int i = 0; i < predicateNumber; i++){
         if(predicateList[i]->isFilter == 0){
-
-
-            if(optimalOrder[i] == - 1){
+            if(optimalOrder[i] == -1){
                 doneFlag = 0;
-                predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], relationsArray[predicateList[i]->leftRelation->key], relationsArray[predicateList[i]->rightRelation->key], statistics);
-
+                predicateCost[i] = getJoinStatistics(relInfo, predicateList[i], relationsArray[predicateList[i]->leftRelation->key], relationsArray[predicateList[i]->rightRelation->key], statistics, 0);
+                //printf("predicate cost: %d\n", predicateCost[i]);
             }
         }
     }
 
-    int minPredicateCost = -1;
-    int index = -1;
-
+    //get first value for minimum cost of predicates
+    int minPredicateCost, index;
     for(int i = 0; i < predicateNumber; i++){
         if(predicateCost[i] != -1){
-            if(minPredicateCost == -1){
+            minPredicateCost = predicateCost[i];
+            index = i;
+            break;
+        }else{
+            minPredicateCost = -1;
+            index = -1;
+        }
+    }
+
+    //and check if there's a predicate that gives a smaller cost
+    for(int i = 0; i < predicateNumber; i++){
+        if(predicateCost[i] != -1){
+            if(minPredicateCost > predicateCost[i]){
                 minPredicateCost = predicateCost[i];
                 index = i;
-            }else{
-                if(minPredicateCost > predicateCost[i]){
-                    minPredicateCost = predicateCost[i];
-                    index = i;
-                }
             }
         }
     }
 
+    /*update the statistics */
+    if(index != -1){
+        getJoinStatistics(relInfo, predicateList[index], relationsArray[predicateList[index]->leftRelation->key], relationsArray[predicateList[index]->rightRelation->key], statistics, 1);
+    }
+
+    /* if doneFlag = 1, it means that all join predicates have been ordered and so the recursive calls end and final cost is returned */
     if(!doneFlag){
         int counter = 0;
+
+        /* with this loop, we place the cheapest predicate to the left-most free space in the optimalOrder array */
         for(int i = 0; i < predicateNumber; i++){
-            if(optimalOrder[i] != -1){
-                counter++;
-            }
+            if(optimalOrder[i] == -1){
+                continue;
+            }else counter++;
         }
         optimalOrder[index] = counter;
-
         minPredicateCost += getOptimalPredicateOrder(predicateList, relInfo, predicateNumber, relationsArray, relationNumber, optimalOrder, statistics);
-    }else minPredicateCost = 0;
+    }
 
     return minPredicateCost;
 }
