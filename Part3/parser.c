@@ -21,6 +21,7 @@ relationInfo* parseRelations(char* workPath, int* numRel){
     }else
         fp = fopen(workPath, "r");
 
+    char locString[100] = "";
     relationInfo* relInfo = NULL;
     char** fileLocations = NULL;
     while((read = getline(&line, &len, fp)) != -1){
@@ -29,10 +30,14 @@ relationInfo* parseRelations(char* workPath, int* numRel){
         if(strcmp(line, "Done") == 0)
             break;
         fileLocations = realloc(fileLocations, (numRelations + 1) * sizeof (char**));
-        fileLocations[numRelations] = malloc(strlen(line) + 1);
 
-        strcpy(fileLocations[numRelations], line);
+        strcat(locString, "./workloads/small/");
+        strcat(locString, line);
+        //printf("%s\n", locString);
+        fileLocations[numRelations] = malloc(strlen(locString) + 1);
 
+        strcpy(fileLocations[numRelations], locString);
+        locString[0] = '\0';
         numRelations++;
     }
 

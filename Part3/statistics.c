@@ -107,11 +107,12 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
                 statistics[relName1][column1].discrete_values = newStatistics->discrete_values;
             }
 
+            int val = newStatistics->value_count;
             free(newStatistics);
 
             if(updateStatistics){
                 return statistics[relName1][column1].value_count;
-            }else return newStatistics->value_count;
+            }else return val;
         }
         if(statistics[relName1][column1].min_value < statistics[relName2][column2].min_value){
             combinedMin = statistics[relName2][column2].min_value;
@@ -161,13 +162,14 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
 //    printf("NEW VALUE COUNT: %ld\n", newStatistics->value_count);
 //    printf("NEW DISCRETE COUNT: %ld\n", newStatistics->discrete_values);
 
+        int val = newStatistics->value_count;
         free(newStatistics);
 
         //could be used for error handling
         //printf("RETURNING %d FOR REL %d COL %d\n", statistics[relName1][column1].value_count, relName1, column1);
         if(updateStatistics){
             return statistics[relName1][column1].value_count;
-        }else return newStatistics->value_count;
+        }else return val;
     }
 
     if(statistics[relName1][column1].min_value < statistics[relName2][column2].min_value){
@@ -219,11 +221,14 @@ int getJoinStatistics(struct relationInfo* relInfo,struct predicate* curPred, in
         statistics[relName2][column2].discrete_values = newStatistics->discrete_values;
     }
 
-    free(newStatistics);
-
     if(updateStatistics){
+        free(newStatistics);
         return statistics[relName1][column1].value_count;
-    }else return newStatistics->value_count;
+    }else{
+        int val = newStatistics->value_count;
+        free(newStatistics);
+        return val;
+    }
 }
 
 int valueExistsInColumn(relationInfo* relInfo, int column, int relName, int value){
