@@ -399,6 +399,8 @@ void* queryFun(void* args){
 					
 					relation *res=PartitionedHashJoin(rel1,rel2,sch);
 					if(res == NULL){
+						relationDelete(rel1);
+						relationDelete(rel2);
 						break;
 					}
 					if(biggerRel(rel1,rel2)){
